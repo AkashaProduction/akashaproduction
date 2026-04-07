@@ -1,0 +1,185 @@
+{
+  "nav": {
+    "presentation": "Overview",
+    "solutions": "Our Solutions",
+    "contact": "Contact",
+    "order": "Order",
+    "account": "My Account",
+    "subtitle": "Digital ecosystem, publishing, and web support"
+  },
+  "footer": {
+    "copy": "A presentation hub for your sub-projects, a commercial storefront, a client entry point, and a foundation ready for future hosting and advanced administration services."
+  },
+  "common": {
+    "onRequest": "Custom quote"
+  },
+  "home": {
+    "hero": {
+      "eyebrow": "Concept and web creation",
+      "title": "The editorial and commercial hub for all your digital projects.",
+      "lead": "Akasha Production showcases, structures, and sells your full ecosystem of sub-projects. The site is designed as a clear entry point: identity, offers, ordering, contact, client follow-up, and future hosting management expansion.",
+      "primary": "Order now",
+      "secondary": "Explore solutions",
+      "stats": [
+        {
+          "value": "3",
+          "label": "languages driven by JSON"
+        },
+        {
+          "value": "3x",
+          "label": "installment payment prepared with Stripe"
+        },
+        {
+          "value": "12+",
+          "label": "sub-projects already designed as editorial extensions"
+        }
+      ]
+    },
+    "about": {
+      "eyebrow": "Who we are",
+      "title": "We build our own creations and support professional web projects over the long term.",
+      "copyOne": "Akasha Production designs, builds, and evolves its own websites. That direct experience shapes a practical approach focused on structure, identity, commercial clarity, and technical durability.",
+      "copyTwo": "Throughout our experience, we have also developed several professional websites for companies across different sectors. This allows us to deliver coherent, solid, and genuinely useful web creations."
+    },
+    "projects": {
+      "eyebrow": "Selected work",
+      "title": "A selection of projects and live digital universes",
+      "lead": "Here are some of our projects and working bases. When a preview is unavailable, the card stays in place with a “Coming soon” state."
+    },
+    "cards": {
+      "ecosystem": {
+        "kicker": "Presentation",
+        "title": "One parent brand for multiple universes",
+        "copy": "Each sub-project keeps its own identity while fitting into a coherent structure of domains, subdomains, and commercial pages."
+      },
+      "commerce": {
+        "kicker": "Ordering",
+        "title": "Simple offers, clear packs, structured quotes",
+        "copy": "The catalog supports standalone purchases, creation + hosting combinations, and quote requests backed by a consistent needs questionnaire."
+      },
+      "hosting": {
+        "kicker": "Scalability",
+        "title": "A foundation ready for an advanced client area",
+        "copy": "The customer account already reserves room for future modules: FTP, SSH, phpMyAdmin, PostgreSQL, technical tracking, and hosted services."
+      },
+      "experience": {
+        "kicker": "Experience",
+        "title": "Internal creations and professional projects",
+        "copy": "We build our own platforms and have developed several professional websites for various businesses throughout our experience."
+      }
+    }
+  },
+  "solutions": {
+    "eyebrow": "Our solutions",
+    "title": "Structured, combinable, and scalable offers.",
+    "lead": "Products can be purchased on their own, combined together, or turned into a quote request depending on the level of customization needed."
+  },
+  "products": {
+    "creation": {
+      "showcase": {
+        "name": "Showcase website",
+        "headline": "Multilingual 3-page website",
+        "description": "A polished web presence launched quickly.",
+        "points": {
+          "one": "3 structured and translatable pages",
+          "two": "Premium responsive design",
+          "three": "Perfect integration into the Akasha Production ecosystem"
+        }
+      },
+      "complex": {
+        "name": "Complex website",
+        "headline": "9-page website + commerce, newsletter, blog + database",
+        "description": "For richer and more autonomous digital projects.",
+        "points": {
+          "one": "9 editorial pages",
+          "two": "3 business modules: commerce, newsletter, blog",
+          "three": "1 integrated database"
+        }
+      },
+      "custom": {
+        "name": "Custom creation",
+        "headline": "Tailor-made project",
+        "description": "In-depth scoping and a dedicated roadmap.",
+        "points": {
+          "one": "Complete business questionnaire",
+          "two": "Free combinations and specific architecture",
+          "three": "Personalized commercial proposal"
+        }
+      }
+    },
+    "hosting": {
+      "sharedMonthly": {
+        "name": "Shared hosting",
+        "headline": "Monthly plan"
+      },
+      "sharedYearly": {
+        "name": "Shared hosting yearly",
+        "headline": "Yearly plan"
+      },
+      "vps": {
+        "name": "Dedicated VPS",
+        "headline": "Managed dedicated server"
+      },
+      "cloud": {
+        "name": "Custom cloud",
+        "headline": "Infrastructure assessed on request"
+      }
+    },
+    "domain": {
+      "subdomain": {
+        "name": "Free subdomain",
+        "description": "Akasha or thematic parent subdomain, subject to validation."
+      },
+      "custom": {
+        "name": "Custom domain name",
+        "description": "Addition or management of a dedicated yearly domain."
+      }
+    }
+  },
+  "packs": {
+    "first": {
+      "title": "Showcase + yearly shared hosting pack",
+      "copy": "50 € + 88 € = 138 €, offered at 120 €."
+    },
+    "second": {
+      "title": "Complex + yearly shared hosting pack",
+      "copy": "500 € + 88 € = 588 €, offered at 550 €."
+    },
+    "third": {
+      "title": "Custom pack",
+      "copy": "Tailor-made creation and hosting after review."
+    }
+  },
+  "contact": {
+    "eyebrow": "Contact",
+    "title": "Describe your needs, constraints, and supporting files.",
+    "lead": "The contact form saves the full contact profile, handles a project-specific mode, and accepts DOCX, PDF, JPG, and WEBP files."
+  },
+  "order": {
+    "eyebrow": "Order",
+    "title": "Build your offer, your options, and your payment mode.",
+    "lead": "The ordering flow supports simple purchases, promotional packs, and a free virtual quote request. Every useful choice is saved with the order.",
+    "lines": {
+      "creation": "Creation",
+      "hosting": "Hosting",
+      "packs": "Bundles"
+    },
+    "form": {
+      "title": "Order and quote",
+      "description": "Select a creation tier, hosting plan, domain mode, and options. Promotional combinations are recalculated automatically.",
+      "submit": "Confirm my order",
+      "success": "Request saved.",
+      "stripeMissing": "If Stripe is not configured yet, the order is still stored locally as a fully usable request."
+    }
+  },
+  "account": {
+    "eyebrow": "My account",
+    "title": "Customer tracking, orders, and subscriptions.",
+    "lead": "This area displays purchases and prepares the path toward a complete technical panel for hosted services.",
+    "future": {
+      "one": "Subscription visibility for 3-installment purchases",
+      "two": "Detailed view of the purchased offer and attached options",
+      "three": "Area under construction for FTP, SSH, phpMyAdmin, and PostgreSQL"
+    }
+  }
+}

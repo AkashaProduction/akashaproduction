@@ -1,0 +1,5 @@
+RewriteEngine On
+
+# Force www on the main domain while preserving future subdomains.
+RewriteCond %{HTTP_HOST} ^akashaproduction\.com$ [NC]
+RewriteRule ^(.*)$ https://www.akashaproduction.com/$1 [L,R=301]
