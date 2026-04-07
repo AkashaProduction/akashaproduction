@@ -23,7 +23,24 @@ Le projet repose sur `Next.js App Router` avec un segment dynamique `[locale]` p
 
 - `data/contacts.json` est créé à la première soumission du formulaire de contact.
 - `data/orders.json` est créé à la première commande ou demande de devis.
+- `data/tickets.json` est créé à la première création de ticket support.
 - `lib/storage.ts` gère la création des fichiers et les lectures/écritures.
+
+## Ticketing support
+
+- `lib/support.ts` définit les catégories, priorités, statuts et sujets cohérents.
+- Le panel client utilise `app/api/tickets` et `app/api/tickets/reply`.
+- Le panel admin utilise `app/api/admin/login`, `app/api/admin/tickets` et `app/api/admin/tickets/[id]`.
+- Le système actuel reste cohérent avec le socle existant:
+  - identification client légère par email dans `Mon compte`
+  - authentification admin via cookie HTTP-only signé
+  - persistance JSON locale
+
+### Variables d’environnement admin
+
+- `ADMIN_EMAIL`
+- `ADMIN_PASSWORD`
+- `ADMIN_SESSION_SECRET`
 
 ## Contact et uploads
 

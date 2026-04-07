@@ -1,5 +1,5 @@
 import Stripe from "stripe";
-import { catalog, computeOrderSummary, getInstallmentAmount, type OrderDraft } from "@/lib/catalog";
+import { computeOrderSummary, getInstallmentAmount, type OrderDraft } from "@/lib/catalog";
 
 export function getStripeClient() {
   const secretKey = process.env.STRIPE_SECRET_KEY;
@@ -8,7 +8,7 @@ export function getStripeClient() {
   }
 
   return new Stripe(secretKey, {
-    apiVersion: "2026-02-25.clover"
+    apiVersion: "2025-04-30.basil"
   });
 }
 

@@ -1,3 +1,4 @@
+import Stripe from "stripe";
 import { NextResponse } from "next/server";
 import { getStripeClient, handleWebhook } from "@/lib/stripe";
 
@@ -11,16 +12,21 @@ export async function POST(request: Request) {
   }
 
   if (event.type === "invoice.paid") {
-    const invoice = event.data.object;
-    if (invoice.subscription) {
+    const invoice = event.data.object as Stripe.Invoice & {
+      subscription?: string | Stripe.Subscription | null;
+    };
+    const subscriptionId =
+      typeof invoice.subscription === "string" ? invoice.subscription : invoice.subscription?.id ?? null;
+
+    if (subscriptionId) {
       const invoices = await stripe.invoices.list({
-        subscription: String(invoice.subscription),
+        subscription: subscriptionId,
         status: "paid",
         limit: 10
       });
 
       if (invoices.data.length >= 3) {
-        await stripe.subscriptions.cancel(String(invoice.subscription));
+        await stripe.subscriptions.cancel(subscriptionId);
       }
     }
   }

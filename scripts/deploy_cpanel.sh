@@ -9,6 +9,15 @@ USER_NAME="prro3328"
 read -s -p "cPanel password: " PASS
 echo
 
+collect_files() {
+  git ls-files
+  find .next \
+    -path '.next/cache' -prune -o \
+    -path '.next/types' -prune -o \
+    -path '.next/diagnostics' -prune -o \
+    -type f -print
+}
+
 while IFS= read -r dir; do
   [ "$dir" = "." ] && continue
   current="$ROOT"
@@ -23,7 +32,7 @@ while IFS= read -r dir; do
       --data-urlencode "name=$part" >/dev/null || true
     current="$current/$part"
   done
-done < <(git ls-files | xargs -n1 dirname | awk '!seen[$0]++')
+done < <(collect_files | xargs -n1 dirname | awk '!seen[$0]++')
 
 while IFS= read -r file; do
   dir=$(dirname "$file")
@@ -34,10 +43,10 @@ while IFS= read -r file; do
   fi
 
   echo "Uploading $file"
-  curl -s -u "$USER_NAME:$PASS" -G "$HOST/execute/Fileman/save_file_content" \
+  curl -s --retry 3 --retry-all-errors -u "$USER_NAME:$PASS" "$HOST/execute/Fileman/save_file_content" \
     --data-urlencode "dir=$remote_dir" \
     --data-urlencode "file=$base" \
     --data-urlencode "content@$file" >/dev/null
-done < <(git ls-files)
+done < <(collect_files)
 
 echo "SYNC_DONE"

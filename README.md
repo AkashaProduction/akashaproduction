@@ -8,6 +8,7 @@ Site vitrine multilingue pour présenter l’écosystème Akasha Production, com
 - TypeScript
 - Traductions JSON (`fr`, `en`, `es`)
 - Persistance locale JSON pour contacts et commandes
+- Ticketing client/admin avec modération
 - Intégration Stripe préparée
 - Envoi email SMTP optionnel
 
@@ -21,7 +22,9 @@ Site vitrine multilingue pour présenter l’écosystème Akasha Production, com
 
 - `app/[locale]` : pages publiques localisées
 - `app/api` : endpoints contact, commandes, checkout, webhook Stripe
+- `app/api/admin` : authentification et modération des tickets
+- `app/api/tickets` : création et réponses client sur tickets
 - `components` : composants UI
-- `lib` : catalogue métier, i18n, stockage, Stripe, email
+- `lib` : catalogue métier, i18n, stockage, support, auth admin, Stripe, email
 - `messages` : traductions JSON
 - `docs` : documentation utilisateur et développeur

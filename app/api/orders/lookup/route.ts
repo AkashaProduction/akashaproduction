@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getOrdersByEmail } from "@/lib/storage";
+import { getOrdersByEmail, getTicketsByEmail } from "@/lib/storage";
 
 export async function POST(request: Request) {
   const { email } = (await request.json()) as { email?: string };
@@ -8,8 +8,13 @@ export async function POST(request: Request) {
   }
 
   const orders = await getOrdersByEmail(email);
+  const tickets = await getTicketsByEmail(email);
   return NextResponse.json({
-    message: orders.length ? `${orders.length} commande(s) retrouvée(s).` : "Aucune commande pour cet email pour le moment.",
-    orders
+    message:
+      orders.length || tickets.length
+        ? `${orders.length} commande(s) et ${tickets.length} ticket(s) retrouvés.`
+        : "Aucune commande ni ticket pour cet email pour le moment.",
+    orders,
+    tickets
   });
 }

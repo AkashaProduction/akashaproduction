@@ -11,7 +11,23 @@ type Copy = {
   stripeMissing: string;
 };
 
-const initialForm = {
+type OrderFormState = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  company: string;
+  country: string;
+  creation: string;
+  hosting: string;
+  domain: string;
+  requestedParentDomain: string;
+  includeDomainAddon: boolean;
+  splitPayment: boolean;
+  projectDescription: string;
+};
+
+const initialForm: OrderFormState = {
   firstName: "",
   lastName: "",
   email: "",
@@ -28,7 +44,7 @@ const initialForm = {
 };
 
 export function OrderForm({ locale, copy }: { locale: string; copy: Copy }) {
-  const [form, setForm] = useState(initialForm);
+  const [form, setForm] = useState<OrderFormState>(initialForm);
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
 

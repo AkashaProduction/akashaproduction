@@ -22,6 +22,7 @@ export default async function AccountPage({ params }: { params: Promise<{ locale
               <li>{messages.account.future.one}</li>
               <li>{messages.account.future.two}</li>
               <li>{messages.account.future.three}</li>
+              <li>Support intégré: tickets Service commercial et Service technique</li>
             </ul>
           </div>
         </div>

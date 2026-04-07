@@ -34,3 +34,16 @@
 - Le client saisit son email pour retrouver ses commandes.
 - Les achats, options et informations de souscription sont affichés.
 - La zone technique avancée est réservée pour les futures fonctionnalités.
+
+## Tickets support
+
+- Le panel client permet de créer un ticket rattaché soit au `Service commercial`, soit au `Service technique`.
+- Chaque ticket propose des sujets cohérents selon la catégorie choisie.
+- Le client peut relier son ticket à une commande existante.
+- Les réponses de modération apparaissent dans le fil du ticket côté client.
+
+## Administration
+
+- Un panel administrateur dédié permet la connexion du superadmin.
+- Le service admin peut modifier le statut, la priorité et répondre directement aux tickets.
+- Les réponses peuvent être envoyées par email si le SMTP est configuré.
