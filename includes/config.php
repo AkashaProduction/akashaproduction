@@ -210,5 +210,9 @@ return [
         'Atlas Access Immo',
     ],
     'admin_email' => 'contact@akashaproduction.com',
+    'admin_aliases' => [
+        'contact@akashaproduction.com',
+        'contact@permatheque.org',
+    ],
     'admin_password' => '',
 ];

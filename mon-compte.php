@@ -8,6 +8,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = (string) ($_POST['action'] ?? '');
     if ($action === 'lookup') {
         $email = trim((string) ($_POST['email'] ?? ''));
+        if (app_is_admin_email($email)) {
+            app_redirect('/admin');
+        }
         app_redirect('/mon-compte?email=' . rawurlencode($email) . '&name=' . rawurlencode((string) ($_POST['name'] ?? '')));
     }
 

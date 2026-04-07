@@ -28,7 +28,6 @@ $nav = app_config()['navigation'];
                         <?= htmlspecialchars($entry['label'], ENT_QUOTES, 'UTF-8'); ?>
                     </a>
                 <?php endforeach; ?>
-                <a href="/admin">Admin</a>
             </nav>
         </div>
     </header>

@@ -260,6 +260,23 @@ function app_admin_is_enabled(): bool
     return !empty($config['admin_password']);
 }
 
+function app_is_admin_email(string $email): bool
+{
+    $normalized = strtolower(trim($email));
+    if ($normalized === '') {
+        return false;
+    }
+
+    $config = app_config();
+    $candidates = $config['admin_aliases'] ?? [];
+    if (!in_array((string) ($config['admin_email'] ?? ''), $candidates, true)) {
+        $candidates[] = (string) ($config['admin_email'] ?? '');
+    }
+
+    $normalizedCandidates = array_map(static fn (string $value): string => strtolower(trim($value)), $candidates);
+    return in_array($normalized, $normalizedCandidates, true);
+}
+
 function app_admin_login(string $email, string $password): bool
 {
     $config = app_config();
