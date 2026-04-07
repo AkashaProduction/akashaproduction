@@ -1,0 +1,16 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/prro3328/akashaproduction
+    - /bin/mkdir -p $DEPLOYPATH
+    - /bin/mkdir -p $DEPLOYPATH/assets
+    - /bin/mkdir -p $DEPLOYPATH/includes
+    - /bin/mkdir -p $DEPLOYPATH/storage
+    - /bin/mkdir -p $DEPLOYPATH/storage/uploads
+    - /bin/mkdir -p $DEPLOYPATH/docs
+    - /bin/cp .htaccess $DEPLOYPATH/.htaccess
+    - /bin/cp index.php solutions.php contact.php commander.php mon-compte.php admin.php mentions-legales.php index.html $DEPLOYPATH/
+    - /bin/cp -R assets/. $DEPLOYPATH/assets/
+    - /bin/cp -R includes/. $DEPLOYPATH/includes/
+    - /bin/cp -R storage/. $DEPLOYPATH/storage/
+    - if [ -d docs ]; then /bin/cp -R docs/. $DEPLOYPATH/docs/; fi

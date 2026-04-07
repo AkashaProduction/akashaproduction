@@ -1,2 +1,15 @@
 RewriteEngine On
 Options -Indexes
+DirectoryIndex index.php index.html
+
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+RewriteRule ^presentation/?$ index.php [L,QSA]
+RewriteRule ^nos-solutions/?$ solutions.php [L,QSA]
+RewriteRule ^contact/?$ contact.php [L,QSA]
+RewriteRule ^commander/?$ commander.php [L,QSA]
+RewriteRule ^mon-compte/?$ mon-compte.php [L,QSA]
+RewriteRule ^mentions-legales/?$ mentions-legales.php [L,QSA]
+RewriteRule ^admin/?$ admin.php [L,QSA]
