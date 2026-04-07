@@ -2,6 +2,42 @@
 require __DIR__ . '/includes/bootstrap.php';
 
 $catalog = app_config()['catalog'];
+$packPresets = [
+    'showcase-shared-yearly' => ['creation' => 'showcase', 'hosting' => 'shared-yearly', 'label' => 'Pack vitrine'],
+    'complex-shared-yearly' => ['creation' => 'complex', 'hosting' => 'shared-yearly', 'label' => 'Pack complexe'],
+    'custom' => ['creation' => 'custom', 'hosting' => 'cloud', 'label' => 'Pack personnalisé'],
+];
+
+$prefillCreation = (string) ($_GET['creation'] ?? 'showcase');
+$prefillHosting = (string) ($_GET['hosting'] ?? 'shared-yearly');
+$prefillPack = (string) ($_GET['pack'] ?? '');
+$prefillSubdomainPrefix = trim((string) ($_GET['subdomain_prefix'] ?? ''));
+$prefillParentDomain = (string) ($_GET['parent_domain'] ?? 'akashaproduction.com');
+$prefillIncludeDomain = !empty($_GET['include_domain']);
+$prefillCustomDomainName = trim((string) ($_GET['custom_domain_name'] ?? ''));
+
+if (isset($packPresets[$prefillPack])) {
+    $prefillCreation = $packPresets[$prefillPack]['creation'];
+    $prefillHosting = $packPresets[$prefillPack]['hosting'];
+}
+
+if (!isset($catalog['creation'][$prefillCreation])) {
+    $prefillCreation = 'showcase';
+}
+
+if (!isset($catalog['hosting'][$prefillHosting])) {
+    $prefillHosting = 'shared-yearly';
+}
+
+if (!in_array($prefillParentDomain, $catalog['parent_domains'], true)) {
+    $prefillParentDomain = 'akashaproduction.com';
+}
+
+$prefillIsQuote = $prefillCreation === 'custom' || $prefillHosting === 'cloud';
+$prefillTotal = $prefillIsQuote ? null : app_compute_total($prefillCreation, $prefillHosting, $prefillIncludeDomain);
+$prefillSummaryLabel = isset($packPresets[$prefillPack])
+    ? $packPresets[$prefillPack]['label']
+    : ($catalog['creation'][$prefillCreation]['headline'] . ' + ' . $catalog['hosting'][$prefillHosting]['headline']);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $firstName = trim((string) ($_POST['first_name'] ?? ''));
@@ -100,6 +136,9 @@ require __DIR__ . '/includes/header.php';
         <div class="eyebrow">Commander</div>
         <h1 class="page-title">Composez votre offre, vos options et votre mode de paiement.</h1>
         <p class="lead">Le configurateur permet les achats simples, les packs promotionnels et les demandes de devis offertes. Les choix sont sauvegardés avec la commande.</p>
+        <?php if (isset($_GET['creation']) || isset($_GET['hosting']) || isset($_GET['pack'])): ?>
+            <div class="notice">Présélection chargée depuis les solutions : <?= htmlspecialchars($prefillSummaryLabel, ENT_QUOTES, 'UTF-8'); ?><?= $prefillTotal !== null ? ' · ' . app_money((float) $prefillTotal) : ' · Sur devis'; ?></div>
+        <?php endif; ?>
     </div>
 </section>
 
@@ -147,26 +186,26 @@ require __DIR__ . '/includes/header.php';
                 <div class="field">
                     <label for="creation">Création</label>
                     <select id="creation" name="creation">
-                        <option value="showcase">Site vitrine multilingue 3 pages</option>
-                        <option value="complex">Site complexe 9 pages + 3 modules + base de données</option>
-                        <option value="custom">Création personnalisée</option>
+                        <option value="showcase"<?= $prefillCreation === 'showcase' ? ' selected' : ''; ?>>Site vitrine multilingue 3 pages</option>
+                        <option value="complex"<?= $prefillCreation === 'complex' ? ' selected' : ''; ?>>Site complexe 9 pages + 3 modules + base de données</option>
+                        <option value="custom"<?= $prefillCreation === 'custom' ? ' selected' : ''; ?>>Création personnalisée</option>
                     </select>
                 </div>
                 <div class="field">
                     <label for="hosting">Hébergement</label>
                     <select id="hosting" name="hosting">
-                        <option value="shared-monthly">Serveur mutualisé mensuel</option>
-                        <option value="shared-yearly">Serveur mutualisé annuel</option>
-                        <option value="vps">VPS dédié</option>
-                        <option value="cloud">Cloud personnalisé</option>
+                        <option value="shared-monthly"<?= $prefillHosting === 'shared-monthly' ? ' selected' : ''; ?>>Serveur mutualisé mensuel</option>
+                        <option value="shared-yearly"<?= $prefillHosting === 'shared-yearly' ? ' selected' : ''; ?>>Serveur mutualisé annuel</option>
+                        <option value="vps"<?= $prefillHosting === 'vps' ? ' selected' : ''; ?>>VPS dédié</option>
+                        <option value="cloud"<?= $prefillHosting === 'cloud' ? ' selected' : ''; ?>>Cloud personnalisé</option>
                     </select>
                 </div>
-                <div class="field"><label for="subdomain_prefix">Préfixe du sous-domaine offert</label><input id="subdomain_prefix" name="subdomain_prefix" placeholder="votre-choix"></div>
+                <div class="field"><label for="subdomain_prefix">Préfixe du sous-domaine offert</label><input id="subdomain_prefix" name="subdomain_prefix" placeholder="votre-choix" value="<?= htmlspecialchars($prefillSubdomainPrefix, ENT_QUOTES, 'UTF-8'); ?>"></div>
                 <div class="field">
                     <label for="parent_domain">Domaine parent souhaité</label>
                     <select id="parent_domain" name="parent_domain">
                         <?php foreach ($catalog['parent_domains'] as $domain): ?>
-                            <option value="<?= htmlspecialchars($domain, ENT_QUOTES, 'UTF-8'); ?>"><?= htmlspecialchars($domain, ENT_QUOTES, 'UTF-8'); ?></option>
+                            <option value="<?= htmlspecialchars($domain, ENT_QUOTES, 'UTF-8'); ?>"<?= $prefillParentDomain === $domain ? ' selected' : ''; ?>><?= htmlspecialchars($domain, ENT_QUOTES, 'UTF-8'); ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
@@ -178,11 +217,11 @@ require __DIR__ . '/includes/header.php';
                     <textarea id="project_description" name="project_description" required></textarea>
                 </div>
                 <div class="field field--full">
-                    <label class="checkbox-row"><input id="include-domain" name="include_domain" type="checkbox" value="1" data-toggle-target="#custom-domain-fields"> Ajouter un nom de domaine personnalisé à 18 €/an</label>
+                    <label class="checkbox-row"><input id="include-domain" name="include_domain" type="checkbox" value="1" data-toggle-target="#custom-domain-fields"<?= $prefillIncludeDomain ? ' checked' : ''; ?>> Ajouter un nom de domaine personnalisé à 18 €/an</label>
                 </div>
-                <div class="field field--full" id="custom-domain-fields" hidden>
+                <div class="field field--full" id="custom-domain-fields"<?= $prefillIncludeDomain ? '' : ' hidden'; ?>>
                     <label for="custom_domain_name">Nom de domaine personnalisé souhaité</label>
-                    <input id="custom_domain_name" name="custom_domain_name" placeholder="exemple.fr">
+                    <input id="custom_domain_name" name="custom_domain_name" placeholder="exemple.fr" value="<?= htmlspecialchars($prefillCustomDomainName, ENT_QUOTES, 'UTF-8'); ?>">
                 </div>
                 <div class="field field--full">
                     <label class="checkbox-row"><input id="split-payment" name="split_payment" type="checkbox" value="1"> Payer en 3x sans frais sur 12 mois</label>
@@ -215,8 +254,8 @@ require __DIR__ . '/includes/header.php';
 
         <div class="form-card order-summary">
             <div class="kicker">Résumé instantané</div>
-            <div data-order-total class="order-summary__total">120 €</div>
-            <p class="copy" data-order-detail>Paiement à l’activation</p>
+            <div data-order-total class="order-summary__total"><?= $prefillTotal !== null ? app_money((float) $prefillTotal) : 'Sur devis'; ?></div>
+            <p class="copy" data-order-detail><?= $prefillIsQuote ? 'Étude commerciale personnalisée' : 'Paiement à l’activation'; ?></p>
             <div class="panel">
                 <p class="copy">Le paiement Stripe reste à raccorder avec les clés réelles. En attendant, la demande est enregistrée de manière propre et exploitable.</p>
             </div>

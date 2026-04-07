@@ -1,4 +1,83 @@
 document.addEventListener("DOMContentLoaded", () => {
+  const solutionBuilder = document.querySelector("[data-solution-builder]");
+  if (solutionBuilder instanceof HTMLFormElement) {
+    const creationInputs = Array.from(solutionBuilder.querySelectorAll('input[name="creation"]'));
+    const hostingInputs = Array.from(solutionBuilder.querySelectorAll('input[name="hosting"]'));
+    const packInputs = Array.from(solutionBuilder.querySelectorAll('input[name="pack"]'));
+    const includeDomainInSolutions = solutionBuilder.querySelector("#solutions-domain");
+    const summaryText = solutionBuilder.querySelector("[data-solution-summary-text]");
+    const summaryTotal = solutionBuilder.querySelector("[data-solution-summary-total]");
+
+    const prices = {
+      creation: { showcase: 50, complex: 500, custom: 0 },
+      hosting: { "shared-yearly": 88, vps: 200, cloud: 0 },
+      packs: {
+        "showcase-shared-yearly": { label: "Pack vitrine", total: 120, creation: "showcase", hosting: "shared-yearly" },
+        "complex-shared-yearly": { label: "Pack complexe", total: 550, creation: "complex", hosting: "shared-yearly" },
+        custom: { label: "Pack personnalisé", total: null, creation: "custom", hosting: "cloud" },
+      },
+    };
+
+    const clearPacks = () => {
+      packInputs.forEach((input) => {
+        input.checked = false;
+      });
+    };
+
+    const pick = (inputs) => inputs.find((input) => input.checked)?.value || "";
+
+    const refreshSolutions = () => {
+      const activePack = pick(packInputs);
+      let creation = pick(creationInputs) || "showcase";
+      let hosting = pick(hostingInputs) || "shared-yearly";
+      let label = "";
+      let total = null;
+
+      if (activePack && prices.packs[activePack]) {
+        const preset = prices.packs[activePack];
+        creation = preset.creation;
+        hosting = preset.hosting;
+        label = preset.label;
+        total = preset.total;
+      } else {
+        label = `${creation === "showcase" ? "Création vitrine" : creation === "complex" ? "Création complexe" : "Création personnalisée"} + ${hosting === "shared-yearly" ? "mutualisé annuel" : hosting === "vps" ? "VPS dédié" : "cloud"}`;
+        total = creation === "custom" || hosting === "cloud"
+          ? null
+          : (prices.creation[creation] || 0) + (prices.hosting[hosting] || 0);
+      }
+
+      if (includeDomainInSolutions instanceof HTMLInputElement && includeDomainInSolutions.checked && total !== null) {
+        total += 18;
+      }
+
+      if (summaryText) {
+        summaryText.textContent = label;
+      }
+
+      if (summaryTotal) {
+        summaryTotal.textContent = total === null ? "Sur devis" : `${total} €`;
+      }
+    };
+
+    creationInputs.forEach((input) => input.addEventListener("change", () => {
+      clearPacks();
+      refreshSolutions();
+    }));
+
+    hostingInputs.forEach((input) => input.addEventListener("change", () => {
+      clearPacks();
+      refreshSolutions();
+    }));
+
+    packInputs.forEach((input) => input.addEventListener("change", refreshSolutions));
+
+    if (includeDomainInSolutions instanceof HTMLInputElement) {
+      includeDomainInSolutions.addEventListener("change", refreshSolutions);
+    }
+
+    refreshSolutions();
+  }
+
   const quoteTriggers = document.querySelectorAll("[data-toggle-target]");
   quoteTriggers.forEach((element) => {
     element.addEventListener("change", () => {
