@@ -11,7 +11,8 @@ $nav = app_config()['navigation'];
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8'); ?></title>
     <meta name="description" content="Akasha Production conçoit des créations web, présente ses projets et accompagne des sites professionnels.">
-    <link rel="stylesheet" href="/assets/site.css?v=1">
+    <meta name="theme-color" content="#08101d">
+    <link rel="stylesheet" href="/assets/site.css?v=2">
 </head>
 <body>
 <div class="site-shell">

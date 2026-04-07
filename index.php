@@ -10,28 +10,52 @@ require __DIR__ . '/includes/header.php';
 ?>
 <section class="hero">
     <div class="container hero-grid">
-        <div>
+        <div class="hero-copy">
             <div class="eyebrow">Concept et création web</div>
-            <h1 class="hero-title">Nous concevons des expériences web claires, structurées et prêtes à porter vos projets.</h1>
+            <h1 class="hero-title">Nous concevons des plateformes web lisibles, premium et prêtes à porter un écosystème complet de projets.</h1>
             <p class="lead">
-                Akasha Production est la base de présentation de nos univers et de nos services. Nous y montrons notre vision,
-                nos réalisations, nos offres de création web et notre capacité à accompagner des projets professionnels de manière
-                cohérente, durable et évolutive.
+                Akasha Production présente nos univers, nos réalisations et nos offres dans une interface plus ambitieuse:
+                une base commerciale claire, une direction visuelle forte et un cadre technique capable de faire évoluer vos projets
+                proprement dans le temps.
             </p>
             <div class="cta-row">
                 <a class="btn btn--primary" href="<?= htmlspecialchars(app_nav_href('solutions'), ENT_QUOTES, 'UTF-8'); ?>">Découvrir les solutions</a>
                 <a class="btn btn--secondary" href="<?= htmlspecialchars(app_nav_href('commander'), ENT_QUOTES, 'UTF-8'); ?>">Commander</a>
             </div>
-            <div class="meta-list" style="margin-top:1.5rem;">
+            <div class="hero-stats">
+                <article class="stat-card">
+                    <strong>Depuis 2005</strong>
+                    <span>Expérience de développement et de mise en ligne de projets professionnels.</span>
+                </article>
+                <article class="stat-card">
+                    <strong>Sites, packs, support</strong>
+                    <span>Une base pensée pour présenter, vendre, accompagner et faire évoluer les services.</span>
+                </article>
+                <article class="stat-card">
+                    <strong>Écosystème propriétaire</strong>
+                    <span>Des créations internes et des domaines thématiques structurés autour d’une même vision.</span>
+                </article>
+            </div>
+            <div class="meta-list">
                 <?php foreach ($subprojects as $item): ?>
                     <span class="meta-tag"><?= htmlspecialchars($item, ENT_QUOTES, 'UTF-8'); ?></span>
                 <?php endforeach; ?>
             </div>
         </div>
         <div class="glass device-scene">
+            <div class="scene-card scene-card--top">
+                <span class="scene-card__label">Akasha Production</span>
+                <strong class="scene-card__value">Présence web premium</strong>
+                <span class="scene-card__meta">Présentation, services, commande et support dans une même base.</span>
+            </div>
             <img class="shot shot-desktop" src="https://images.unsplash.com/photo-1496171367470-9ed9a91ea931?auto=format&fit=crop&w=1200&q=80" alt="Présentation d'une interface web sur écran desktop">
             <img class="shot shot-tablet" src="https://images.unsplash.com/photo-1496171367470-9ed9a91ea931?auto=format&fit=crop&w=900&q=80" alt="Présentation sur tablette">
             <img class="shot shot-mobile" src="https://images.unsplash.com/photo-1496171367470-9ed9a91ea931?auto=format&fit=crop&w=600&q=80" alt="Présentation sur mobile">
+            <div class="scene-card scene-card--bottom">
+                <span class="scene-card__label">Architecture</span>
+                <strong class="scene-card__value">Solutions combinables</strong>
+                <span class="scene-card__meta">Création, hébergement, domaine, espace client et ticketing.</span>
+            </div>
         </div>
     </div>
 </section>
