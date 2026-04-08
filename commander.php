@@ -66,9 +66,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $domainPrice = 0;
     if ($includeDomain && $customDomainName !== '') {
-        $htPrices = app_domain_ht_prices();
-        if (isset($htPrices[$domainExtension])) {
-            $domainPrice = app_domain_selling_price($htPrices[$domainExtension]);
+        $allPrices = app_domain_selling_prices();
+        if (isset($allPrices[$domainExtension])) {
+            $domainPrice = $allPrices[$domainExtension];
         }
     }
 

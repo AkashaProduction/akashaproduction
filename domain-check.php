@@ -34,14 +34,14 @@ if ($name === '' || strlen($name) < 2) {
     exit;
 }
 
-$prices = app_domain_ht_prices();
+$prices = app_domain_selling_prices();
 if (!isset($prices[$tld])) {
     echo json_encode(['error' => 'Extension non disponible.']);
     exit;
 }
 
 $domain = $name . '.' . $tld;
-$sellingPrice = app_domain_selling_price($prices[$tld]);
+$sellingPrice = $prices[$tld];
 
 $rdapServers = [
     'com' => 'https://rdap.verisign.com/com/v1/domain/',
