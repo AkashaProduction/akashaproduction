@@ -49,9 +49,11 @@ require __DIR__ . '/includes/header.php';
     <section class="section">
         <div class="container catalog-row">
             <div class="catalog-row__header">
-                <div class="eyebrow">Ligne 1</div>
-                <h2 class="section-title">Création</h2>
-                <p class="copy">Choisissez le niveau de création web correspondant à votre projet.</p>
+                <div class="catalog-row__intro">
+                    <div class="eyebrow">Ligne 1</div>
+                    <h2 class="section-title">Création</h2>
+                </div>
+                <p class="copy catalog-row__meta">Choisissez le niveau de création web correspondant à votre projet et utilisez cette ligne comme base de départ.</p>
             </div>
             <div class="catalog-select-grid">
                 <?php foreach ($catalog['creation'] as $key => $entry): ?>
@@ -72,9 +74,11 @@ require __DIR__ . '/includes/header.php';
     <section class="section">
         <div class="container catalog-row">
             <div class="catalog-row__header">
-                <div class="eyebrow">Ligne 2</div>
-                <h2 class="section-title">Hébergement</h2>
-                <p class="copy">Choisissez l’environnement d’hébergement principal; le mode mensuel ou annuel sera rappelé dans la commande.</p>
+                <div class="catalog-row__intro">
+                    <div class="eyebrow">Ligne 2</div>
+                    <h2 class="section-title">Hébergement</h2>
+                </div>
+                <p class="copy catalog-row__meta">Choisissez l’environnement d’hébergement principal. La distinction mensuelle ou annuelle est rappelée dans la commande finale.</p>
             </div>
             <div class="catalog-select-grid">
                 <label class="select-card-label">
@@ -111,9 +115,11 @@ require __DIR__ . '/includes/header.php';
     <section class="section">
         <div class="container catalog-row">
             <div class="catalog-row__header">
-                <div class="eyebrow">Ligne 3</div>
-                <h2 class="section-title">Packs</h2>
-                <p class="copy">Sélectionnez un pack si vous souhaitez partir directement sur une combinaison déjà pensée.</p>
+                <div class="catalog-row__intro">
+                    <div class="eyebrow">Ligne 3</div>
+                    <h2 class="section-title">Packs</h2>
+                </div>
+                <p class="copy catalog-row__meta">Sélectionnez un pack si vous préférez partir sur une formule déjà assemblée, avec une logique tarifaire plus directe.</p>
             </div>
             <div class="catalog-select-grid">
                 <?php foreach ($packPresets as $key => $pack): ?>

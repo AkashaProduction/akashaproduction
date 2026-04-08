@@ -143,8 +143,15 @@ require __DIR__ . '/includes/header.php';
 </section>
 
 <section class="section">
-    <div class="container grid-3">
-        <article class="pricing-card">
+    <div class="container section-heading">
+        <div>
+            <div class="eyebrow">Repères</div>
+            <h2 class="section-title">Vue rapide des tarifs</h2>
+        </div>
+        <p class="copy section-heading__note">Cette synthèse donne les points d’entrée principaux avant configuration détaillée. Le formulaire plus bas reste la source finale de votre commande.</p>
+    </div>
+    <div class="container grid-3 pricing-overview">
+        <article class="pricing-card pricing-card--overview">
             <div class="kicker">Création</div>
             <h3>Offres de création web</h3>
             <ul>
@@ -153,7 +160,7 @@ require __DIR__ . '/includes/header.php';
                 <li>Création personnalisée : sur devis</li>
             </ul>
         </article>
-        <article class="pricing-card">
+        <article class="pricing-card pricing-card--overview">
             <div class="kicker">Hébergement</div>
             <h3>Infrastructure</h3>
             <ul>
@@ -163,7 +170,7 @@ require __DIR__ . '/includes/header.php';
                 <li>Cloud : sur devis</li>
             </ul>
         </article>
-        <article class="pricing-card">
+        <article class="pricing-card pricing-card--overview">
             <div class="kicker">Packs</div>
             <h3>Combinaisons promotionnelles</h3>
             <div class="price"><strong>120 €</strong><s>138 €</s></div>
@@ -176,6 +183,9 @@ require __DIR__ . '/includes/header.php';
 <section class="section">
     <div class="container grid-2">
         <div class="form-card">
+            <div class="kicker">Configuration</div>
+            <h2 class="section-title">Paramétrer votre demande</h2>
+            <p class="copy">Chaque choix est enregistré avec la commande pour garder un dossier exploitable et détaillé.</p>
             <form class="form-grid" method="post" data-order-form>
                 <div class="field"><label for="first_name">Prénom</label><input id="first_name" name="first_name" required></div>
                 <div class="field"><label for="last_name">Nom</label><input id="last_name" name="last_name" required></div>
@@ -254,6 +264,7 @@ require __DIR__ . '/includes/header.php';
 
         <div class="form-card order-summary">
             <div class="kicker">Résumé instantané</div>
+            <h2 class="section-title">Montant et logique de commande</h2>
             <div data-order-total class="order-summary__total"><?= $prefillTotal !== null ? app_money((float) $prefillTotal) : 'Sur devis'; ?></div>
             <p class="copy" data-order-detail><?= $prefillIsQuote ? 'Étude commerciale personnalisée' : 'Paiement à l’activation'; ?></p>
             <div class="panel">
