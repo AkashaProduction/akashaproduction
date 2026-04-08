@@ -9,8 +9,9 @@ deployment:
     - /bin/mkdir -p $DEPLOYPATH/storage/uploads
     - /bin/mkdir -p $DEPLOYPATH/docs
     - /bin/cp .htaccess $DEPLOYPATH/.htaccess
-    - /bin/cp index.php solutions.php contact.php commander.php mon-compte.php admin.php mentions-legales.php index.html $DEPLOYPATH/
+    - /bin/cp index.php solutions.php contact.php commander.php mon-compte.php admin.php mentions-legales.php domain-check.php $DEPLOYPATH/
     - /bin/cp -R assets/. $DEPLOYPATH/assets/
     - /bin/cp -R includes/. $DEPLOYPATH/includes/
     - /bin/cp -R storage/. $DEPLOYPATH/storage/
+    - /bin/cp -R messages/. $DEPLOYPATH/messages/ 2>/dev/null || true
     - if [ -d docs ]; then /bin/cp -R docs/. $DEPLOYPATH/docs/; fi

@@ -1,12 +1,4 @@
-.next
-node_modules
-.env
-.env.local
-data/*.json
-public/uploads/*
-!public/uploads/.gitkeep
 includes/runtime-config.php
 storage/*.json
 storage/uploads/*
 !storage/.gitkeep
-tsconfig.tsbuildinfo
