@@ -613,6 +613,7 @@ li {
   padding: 1.35rem;
   display: grid;
   gap: 1rem;
+  background: radial-gradient(ellipse at 50% 0%, #573f2c 0%, #211510 70%);
 }
 
 .project-thumb__overlay {
