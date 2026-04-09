@@ -876,14 +876,8 @@ li {
   user-select: none;
 }
 
-.project-card--hidden::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: rgba(14, 13, 18, 0.88);
-  backdrop-filter: blur(6px);
-  border-radius: var(--radius);
-  z-index: 5;
+.project-card--hidden > * {
+  filter: blur(10px);
 }
 
 .project-thumb__overlay {
