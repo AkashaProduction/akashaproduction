@@ -120,6 +120,9 @@ document.addEventListener("DOMContentLoaded", () => {
     orderForm.querySelectorAll(".product-tab input").forEach(function(inp) {
       inp.closest(".product-tab").classList.toggle("product-tab--active", inp.checked);
     });
+
+    var submitBtn = orderForm.querySelector("[data-submit-btn]");
+    if (submitBtn) submitBtn.textContent = isQuote ? "Envoyer la demande de devis" : "Payer avec Stripe";
   }
 
   orderForm.querySelectorAll("[name=\"creation\"], [name=\"hosting\"]").forEach(function(el) { el.addEventListener("change", refresh); });

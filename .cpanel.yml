@@ -9,7 +9,7 @@ deployment:
     - /bin/mkdir -p $DEPLOYPATH/storage/uploads
     - /bin/mkdir -p $DEPLOYPATH/docs
     - /bin/cp .htaccess $DEPLOYPATH/.htaccess
-    - /bin/cp index.php solutions.php contact.php commander.php mon-compte.php admin.php mentions-legales.php domain-check.php $DEPLOYPATH/
+    - /bin/cp index.php solutions.php contact.php commander.php mon-compte.php admin.php mentions-legales.php domain-check.php checkout.php commande-confirmee.php $DEPLOYPATH/
     - /bin/cp -R assets/. $DEPLOYPATH/assets/
     - /bin/cp -R includes/. $DEPLOYPATH/includes/
     - /bin/cp -R storage/. $DEPLOYPATH/storage/

@@ -122,10 +122,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         . "Reponses devis:\n" . print_r($quoteAnswers, true);
     app_send_mail('Nouvelle commande / demande Akasha Production', $body, $email);
 
-    app_flash('success', $isQuote
-        ? 'Votre demande de devis a bien ete enregistree. Nous reviendrons vers vous avec une proposition adaptee.'
-        : 'Votre demande de commande a bien ete enregistree. La validation et l\'activation vous seront confirmees rapidement.');
-    app_redirect('/commander');
+    if ($isQuote) {
+        app_flash('success', 'Votre demande de devis a bien ete enregistree. Nous reviendrons vers vous avec une proposition adaptee.');
+        app_redirect('/commander');
+    } else {
+        app_redirect('/checkout?order=' . urlencode($record['id']));
+    }
 }
 
 $currentPage = 'commander';
@@ -268,7 +270,7 @@ require __DIR__ . '/includes/header.php';
                 </div>
 
                 <div class="field field--full">
-                    <button class="btn btn--primary" type="submit">Enregistrer la demande</button>
+                    <button class="btn btn--primary" type="submit" data-submit-btn>Payer avec Stripe</button>
                 </div>
             </form>
         </div>
@@ -308,7 +310,7 @@ require __DIR__ . '/includes/header.php';
             <p class="copy" data-order-detail><?= $prefillIsQuote ? 'Etude commerciale personnalisee' : 'Paiement a l\'activation'; ?></p>
 
             <div class="panel summary-note">
-                <p class="copy">Les prix combines beneficient automatiquement de la tarification pack quand elle existe. Le paiement Stripe sera connecte prochainement.</p>
+                <p class="copy">Les prix combines beneficient automatiquement de la tarification pack. Paiement securise par Stripe avec facture detaillee.</p>
             </div>
         </div>
     </div>
