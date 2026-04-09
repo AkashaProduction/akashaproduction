@@ -40,14 +40,14 @@ return [
             'url' => 'https://www.cms-source.org',
             'domain' => 'cms-source.org',
             'status' => 'Vérification partielle',
-            'description' => 'Socle éditorial et technique dédié à la publication de contenus et à l’architecture de sites. Le site était temporairement indisponible lors de notre dernière vérification.',
+            'description' => 'Notre projet CMS multisite, multilingue, mis à disposition du grand public. Téléchargez et parametrez vous même votre installation.',
         ],
         [
             'title' => 'Mafiaz World',
             'url' => 'https://www.mafiaz.world',
             'domain' => 'mafiaz.world',
             'status' => 'En ligne',
-            'description' => 'Univers narratif centré sur Ombres & Lumières, avec une direction artistique forte et une promesse d’expérience immersive.',
+            'description' => 'Le jeu en ligne Ombres & Lumières, de l’univers Mafiaz.World - Création sur serveur VPS dédié avec installation Node.js',
         ],
         [
             'title' => 'Permathèque',

@@ -134,11 +134,24 @@ $currentPage = 'commander';
 $pageTitle = app_page_title(t('nav.commander'));
 require __DIR__ . '/includes/header.php';
 ?>
-<section class="page-hero">
-    <div class="container">
-        <div class="eyebrow"><?= htmlspecialchars(t('commander.eyebrow'), ENT_QUOTES, 'UTF-8'); ?></div>
-        <h1 class="page-title"><?= htmlspecialchars(t('commander.title'), ENT_QUOTES, 'UTF-8'); ?></h1>
-        <p class="lead"><?= htmlspecialchars(t('commander.lead'), ENT_QUOTES, 'UTF-8'); ?></p>
+<section class="page-hero commander-hero">
+    <div class="container solutions-hero-grid">
+        <div>
+            <div class="eyebrow"><?= htmlspecialchars(t('commander.eyebrow'), ENT_QUOTES, 'UTF-8'); ?></div>
+            <h1 class="page-title"><?= htmlspecialchars(t('commander.title'), ENT_QUOTES, 'UTF-8'); ?></h1>
+            <p class="lead"><?= htmlspecialchars(t('commander.lead'), ENT_QUOTES, 'UTF-8'); ?></p>
+        </div>
+        <div class="solutions-scene glass">
+            <div class="solutions-bubble solutions-bubble--1">
+                <img src="https://images.unsplash.com/photo-1553729459-uj1ebxprbmw?auto=format&fit=crop&w=500&q=80" alt="Podium" onerror="this.src='https://images.unsplash.com/photo-1567427017947-545c5f8d16ad?auto=format&fit=crop&w=500&q=80'">
+            </div>
+            <div class="solutions-bubble solutions-bubble--2">
+                <img src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=500&q=80" alt="Growth">
+            </div>
+            <div class="solutions-bubble solutions-bubble--3">
+                <img src="https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=500&q=80" alt="Happy clients">
+            </div>
+        </div>
     </div>
 </section>
 

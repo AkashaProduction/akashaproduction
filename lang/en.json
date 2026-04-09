@@ -20,7 +20,8 @@
     "admin": "Admin access",
     "hosting": "Hosting",
     "host_site": "Host provider website",
-    "facebook": "Facebook"
+    "facebook": "Facebook",
+    "copyright": "CopyRight 2026-2027 - Website created by"
   },
   "home": {
     "eyebrow": "Concept and web design",
@@ -40,7 +41,7 @@
     "tag4": "Usability",
     "scene_top_label": "Akasha Production",
     "scene_top_value": "Premium web presence",
-    "scene_top_meta": "Presentation, services, ordering and support in a single platform.",
+    "scene_top_meta": "Treat yourself to quality, share it with your users",
     "scene_bottom_label": "Architecture",
     "scene_bottom_value": "Combinable solutions",
     "scene_bottom_meta": "Web design, hosting, domain, client area and ticketing.",
@@ -64,7 +65,7 @@
   },
   "solutions": {
     "eyebrow": "Our Solutions",
-    "title": "Defined & adaptable offers",
+    "title": "Modular Offers & Personalized Support",
     "lead": "Each service can be ordered individually or combined with different options. Discover our offers, and click on a product to pre-select it in the order configurator.",
     "creation_eyebrow": "Our",
     "creation_title": "Web designs",
@@ -92,11 +93,11 @@
   },
   "contact": {
     "eyebrow": "Contact",
-    "title": "Describe your needs, constraints and share your documents.",
+    "title": "Present your concept, its needs and constraints.",
     "lead": "The contact form records all sender information, supports a detailed project mode and accepts DOCX, PDF, JPG and WEBP formats.",
     "processing_title": "Request handling:",
-    "processing_text": "This form is the main entry point for commercial, technical and document transmission requests.",
-    "processing_detail": "Describe your needs here, attach your files, and your request will be recorded with confirmation on the page.",
+    "processing_text": "this form is your entry point for commercial and technical requests. You can attach documents, detail your project, and most importantly explain precisely what you need us to set up: conceptualization, development, deployment, maintenance and updates?",
+    "processing_detail": "We process requests in the order received, and attach great importance to studying your file before offering a quote and making initial contact to discuss it.",
     "firstname": "First name",
     "lastname": "Last name",
     "email": "Email",
@@ -104,7 +105,7 @@
     "company": "Organization",
     "website": "Existing website",
     "message": "Message",
-    "has_project": "This is a project that needs scoping",
+    "has_project": "This is a project that needs conceptualizing",
     "project_details": "Project details",
     "attachments": "Attached documents (docx, pdf, jpg, webp)",
     "submit": "Send",
@@ -252,7 +253,7 @@
       "showcase": {
         "label": "Multilingual showcase site, 3 pages",
         "headline": "Showcase design",
-        "features": ["3 structured pages", "Multilingual version", "Premium responsive design"]
+        "features": ["3 configurable pages", "Multilingual version", "Premium responsive design"]
       },
       "complex": {
         "label": "Complex site, 9 pages + 3 modules + database",

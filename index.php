@@ -11,7 +11,7 @@ require __DIR__ . '/includes/header.php';
     <div class="container hero-grid">
         <div class="hero-copy">
             <div class="eyebrow"><?= htmlspecialchars(t('home.eyebrow'), ENT_QUOTES, 'UTF-8'); ?></div>
-            <h1 class="hero-title"><?= htmlspecialchars(t('home.title'), ENT_QUOTES, 'UTF-8'); ?></h1>
+            <h1 class="hero-title"><?= str_replace('fl', '<span class="fl-fix">fl</span>', htmlspecialchars(t('home.title'), ENT_QUOTES, 'UTF-8')); ?></h1>
             <p class="lead"><?= htmlspecialchars(t('home.lead'), ENT_QUOTES, 'UTF-8'); ?></p>
             <div class="cta-row">
                 <a class="btn btn--primary" href="<?= htmlspecialchars(app_nav_href('solutions'), ENT_QUOTES, 'UTF-8'); ?>"><?= htmlspecialchars(t('home.cta_solutions'), ENT_QUOTES, 'UTF-8'); ?></a>

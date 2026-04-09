@@ -48,6 +48,9 @@
                 </div>
             </section>
         </div>
+        <div class="footer-copyright">
+            &copy; <?= htmlspecialchars(t('footer.copyright'), ENT_QUOTES, 'UTF-8'); ?> <a href="https://www.akashaproduction.com"><?= htmlspecialchars(t('site.name'), ENT_QUOTES, 'UTF-8'); ?></a>
+        </div>
     </footer>
 </div>
 <script src="/assets/site.js?v=8" defer></script>
