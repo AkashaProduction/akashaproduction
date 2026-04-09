@@ -336,22 +336,52 @@ main {
   to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
-/* Commander hero: circle container, images overflow */
+/* Commander hero: modern overlapping image composition */
 .commander-hero .solutions-scene {
-  border-radius: 50%;
+  background: none;
+  box-shadow: none;
+  border: none;
   overflow: visible;
-  width: 380px;
-  height: 380px;
-  min-height: auto;
-  margin: 0 auto;
+  min-height: 440px;
+  backdrop-filter: none;
 }
 
 .commander-hero .solutions-scene::before {
-  border-radius: 50%;
+  display: none;
 }
 
 .commander-hero .solutions-bubble {
+  border-radius: 20px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255,255,255,0.08);
+  transition: transform 400ms cubic-bezier(.2,.8,.2,1), box-shadow 400ms ease;
+}
+
+.commander-hero .solutions-bubble:hover {
+  transform: translateY(-6px) scale(1.03);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255,255,255,0.12);
+}
+
+.commander-hero .solutions-bubble--1 {
+  top: 0; left: 0;
+  width: 62%; height: 65%;
+  border-radius: 24px;
   z-index: 2;
+}
+
+.commander-hero .solutions-bubble--2 {
+  top: -0.5rem; right: 0;
+  left: auto;
+  width: 42%; height: 45%;
+  border-radius: 18px;
+  z-index: 1;
+}
+
+.commander-hero .solutions-bubble--3 {
+  bottom: 0; right: 1rem;
+  left: auto; top: auto;
+  width: 50%; height: 48%;
+  border-radius: 22px;
+  z-index: 3;
 }
 
 /* Mon compte: wider page-title */
