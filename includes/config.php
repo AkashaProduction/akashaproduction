@@ -91,6 +91,13 @@ return [
             'status' => 'En ligne',
             'description' => 'Investissement immobilier et installation au Maroc avec accès facilité, paiement différé et projets VEFA à Marrakech.',
         ],
+        [
+            'title' => 'Épanouissement Amoureux',
+            'url' => 'https://www.epanouissement-amoureux.fr',
+            'domain' => 'epanouissement-amoureux.fr',
+            'status' => 'En ligne',
+            'description' => 'Ressources et accompagnement pour cultiver des relations épanouissantes, renforcer la communication et nourrir la vie de couple.',
+        ],
     ],
     'catalog' => [
         'creation' => [
