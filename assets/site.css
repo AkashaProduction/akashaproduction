@@ -311,8 +311,8 @@ main {
 }
 
 .solutions-bubble--1 {
-  top: 1.5rem; left: 1.5rem;
-  width: 52%; height: 48%;
+  top: 1.8rem; left: 1.5rem;
+  width: 80%; height: 74%;
   border-radius: 32px 18px 24px 14px;
   animation-delay: 0.1s;
 }
@@ -362,16 +362,16 @@ main {
 }
 
 .commander-hero .solutions-bubble--1 {
-  top: -1.5rem; left: -1.5rem;
-  width: 60%; height: 58%;
+  top: 3.5rem; left: 16.5rem;
+  width: 50%; height: 50%;
   border-radius: 22px;
   z-index: 2;
 }
 
 .commander-hero .solutions-bubble--2 {
-  top: -2rem; right: -1.5rem;
+  top: 2rem; right: 3.5rem;
   left: auto;
-  width: 44%; height: 44%;
+  width: 100%; height: 70.1%;
   border-radius: 16px;
   z-index: 1;
 }
