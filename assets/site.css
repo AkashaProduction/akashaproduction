@@ -336,55 +336,10 @@ main {
   to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
-/* Tier 1 — Blue: Vitrine, Mutualisé annuel, Pack vitrine */
-.solution-card--creation {
-  background:
-    linear-gradient(180deg, rgba(255,225,255,0.05), rgba(235,255,225,0.02)),
-    linear-gradient(180deg, rgba(183, 221, 255, 0.92), rgba(78, 170, 225, 0.98));
-  border-color: rgba(78, 170, 225, 0.3);
-  color: #0d3a5c;
-}
-.solution-card--creation:hover {
-  border-color: rgba(78, 170, 225, 0.6);
-  box-shadow: 0 32px 80px rgba(20, 80, 140, 0.3);
-}
-.solution-card--creation .solution-card__eyebrow { color: #1a5a8a; }
-.solution-card--creation .solution-card__title { color: #0a2e4a; }
-.solution-card--creation .solution-card__price { color: #0d3a5c; }
-.solution-card--creation .solution-card__features li { color: #1c4d6e; }
-.solution-card--creation .solution-card__features li::before { color: #1a5a8a; }
-
-/* Tier 2 — Orange: Complexe, VPS, Pack complexe */
-.solution-card--hosting {
-  background:
-    linear-gradient(180deg, rgba(255,225,255,0.05), rgba(235,255,225,0.02)),
-    linear-gradient(180deg, rgba(255, 205, 128, 0.92), rgba(255, 144, 46, 0.98));
-  border-color: rgba(255, 144, 46, 0.3);
-  color: #5c2e0d;
-}
-.solution-card--hosting:hover {
-  border-color: rgba(255, 144, 46, 0.6);
-  box-shadow: 0 32px 80px rgba(140, 60, 10, 0.3);
-}
-.solution-card--hosting .solution-card__eyebrow { color: #7a3d10; }
-.solution-card--hosting .solution-card__title { color: #4a2508; }
-.solution-card--hosting .solution-card__price { color: #5c2e0d; }
-
-/* Tier 3 — Yellow: Sur devis (custom) */
-.solution-card--pack {
-  background:
-    linear-gradient(180deg, rgba(255,225,255,0.05), rgba(235,255,225,0.02)),
-    linear-gradient(180deg, rgba(255, 247, 128, 0.92), rgba(255, 203, 46, 0.98));
-  border-color: rgba(255, 203, 46, 0.3);
-  color: #5c4a0d;
-}
-.solution-card--pack:hover {
-  border-color: rgba(255, 203, 46, 0.6);
-  box-shadow: 0 32px 80px rgba(140, 100, 10, 0.3);
-}
-.solution-card--pack .solution-card__eyebrow { color: #7a5d10; }
-.solution-card--pack .solution-card__title { color: #4a3808; }
-.solution-card--pack .solution-card__price { color: #5c4a0d; }
+/* Solution card category accents (eyebrow colors only) */
+.solution-card--creation .solution-card__eyebrow { color: #c9a87c; }
+.solution-card--hosting .solution-card__eyebrow { color: #8eaed0; }
+.solution-card--pack .solution-card__eyebrow { color: #e8b06a; }
 
 .hero,
 .page-hero {
@@ -464,7 +419,7 @@ main {
   line-height: 0.88;
   letter-spacing: -0.03em;
   margin: 1rem 0 1.1rem;
-  max-width: 10ch;
+  max-width: 10.7ch;
   font-weight: 600;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.88), 0 18px 38px rgba(172, 100, 52, 0.14);
 }
@@ -1662,6 +1617,61 @@ s {
   margin-top: auto;
   text-align: center;
 }
+
+/* Tier gradients — 1st card blue, 2nd orange, 3rd yellow in each row */
+.solutions-grid .solution-card:nth-child(1) {
+  background:
+    linear-gradient(180deg, rgba(255,225,255,0.05), rgba(235,255,225,0.02)),
+    linear-gradient(180deg, rgba(183, 221, 255, 0.92), rgba(78, 170, 225, 0.98));
+  border-color: rgba(78, 170, 225, 0.3);
+  color: #0d3a5c;
+}
+.solutions-grid .solution-card:nth-child(1):hover {
+  border-color: rgba(78, 170, 225, 0.6);
+  box-shadow: 0 32px 80px rgba(20, 80, 140, 0.3);
+}
+.solutions-grid .solution-card:nth-child(1) .solution-card__eyebrow,
+.solutions-grid .solution-card:nth-child(1) .solution-card__features li::before { color: #1a5a8a; }
+.solutions-grid .solution-card:nth-child(1) .solution-card__title { color: #0a2e4a; }
+.solutions-grid .solution-card:nth-child(1) .solution-card__price { color: #0d3a5c; }
+.solutions-grid .solution-card:nth-child(1) .solution-card__features li { color: #1c4d6e; }
+.solutions-grid .solution-card:nth-child(1) .solution-card__cta { color: #0d3a5c; border-color: rgba(13,58,92,0.3); }
+
+.solutions-grid .solution-card:nth-child(2) {
+  background:
+    linear-gradient(180deg, rgba(255,225,255,0.05), rgba(235,255,225,0.02)),
+    linear-gradient(180deg, rgba(255, 205, 128, 0.92), rgba(255, 144, 46, 0.98));
+  border-color: rgba(255, 144, 46, 0.3);
+  color: #5c2e0d;
+}
+.solutions-grid .solution-card:nth-child(2):hover {
+  border-color: rgba(255, 144, 46, 0.6);
+  box-shadow: 0 32px 80px rgba(140, 60, 10, 0.3);
+}
+.solutions-grid .solution-card:nth-child(2) .solution-card__eyebrow,
+.solutions-grid .solution-card:nth-child(2) .solution-card__features li::before { color: #7a3d10; }
+.solutions-grid .solution-card:nth-child(2) .solution-card__title { color: #4a2508; }
+.solutions-grid .solution-card:nth-child(2) .solution-card__price { color: #5c2e0d; }
+.solutions-grid .solution-card:nth-child(2) .solution-card__features li { color: #5c3510; }
+.solutions-grid .solution-card:nth-child(2) .solution-card__cta { color: #5c2e0d; border-color: rgba(92,46,13,0.3); }
+
+.solutions-grid .solution-card:nth-child(3) {
+  background:
+    linear-gradient(180deg, rgba(255,225,255,0.05), rgba(235,255,225,0.02)),
+    linear-gradient(180deg, rgba(255, 247, 128, 0.92), rgba(255, 203, 46, 0.98));
+  border-color: rgba(255, 203, 46, 0.3);
+  color: #5c4a0d;
+}
+.solutions-grid .solution-card:nth-child(3):hover {
+  border-color: rgba(255, 203, 46, 0.6);
+  box-shadow: 0 32px 80px rgba(140, 100, 10, 0.3);
+}
+.solutions-grid .solution-card:nth-child(3) .solution-card__eyebrow,
+.solutions-grid .solution-card:nth-child(3) .solution-card__features li::before { color: #7a5d10; }
+.solutions-grid .solution-card:nth-child(3) .solution-card__title { color: #4a3808; }
+.solutions-grid .solution-card:nth-child(3) .solution-card__price { color: #5c4a0d; }
+.solutions-grid .solution-card:nth-child(3) .solution-card__features li { color: #5c4a10; }
+.solutions-grid .solution-card:nth-child(3) .solution-card__cta { color: #5c4a0d; border-color: rgba(92,74,13,0.3); }
 
 @media (max-width: 1100px) {
   .project-grid {
