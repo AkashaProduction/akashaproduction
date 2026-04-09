@@ -1090,6 +1090,9 @@ ul li::marker {
   display: grid;
   gap: 0.65rem;
   align-content: start;
+  background: #32251f;
+  padding: 30px;
+  border-radius: 30px;
 }
 
 .order-summary__total {
@@ -1402,7 +1405,7 @@ s {
 }
 
 .summary-line span:first-child {
-  font-size: 0.82rem;
+  font-size: 1.02rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: #a08060;
@@ -1422,7 +1425,7 @@ s {
 .summary-promo {
   padding: 0.65rem 0.85rem;
   border-radius: 12px;
-  background: rgba(72, 127, 91, 0.12);
+  background: rgba(139, 255, 0, 0.12);
   border: 1px solid rgba(72, 127, 91, 0.18);
   display: flex;
   justify-content: space-between;
@@ -1431,8 +1434,8 @@ s {
   font-size: 0.9rem;
 }
 
-.summary-promo span { color: rgba(72, 127, 91, 0.9); }
-.summary-promo strong { color: #4a9e64; }
+.summary-promo span { color: rgba(190, 227, 138, 0.9); }
+.summary-promo strong { color: rgba(190, 227, 138, 0.9); }
 
 .summary-total-row {
   display: flex;

@@ -143,13 +143,13 @@ require __DIR__ . '/includes/header.php';
         </div>
         <div class="solutions-scene glass">
             <div class="solutions-bubble solutions-bubble--1">
-                <img src="https://images.unsplash.com/photo-1553729459-uj1ebxprbmw?auto=format&fit=crop&w=500&q=80" alt="Podium" onerror="this.src='https://images.unsplash.com/photo-1567427017947-545c5f8d16ad?auto=format&fit=crop&w=500&q=80'">
+                <img src="https://images.unsplash.com/photo-1569705460033-cfaa4bf9f822?auto=format&fit=crop&w=500&q=80" alt="Podium">
             </div>
             <div class="solutions-bubble solutions-bubble--2">
-                <img src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=500&q=80" alt="Growth">
+                <img src="https://images.unsplash.com/photo-1543286386-713bdd548da4?auto=format&fit=crop&w=500&q=80" alt="Growth">
             </div>
             <div class="solutions-bubble solutions-bubble--3">
-                <img src="https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=500&q=80" alt="Happy clients">
+                <img src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=500&q=80" alt="Happy clients">
             </div>
         </div>
     </div>
