@@ -25,15 +25,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const orderForm = document.querySelector("[data-order-form]");
   if (!orderForm) return;
 
+  var i18n = window.i18n || {};
+  var i18nLabels = i18n.labels || {};
+
   const prices = {
     creation: { showcase: 50, complex: 500, custom: 0 },
     hosting: { "shared-monthly": 8, "shared-yearly": 88, vps: 200, cloud: 0 },
     packs: { "showcase:shared-yearly": 120, "complex:shared-yearly": 550, "showcase:vps": 230, "complex:vps": 675 },
-  };
-
-  const labels = {
-    creation: { showcase: "Site vitrine multilingue 3 pages", complex: "Site complexe 9 pages + 3 modules + BDD", custom: "Creation personnalisee sur devis" },
-    hosting: { "shared-monthly": "Mutualise mensuel", "shared-yearly": "Mutualise annuel", vps: "VPS dedie", cloud: "Cloud personnalise sur devis" },
   };
 
   const $ = (sel) => document.querySelector(sel);
@@ -75,26 +73,29 @@ document.addEventListener("DOMContentLoaded", () => {
     var rawSum = (prices.creation[c] || 0) + (prices.hosting[h] || 0);
     var total = base + domainPrice;
 
-    if (summaryCreation) summaryCreation.textContent = labels.creation[c] || c;
-    if (summaryCreationPrice) summaryCreationPrice.textContent = prices.creation[c] > 0 ? prices.creation[c] + " \u20AC" : "Sur devis";
-    if (summaryHosting) summaryHosting.textContent = labels.hosting[h] || h;
-    if (summaryHostingPrice) summaryHostingPrice.textContent = prices.hosting[h] > 0 ? prices.hosting[h] + " \u20AC" : "Sur devis";
+    var onQuote = i18n.on_quote || "Sur devis";
+    var currency = i18n.currency || "\u20AC";
+
+    if (summaryCreation) summaryCreation.textContent = (i18nLabels.creation && i18nLabels.creation[c]) || c;
+    if (summaryCreationPrice) summaryCreationPrice.textContent = prices.creation[c] > 0 ? prices.creation[c] + " " + currency : onQuote;
+    if (summaryHosting) summaryHosting.textContent = (i18nLabels.hosting && i18nLabels.hosting[h]) || h;
+    if (summaryHostingPrice) summaryHostingPrice.textContent = prices.hosting[h] > 0 ? prices.hosting[h] + " " + currency : onQuote;
 
     if (summaryDomainLine) {
       summaryDomainLine.hidden = domainPrice === 0;
       if (summaryDomainName) {
         var nameInput = $("#domain-name-input");
         var ext = domainExtSelect ? domainExtSelect.value : "";
-        summaryDomainName.textContent = nameInput && nameInput.value ? nameInput.value + "." + ext : "Domaine personnalise";
+        summaryDomainName.textContent = nameInput && nameInput.value ? nameInput.value + "." + ext : (i18n.domain_custom || "Domaine personnalis\u00E9");
       }
-      if (summaryDomainPrice) summaryDomainPrice.textContent = domainPrice + " \u20AC/an";
+      if (summaryDomainPrice) summaryDomainPrice.textContent = domainPrice + " " + (i18n.per_year || "\u20AC/an");
     }
 
     if (summaryPromo) {
       if (hasPack && !isQuote) {
         summaryPromo.hidden = false;
         var saving = rawSum - base;
-        if (summaryPromoLabel) summaryPromoLabel.textContent = "-" + saving + " \u20AC (tarif pack)";
+        if (summaryPromoLabel) summaryPromoLabel.textContent = "-" + saving + " " + currency + " (" + (i18n.pack_discount || "tarif pack") + ")";
       } else {
         summaryPromo.hidden = true;
       }
@@ -106,14 +107,15 @@ document.addEventListener("DOMContentLoaded", () => {
       if (isQuote) splitInput.checked = false;
     }
 
-    if (totalEl) totalEl.textContent = isQuote ? "Sur devis" : total + " \u20AC";
+    if (totalEl) totalEl.textContent = isQuote ? onQuote : total + " " + currency;
     if (detailEl) {
       if (isQuote) {
-        detailEl.textContent = "Etude commerciale personnalisee";
+        detailEl.textContent = i18n.quote_detail || "\u00C9tude commerciale personnalis\u00E9e";
       } else if (splitInput instanceof HTMLInputElement && splitInput.checked) {
-        detailEl.textContent = "3 x " + (total / 3).toFixed(2) + " \u20AC";
+        var splitText = i18n.split_format || "3 x :amount \u20AC";
+        detailEl.textContent = splitText.replace(":amount", (total / 3).toFixed(2));
       } else {
-        detailEl.textContent = "Paiement a l'activation";
+        detailEl.textContent = i18n.pay_detail || "Paiement \u00E0 l'activation";
       }
     }
 
@@ -122,7 +124,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     var submitBtn = orderForm.querySelector("[data-submit-btn]");
-    if (submitBtn) submitBtn.textContent = isQuote ? "Envoyer la demande de devis" : "Payer avec Stripe";
+    if (submitBtn) submitBtn.textContent = isQuote ? (i18n.submit_quote || "Envoyer la demande de devis") : (i18n.submit_pay || "Payer avec Stripe");
   }
 
   orderForm.querySelectorAll("[name=\"creation\"], [name=\"hosting\"]").forEach(function(el) { el.addEventListener("change", refresh); });
@@ -142,11 +144,11 @@ document.addEventListener("DOMContentLoaded", () => {
       var name = domainNameInput.value.trim().toLowerCase().replace(/[^a-z0-9\-]/g, "");
       var tld = domainExtSelect.value;
       if (!name || name.length < 2) {
-        showResult("warning", "Saisissez au moins 2 caracteres pour le nom de domaine.");
+        showResult("warning", i18n.search_min || "Saisissez au moins 2 caract\u00E8res pour le nom de domaine.");
         return;
       }
       searchBtn.disabled = true;
-      searchBtn.textContent = "Recherche...";
+      searchBtn.textContent = i18n.searching || "Recherche\u2026";
 
       fetch("/domain-check?name=" + encodeURIComponent(name) + "&tld=" + encodeURIComponent(tld))
         .then(function(resp) { return resp.json(); })
@@ -154,19 +156,22 @@ document.addEventListener("DOMContentLoaded", () => {
           if (data.error) {
             showResult("warning", data.error);
           } else if (data.available === true) {
-            showResult("success", data.domain + " est disponible — " + data.price + " \u20AC/an");
+            var msg = (i18n.domain_available || ":domain est disponible \u2014 :price \u20AC/an").replace(":domain", data.domain).replace(":price", data.price);
+            showResult("success", msg);
           } else if (data.available === false) {
-            showResult("taken", data.domain + " est deja enregistre. Essayez un autre nom ou une autre extension.");
+            var msg = (i18n.domain_taken || ":domain est d\u00E9j\u00E0 enregistr\u00E9. Essayez un autre nom ou une autre extension.").replace(":domain", data.domain);
+            showResult("taken", msg);
           } else {
-            showResult("warning", "Impossible de confirmer la disponibilite de " + data.domain + ". Contactez-nous.");
+            var msg = (i18n.domain_unknown || "Impossible de confirmer la disponibilit\u00E9 de :domain. Contactez-nous.").replace(":domain", data.domain);
+            showResult("warning", msg);
           }
         })
         .catch(function() {
-          showResult("warning", "Erreur de connexion. Reessayez dans quelques instants.");
+          showResult("warning", i18n.domain_error || "Erreur de connexion. R\u00E9essayez dans quelques instants.");
         })
         .finally(function() {
           searchBtn.disabled = false;
-          searchBtn.textContent = "Verifier";
+          searchBtn.textContent = i18n.verify || "V\u00E9rifier";
         });
     });
 

@@ -149,7 +149,9 @@
     "summary_pay_detail": "Pago a la activacion",
     "summary_note": "Los precios combinados se benefician automaticamente de la tarifa pack. Pago seguro con Stripe y factura detallada.",
     "flash_warning": "Por favor, indique su informacion esencial y la descripcion del proyecto.",
-    "flash_quote_success": "Su solicitud de presupuesto ha sido registrada correctamente. Le responderemos con una propuesta adaptada."
+    "flash_quote_success": "Su solicitud de presupuesto ha sido registrada correctamente. Le responderemos con una propuesta adaptada.",
+    "popular_extensions": "Extensiones populares",
+    "all_extensions": "Todas las extensiones"
   },
   "account": {
     "eyebrow": "Mi cuenta",
@@ -172,6 +174,8 @@
     "orders_title": "Sus pedidos",
     "no_orders_title": "Ningun pedido encontrado",
     "no_orders_text": "Actualmente no hay ningun pedido asociado a este correo electronico. Verifique la direccion utilizada en la solicitud o contactenos si es necesario.",
+    "order_ref": "Expediente",
+    "order_status_default": "Pedido",
     "order_creation": "Creacion",
     "order_hosting": "Alojamiento",
     "order_subdomain": "Subdominio solicitado",
@@ -199,7 +203,8 @@
     "reply_label": "Añadir un mensaje",
     "reply_submit": "Enviar el complemento",
     "flash_ticket_success": "Su ticket ha sido creado correctamente.",
-    "flash_ticket_warning": "Por favor, indique su nombre, su correo electronico, el asunto y su mensaje."
+    "flash_ticket_warning": "Por favor, indique su nombre, su correo electronico, el asunto y su mensaje.",
+    "flash_reply_success": "Su complemento ha sido añadido al ticket."
   },
   "confirmation": {
     "eyebrow": "Confirmacion",
@@ -219,6 +224,15 @@
     "not_found": "Pedido no encontrado o ya procesado. Consulte su",
     "for_tracking": "para el seguimiento.",
     "back": "Volver al inicio"
+  },
+  "checkout": {
+    "order_not_found": "Pedido no encontrado.",
+    "already_paid": "Este pedido ya ha sido pagado.",
+    "quote_pending": "Este pedido está en espera de presupuesto.",
+    "payment_unavailable": "Configuración de pago no disponible.",
+    "no_items": "Ningún producto a facturar.",
+    "connection_error": "Error de conexión con el servicio de pago. Inténtelo de nuevo.",
+    "session_error": "Error al crear la sesión de pago."
   },
   "legal": {
     "eyebrow": "Aviso legal",
@@ -274,5 +288,19 @@
         "description": "Estudio completo y presupuesto a medida para necesidades atipicas."
       }
     }
+  },
+  "js": {
+    "currency": "€",
+    "per_year": "€/año",
+    "pack_discount": "tarifa pack",
+    "domain_custom": "Dominio personalizado",
+    "split_format": "3 x :amount €",
+    "search_min": "Introduzca al menos 2 caracteres para el nombre de dominio.",
+    "searching": "Buscando…",
+    "verify": "Verificar",
+    "domain_available": ":domain está disponible — :price €/año",
+    "domain_taken": ":domain ya está registrado. Pruebe con otro nombre u otra extensión.",
+    "domain_unknown": "No se puede confirmar la disponibilidad de :domain. Contáctenos.",
+    "domain_error": "Error de conexión. Inténtelo de nuevo en unos instantes."
   }
 }

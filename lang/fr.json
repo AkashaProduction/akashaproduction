@@ -149,7 +149,9 @@
     "summary_pay_detail": "Paiement à l'activation",
     "summary_note": "Les prix combinés bénéficient automatiquement de la tarification pack. Paiement sécurisé par Stripe avec facture détaillée.",
     "flash_warning": "Merci de renseigner vos informations essentielles et la description du projet.",
-    "flash_quote_success": "Votre demande de devis a bien été enregistrée. Nous reviendrons vers vous avec une proposition adaptée."
+    "flash_quote_success": "Votre demande de devis a bien été enregistrée. Nous reviendrons vers vous avec une proposition adaptée.",
+    "popular_extensions": "Extensions populaires",
+    "all_extensions": "Toutes les extensions"
   },
   "account": {
     "eyebrow": "Mon compte",
@@ -172,6 +174,8 @@
     "orders_title": "Vos commandes",
     "no_orders_title": "Aucune commande retrouvée",
     "no_orders_text": "Aucune commande n'est actuellement associée à cet email. Vérifiez l'adresse utilisée lors de la demande ou contactez-nous si nécessaire.",
+    "order_ref": "Dossier",
+    "order_status_default": "Commande",
     "order_creation": "Création",
     "order_hosting": "Hébergement",
     "order_subdomain": "Sous-domaine demandé",
@@ -199,7 +203,8 @@
     "reply_label": "Ajouter un message",
     "reply_submit": "Envoyer le complément",
     "flash_ticket_success": "Votre ticket a bien été créé.",
-    "flash_ticket_warning": "Merci de renseigner votre nom, votre email, le sujet et votre message."
+    "flash_ticket_warning": "Merci de renseigner votre nom, votre email, le sujet et votre message.",
+    "flash_reply_success": "Votre complément a été ajouté au ticket."
   },
   "confirmation": {
     "eyebrow": "Confirmation",
@@ -219,6 +224,15 @@
     "not_found": "Commande introuvable ou déjà traitée. Consultez votre",
     "for_tracking": "pour le suivi.",
     "back": "Retour à l'accueil"
+  },
+  "checkout": {
+    "order_not_found": "Commande introuvable.",
+    "already_paid": "Cette commande a déjà été payée.",
+    "quote_pending": "Cette commande est en attente de devis.",
+    "payment_unavailable": "Configuration de paiement indisponible.",
+    "no_items": "Aucun produit à facturer.",
+    "connection_error": "Erreur de connexion au service de paiement. Réessayez.",
+    "session_error": "Erreur lors de la création de la session de paiement."
   },
   "legal": {
     "eyebrow": "Mentions légales",
@@ -274,5 +288,19 @@
         "description": "Étude complète et chiffrage sur mesure pour les besoins atypiques."
       }
     }
+  },
+  "js": {
+    "currency": "€",
+    "per_year": "€/an",
+    "pack_discount": "tarif pack",
+    "domain_custom": "Domaine personnalisé",
+    "split_format": "3 x :amount €",
+    "search_min": "Saisissez au moins 2 caractères pour le nom de domaine.",
+    "searching": "Recherche…",
+    "verify": "Vérifier",
+    "domain_available": ":domain est disponible — :price €/an",
+    "domain_taken": ":domain est déjà enregistré. Essayez un autre nom ou une autre extension.",
+    "domain_unknown": "Impossible de confirmer la disponibilité de :domain. Contactez-nous.",
+    "domain_error": "Erreur de connexion. Réessayez dans quelques instants."
   }
 }

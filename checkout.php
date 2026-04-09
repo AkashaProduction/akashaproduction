@@ -11,7 +11,7 @@ require_once __DIR__ . '/includes/domain-pricing.php';
 
 $orderId = trim((string) ($_GET['order'] ?? ''));
 if ($orderId === '') {
-    app_flash('warning', 'Commande introuvable.');
+    app_flash('warning', t('checkout.order_not_found'));
     app_redirect('/commander');
 }
 
@@ -25,24 +25,24 @@ foreach ($orders as $o) {
 }
 
 if (!$order) {
-    app_flash('warning', 'Commande introuvable.');
+    app_flash('warning', t('checkout.order_not_found'));
     app_redirect('/commander');
 }
 
 if (($order['status'] ?? '') === 'paid') {
-    app_flash('info', 'Cette commande a deja ete payee.');
+    app_flash('info', t('checkout.already_paid'));
     app_redirect('/commande-confirmee?order=' . urlencode($orderId));
 }
 
 if (($order['status'] ?? '') === 'quote-requested') {
-    app_flash('info', 'Cette commande est en attente de devis.');
+    app_flash('info', t('checkout.quote_pending'));
     app_redirect('/commander');
 }
 
 $stripe = require __DIR__ . '/includes/stripe-config.php';
 $secretKey = (string) (app_config()['stripe_secret_key'] ?? '');
 if ($secretKey === '') {
-    app_flash('warning', 'Configuration de paiement indisponible.');
+    app_flash('warning', t('checkout.payment_unavailable'));
     app_redirect('/commander');
 }
 
@@ -125,7 +125,7 @@ if ($includeDomain && $domainName !== '' && $domainPrice > 0) {
 }
 
 if (empty($lineItems)) {
-    app_flash('warning', 'Aucun produit a facturer.');
+    app_flash('warning', t('checkout.no_items'));
     app_redirect('/commander');
 }
 
@@ -177,14 +177,14 @@ $curlError = curl_error($ch);
 curl_close($ch);
 
 if ($curlError !== '' || $httpCode === 0) {
-    app_flash('warning', 'Erreur de connexion au service de paiement. Reessayez.');
+    app_flash('warning', t('checkout.connection_error'));
     app_redirect('/commander');
 }
 
 $data = json_decode((string) $response, true);
 
 if ($httpCode >= 400 || !isset($data['url'])) {
-    $errorMsg = $data['error']['message'] ?? 'Erreur lors de la creation de la session de paiement.';
+    $errorMsg = $data['error']['message'] ?? t('checkout.session_error');
     app_flash('warning', $errorMsg);
     app_redirect('/commander');
 }

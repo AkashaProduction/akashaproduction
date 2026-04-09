@@ -50,6 +50,6 @@
         </div>
     </footer>
 </div>
-<script src="/assets/site.js?v=7" defer></script>
+<script src="/assets/site.js?v=8" defer></script>
 </body>
 </html>

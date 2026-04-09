@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $isQuote = $creation === 'custom' || $hosting === 'cloud';
 
     if ($firstName === '' || $lastName === '' || $email === '' || $projectDescription === '') {
-        app_flash('warning', 'Merci de renseigner vos informations essentielles et la description du projet.');
+        app_flash('warning', t('commander.flash_warning'));
         app_redirect('/commander');
     }
 
@@ -123,7 +123,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     app_send_mail('Nouvelle commande / demande Akasha Production', $body, $email);
 
     if ($isQuote) {
-        app_flash('success', 'Votre demande de devis a bien ete enregistree. Nous reviendrons vers vous avec une proposition adaptee.');
+        app_flash('success', t('commander.flash_quote_success'));
         app_redirect('/commander');
     } else {
         app_redirect('/checkout?order=' . urlencode($record['id']));
@@ -154,9 +154,9 @@ require __DIR__ . '/includes/header.php';
                             <label class="product-tab">
                                 <input type="radio" name="creation" value="<?= htmlspecialchars($key, ENT_QUOTES, 'UTF-8'); ?>"<?= $prefillCreation === $key ? ' checked' : ''; ?>>
                                 <span class="product-tab__inner">
-                                    <span class="product-tab__name"><?= htmlspecialchars($entry['label'], ENT_QUOTES, 'UTF-8'); ?></span>
-                                    <span class="product-tab__price"><?= $entry['amount'] > 0 ? app_money((float) $entry['amount']) : 'Sur devis'; ?></span>
-                                    <span class="product-tab__features"><?= htmlspecialchars(implode(' · ', $entry['features']), ENT_QUOTES, 'UTF-8'); ?></span>
+                                    <span class="product-tab__name"><?= htmlspecialchars(t('catalog.creation.' . $key . '.label'), ENT_QUOTES, 'UTF-8'); ?></span>
+                                    <span class="product-tab__price"><?= $entry['amount'] > 0 ? app_money((float) $entry['amount']) : htmlspecialchars(t('commander.summary_on_quote'), ENT_QUOTES, 'UTF-8'); ?></span>
+                                    <span class="product-tab__features"><?= htmlspecialchars(implode(' · ', ta('catalog.creation.' . $key . '.features') ?: $entry['features']), ENT_QUOTES, 'UTF-8'); ?></span>
                                 </span>
                             </label>
                         <?php endforeach; ?>
@@ -171,8 +171,8 @@ require __DIR__ . '/includes/header.php';
                             <label class="product-tab">
                                 <input type="radio" name="hosting" value="<?= htmlspecialchars($key, ENT_QUOTES, 'UTF-8'); ?>"<?= $prefillHosting === $key ? ' checked' : ''; ?>>
                                 <span class="product-tab__inner">
-                                    <span class="product-tab__name"><?= htmlspecialchars($entry['label'], ENT_QUOTES, 'UTF-8'); ?></span>
-                                    <span class="product-tab__price"><?= $entry['amount'] > 0 ? app_money((float) $entry['amount']) . '<small>' . htmlspecialchars($entry['suffix'], ENT_QUOTES, 'UTF-8') . '</small>' : 'Sur devis'; ?></span>
+                                    <span class="product-tab__name"><?= htmlspecialchars(t('catalog.hosting.' . $key . '.label'), ENT_QUOTES, 'UTF-8'); ?></span>
+                                    <span class="product-tab__price"><?= $entry['amount'] > 0 ? app_money((float) $entry['amount']) . '<small>' . htmlspecialchars($entry['suffix'], ENT_QUOTES, 'UTF-8') . '</small>' : htmlspecialchars(t('commander.summary_on_quote'), ENT_QUOTES, 'UTF-8'); ?></span>
                                 </span>
                             </label>
                         <?php endforeach; ?>
@@ -184,7 +184,7 @@ require __DIR__ . '/includes/header.php';
                     <div class="kicker"><?= htmlspecialchars(t('commander.subdomain_kicker'), ENT_QUOTES, 'UTF-8'); ?></div>
                     <p class="copy"><?= htmlspecialchars(t('commander.subdomain_text'), ENT_QUOTES, 'UTF-8'); ?></p>
                     <div class="subdomain-row">
-                        <input id="subdomain_prefix" name="subdomain_prefix" placeholder="votre-choix" value="<?= htmlspecialchars($prefillSubdomainPrefix, ENT_QUOTES, 'UTF-8'); ?>">
+                        <input id="subdomain_prefix" name="subdomain_prefix" placeholder="<?= htmlspecialchars(t('commander.subdomain_placeholder'), ENT_QUOTES, 'UTF-8'); ?>" value="<?= htmlspecialchars($prefillSubdomainPrefix, ENT_QUOTES, 'UTF-8'); ?>">
                         <span class="subdomain-dot">.</span>
                         <select id="parent_domain" name="parent_domain">
                             <?php foreach ($catalog['parent_domains'] as $domain): ?>
@@ -205,17 +205,17 @@ require __DIR__ . '/includes/header.php';
                 <div class="field field--full" id="domain-search-block"<?= $prefillIncludeDomain ? '' : ' hidden'; ?>>
                     <div class="domain-search-box">
                         <div class="domain-search-row">
-                            <input id="domain-name-input" name="custom_domain_name" type="text" placeholder="ex: monsite (sans www.)" value="<?= htmlspecialchars($prefillCustomDomainName, ENT_QUOTES, 'UTF-8'); ?>" class="domain-name-field">
+                            <input id="domain-name-input" name="custom_domain_name" type="text" placeholder="<?= htmlspecialchars(t('commander.domain_placeholder'), ENT_QUOTES, 'UTF-8'); ?>" value="<?= htmlspecialchars($prefillCustomDomainName, ENT_QUOTES, 'UTF-8'); ?>" class="domain-name-field">
                             <span class="subdomain-dot">.</span>
                             <select id="domain-extension" name="domain_extension" class="domain-ext-field">
-                                <optgroup label="Extensions populaires">
+                                <optgroup label="<?= htmlspecialchars(t('commander.popular_extensions'), ENT_QUOTES, 'UTF-8'); ?>">
                                     <?php foreach ($popularTlds as $tld): ?>
                                         <?php if (isset($domainPrices[$tld])): ?>
                                             <option value="<?= $tld; ?>">.<?= $tld; ?> — <?= $domainPrices[$tld]; ?> &euro;/an</option>
                                         <?php endif; ?>
                                     <?php endforeach; ?>
                                 </optgroup>
-                                <optgroup label="Toutes les extensions">
+                                <optgroup label="<?= htmlspecialchars(t('commander.all_extensions'), ENT_QUOTES, 'UTF-8'); ?>">
                                     <?php foreach ($domainPrices as $tld => $price): ?>
                                         <?php if (!in_array($tld, $popularTlds, true)): ?>
                                             <option value="<?= $tld; ?>">.<?= $tld; ?> — <?= $price; ?> &euro;/an</option>
@@ -223,7 +223,7 @@ require __DIR__ . '/includes/header.php';
                                     <?php endforeach; ?>
                                 </optgroup>
                             </select>
-                            <button type="button" class="btn btn--secondary domain-search-btn" data-domain-search>Verifier</button>
+                            <button type="button" class="btn btn--secondary domain-search-btn" data-domain-search><?= htmlspecialchars(t('commander.domain_verify'), ENT_QUOTES, 'UTF-8'); ?></button>
                         </div>
                         <div class="domain-result" data-domain-result hidden></div>
                     </div>
@@ -270,7 +270,7 @@ require __DIR__ . '/includes/header.php';
                 </div>
 
                 <div class="field field--full">
-                    <button class="btn btn--primary" type="submit" data-submit-btn>Payer avec Stripe</button>
+                    <button class="btn btn--primary" type="submit" data-submit-btn><?= htmlspecialchars(t('commander.submit_pay'), ENT_QUOTES, 'UTF-8'); ?></button>
                 </div>
             </form>
         </div>
@@ -282,32 +282,32 @@ require __DIR__ . '/includes/header.php';
 
             <div class="summary-lines">
                 <div class="summary-line">
-                    <span>Creation</span>
-                    <strong data-summary-creation><?= htmlspecialchars($catalog['creation'][$prefillCreation]['label'], ENT_QUOTES, 'UTF-8'); ?></strong>
-                    <span data-summary-creation-price><?= $catalog['creation'][$prefillCreation]['amount'] > 0 ? app_money((float) $catalog['creation'][$prefillCreation]['amount']) : 'Sur devis'; ?></span>
+                    <span><?= htmlspecialchars(t('commander.summary_creation'), ENT_QUOTES, 'UTF-8'); ?></span>
+                    <strong data-summary-creation><?= htmlspecialchars(t('catalog.creation.' . $prefillCreation . '.label'), ENT_QUOTES, 'UTF-8'); ?></strong>
+                    <span data-summary-creation-price><?= $catalog['creation'][$prefillCreation]['amount'] > 0 ? app_money((float) $catalog['creation'][$prefillCreation]['amount']) : htmlspecialchars(t('commander.summary_on_quote'), ENT_QUOTES, 'UTF-8'); ?></span>
                 </div>
                 <div class="summary-line">
-                    <span>Hebergement</span>
-                    <strong data-summary-hosting><?= htmlspecialchars($catalog['hosting'][$prefillHosting]['label'], ENT_QUOTES, 'UTF-8'); ?></strong>
-                    <span data-summary-hosting-price><?= $catalog['hosting'][$prefillHosting]['amount'] > 0 ? app_money((float) $catalog['hosting'][$prefillHosting]['amount']) : 'Sur devis'; ?></span>
+                    <span><?= htmlspecialchars(t('commander.summary_hosting'), ENT_QUOTES, 'UTF-8'); ?></span>
+                    <strong data-summary-hosting><?= htmlspecialchars(t('catalog.hosting.' . $prefillHosting . '.label'), ENT_QUOTES, 'UTF-8'); ?></strong>
+                    <span data-summary-hosting-price><?= $catalog['hosting'][$prefillHosting]['amount'] > 0 ? app_money((float) $catalog['hosting'][$prefillHosting]['amount']) : htmlspecialchars(t('commander.summary_on_quote'), ENT_QUOTES, 'UTF-8'); ?></span>
                 </div>
                 <div class="summary-line summary-line--domain" data-summary-domain-line hidden>
-                    <span>Nom de domaine</span>
+                    <span><?= htmlspecialchars(t('commander.summary_domain'), ENT_QUOTES, 'UTF-8'); ?></span>
                     <strong data-summary-domain-name>—</strong>
                     <span data-summary-domain-price>—</span>
                 </div>
             </div>
 
             <div class="summary-promo" data-summary-promo hidden>
-                <span>Promotion pack</span>
+                <span><?= htmlspecialchars(t('commander.summary_promo'), ENT_QUOTES, 'UTF-8'); ?></span>
                 <strong data-summary-promo-label></strong>
             </div>
 
             <div class="summary-total-row">
-                <span>Total</span>
-                <div class="order-summary__total" data-order-total><?= $prefillTotal !== null ? app_money((float) $prefillTotal) : 'Sur devis'; ?></div>
+                <span><?= htmlspecialchars(t('commander.summary_total'), ENT_QUOTES, 'UTF-8'); ?></span>
+                <div class="order-summary__total" data-order-total><?= $prefillTotal !== null ? app_money((float) $prefillTotal) : htmlspecialchars(t('commander.summary_on_quote'), ENT_QUOTES, 'UTF-8'); ?></div>
             </div>
-            <p class="copy" data-order-detail><?= $prefillIsQuote ? 'Etude commerciale personnalisee' : 'Paiement a l\'activation'; ?></p>
+            <p class="copy" data-order-detail><?= $prefillIsQuote ? htmlspecialchars(t('commander.summary_quote_detail'), ENT_QUOTES, 'UTF-8') : htmlspecialchars(t('commander.summary_pay_detail'), ENT_QUOTES, 'UTF-8'); ?></p>
 
             <div class="panel summary-note">
                 <p class="copy"><?= htmlspecialchars(t('commander.summary_note'), ENT_QUOTES, 'UTF-8'); ?></p>
@@ -315,4 +315,38 @@ require __DIR__ . '/includes/header.php';
         </div>
     </div>
 </section>
+<script>
+window.i18n = <?= json_encode([
+    'labels' => [
+        'creation' => [
+            'showcase' => t('catalog.creation.showcase.label'),
+            'complex' => t('catalog.creation.complex.label'),
+            'custom' => t('catalog.creation.custom.label'),
+        ],
+        'hosting' => [
+            'shared-monthly' => t('catalog.hosting.shared-monthly.label'),
+            'shared-yearly' => t('catalog.hosting.shared-yearly.label'),
+            'vps' => t('catalog.hosting.vps.label'),
+            'cloud' => t('catalog.hosting.cloud.label'),
+        ],
+    ],
+    'on_quote' => t('commander.summary_on_quote'),
+    'currency' => t('js.currency'),
+    'per_year' => t('js.per_year'),
+    'pack_discount' => t('js.pack_discount'),
+    'domain_custom' => t('js.domain_custom'),
+    'split_format' => t('js.split_format'),
+    'quote_detail' => t('commander.summary_quote_detail'),
+    'pay_detail' => t('commander.summary_pay_detail'),
+    'submit_pay' => t('commander.submit_pay'),
+    'submit_quote' => t('commander.submit_quote'),
+    'search_min' => t('js.search_min'),
+    'searching' => t('js.searching'),
+    'verify' => t('js.verify'),
+    'domain_available' => t('js.domain_available'),
+    'domain_taken' => t('js.domain_taken'),
+    'domain_unknown' => t('js.domain_unknown'),
+    'domain_error' => t('js.domain_error'),
+], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG); ?>;
+</script>
 <?php require __DIR__ . '/includes/footer.php'; ?>

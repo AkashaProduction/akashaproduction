@@ -53,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $message = trim((string) ($_POST['message'] ?? ''));
         if ($ticketId !== '' && $message !== '') {
             app_add_ticket_reply($ticketId, 'customer', $name !== '' ? $name : 'Client', $message, $email);
-            app_flash('success', 'Votre complément a été ajouté au ticket.');
+            app_flash('success', t('account.flash_reply_success'));
         }
         app_redirect('/mon-compte?email=' . rawurlencode($email) . '&name=' . rawurlencode($name));
     }
@@ -71,21 +71,21 @@ require __DIR__ . '/includes/header.php';
 <section class="page-hero">
     <div class="container grid-2">
         <div>
-            <div class="eyebrow"><?= htmlspecialchars(t(‘account.eyebrow’), ENT_QUOTES, ‘UTF-8’); ?></div>
-            <h1 class="page-title"><?= htmlspecialchars(t(‘account.title’), ENT_QUOTES, ‘UTF-8’); ?></h1>
-            <p class="lead"><?= htmlspecialchars(t(‘account.lead’), ENT_QUOTES, ‘UTF-8’); ?></p>
+            <div class="eyebrow"><?= htmlspecialchars(t('account.eyebrow'), ENT_QUOTES, 'UTF-8'); ?></div>
+            <h1 class="page-title"><?= htmlspecialchars(t('account.title'), ENT_QUOTES, 'UTF-8'); ?></h1>
+            <p class="lead"><?= htmlspecialchars(t('account.lead'), ENT_QUOTES, 'UTF-8'); ?></p>
             <div class="grid-3 account-points">
                 <article class="card compact-card">
-                    <h3><?= htmlspecialchars(t(‘account.orders_card_title’), ENT_QUOTES, ‘UTF-8’); ?></h3>
-                    <p class="copy"><?= htmlspecialchars(t(‘account.orders_card_text’), ENT_QUOTES, ‘UTF-8’); ?></p>
+                    <h3><?= htmlspecialchars(t('account.orders_card_title'), ENT_QUOTES, 'UTF-8'); ?></h3>
+                    <p class="copy"><?= htmlspecialchars(t('account.orders_card_text'), ENT_QUOTES, 'UTF-8'); ?></p>
                 </article>
                 <article class="card compact-card">
-                    <h3><?= htmlspecialchars(t(‘account.commercial_card_title’), ENT_QUOTES, ‘UTF-8’); ?></h3>
-                    <p class="copy"><?= htmlspecialchars(t(‘account.commercial_card_text’), ENT_QUOTES, ‘UTF-8’); ?></p>
+                    <h3><?= htmlspecialchars(t('account.commercial_card_title'), ENT_QUOTES, 'UTF-8'); ?></h3>
+                    <p class="copy"><?= htmlspecialchars(t('account.commercial_card_text'), ENT_QUOTES, 'UTF-8'); ?></p>
                 </article>
                 <article class="card compact-card">
-                    <h3><?= htmlspecialchars(t(‘account.technical_card_title’), ENT_QUOTES, ‘UTF-8’); ?></h3>
-                    <p class="copy"><?= htmlspecialchars(t(‘account.technical_card_text’), ENT_QUOTES, ‘UTF-8’); ?></p>
+                    <h3><?= htmlspecialchars(t('account.technical_card_title'), ENT_QUOTES, 'UTF-8'); ?></h3>
+                    <p class="copy"><?= htmlspecialchars(t('account.technical_card_text'), ENT_QUOTES, 'UTF-8'); ?></p>
                 </article>
             </div>
         </div>
@@ -122,22 +122,22 @@ require __DIR__ . '/includes/header.php';
         <div class="container grid-2">
             <?php if (!$orders): ?>
                 <article class="panel">
-                    <h3><?= htmlspecialchars(t(‘account.no_orders_title’), ENT_QUOTES, ‘UTF-8’); ?></h3>
-                    <p class="copy"><?= htmlspecialchars(t(‘account.no_orders_text’), ENT_QUOTES, ‘UTF-8’); ?></p>
+                    <h3><?= htmlspecialchars(t('account.no_orders_title'), ENT_QUOTES, 'UTF-8'); ?></h3>
+                    <p class="copy"><?= htmlspecialchars(t('account.no_orders_text'), ENT_QUOTES, 'UTF-8'); ?></p>
                 </article>
             <?php endif; ?>
             <?php foreach ($orders as $order): ?>
                 <article class="panel">
-                    <div class="kicker"><?= htmlspecialchars((string) ($order['status'] ?? 'Commande'), ENT_QUOTES, 'UTF-8'); ?></div>
-                    <h3><?= htmlspecialchars((string) ($catalog['creation'][$order['selection']['creation']]['headline'] ?? ($order['selection']['creation'] ?? 'création')), ENT_QUOTES, 'UTF-8'); ?> / <?= htmlspecialchars((string) ($catalog['hosting'][$order['selection']['hosting']]['headline'] ?? ($order['selection']['hosting'] ?? 'hébergement')), ENT_QUOTES, 'UTF-8'); ?></h3>
-                    <p class="muted">Dossier <?= htmlspecialchars(substr((string) $order['id'], 0, 8), ENT_QUOTES, 'UTF-8'); ?> · <?= htmlspecialchars(date('d/m/Y', strtotime((string) $order['created_at'])), ENT_QUOTES, 'UTF-8'); ?></p>
+                    <div class="kicker"><?= htmlspecialchars((string) ($order['status'] ?? t('account.order_status_default')), ENT_QUOTES, 'UTF-8'); ?></div>
+                    <h3><?= htmlspecialchars(t('catalog.creation.' . ($order['selection']['creation'] ?? 'showcase') . '.headline'), ENT_QUOTES, 'UTF-8'); ?> / <?= htmlspecialchars(t('catalog.hosting.' . ($order['selection']['hosting'] ?? 'shared-yearly') . '.headline'), ENT_QUOTES, 'UTF-8'); ?></h3>
+                    <p class="muted"><?= htmlspecialchars(t('account.order_ref'), ENT_QUOTES, 'UTF-8'); ?> <?= htmlspecialchars(substr((string) $order['id'], 0, 8), ENT_QUOTES, 'UTF-8'); ?> · <?= htmlspecialchars(date('d/m/Y', strtotime((string) $order['created_at'])), ENT_QUOTES, 'UTF-8'); ?></p>
                     <ul>
-                        <li>Création : <?= htmlspecialchars((string) ($catalog['creation'][$order['selection']['creation']]['label'] ?? ($order['selection']['creation'] ?? '')), ENT_QUOTES, 'UTF-8'); ?></li>
-                        <li>Hébergement : <?= htmlspecialchars((string) ($catalog['hosting'][$order['selection']['hosting']]['label'] ?? ($order['selection']['hosting'] ?? '')), ENT_QUOTES, 'UTF-8'); ?></li>
-                        <li>Sous-domaine demandé : <?= htmlspecialchars((string) (($order['selection']['subdomain_prefix'] ?? '') !== '' ? $order['selection']['subdomain_prefix'] . '.' . ($order['selection']['parent_domain'] ?? '') : 'À définir sur ' . ($order['selection']['parent_domain'] ?? 'akashaproduction.com')), ENT_QUOTES, 'UTF-8'); ?></li>
-                        <li>Total : <?= isset($order['summary']['total']) && $order['summary']['total'] !== null ? app_money((float) $order['summary']['total']) : 'Sur devis'; ?></li>
-                        <li>Paiement 3x : <?= !empty($order['selection']['split_payment']) ? 'Oui' : 'Non'; ?></li>
-                        <li>Domaine personnalisé : <?= !empty($order['selection']['include_domain']) ? htmlspecialchars((string) ($order['selection']['custom_domain_name'] ?? 'Oui'), ENT_QUOTES, 'UTF-8') : 'Non'; ?></li>
+                        <li><?= htmlspecialchars(t('account.order_creation'), ENT_QUOTES, 'UTF-8'); ?> : <?= htmlspecialchars(t('catalog.creation.' . ($order['selection']['creation'] ?? 'showcase') . '.label'), ENT_QUOTES, 'UTF-8'); ?></li>
+                        <li><?= htmlspecialchars(t('account.order_hosting'), ENT_QUOTES, 'UTF-8'); ?> : <?= htmlspecialchars(t('catalog.hosting.' . ($order['selection']['hosting'] ?? 'shared-yearly') . '.label'), ENT_QUOTES, 'UTF-8'); ?></li>
+                        <li><?= htmlspecialchars(t('account.order_subdomain'), ENT_QUOTES, 'UTF-8'); ?> : <?= htmlspecialchars((string) (($order['selection']['subdomain_prefix'] ?? '') !== '' ? $order['selection']['subdomain_prefix'] . '.' . ($order['selection']['parent_domain'] ?? '') : t('account.order_subdomain_pending', ['domain' => ($order['selection']['parent_domain'] ?? 'akashaproduction.com')])), ENT_QUOTES, 'UTF-8'); ?></li>
+                        <li><?= htmlspecialchars(t('account.order_total'), ENT_QUOTES, 'UTF-8'); ?> : <?= isset($order['summary']['total']) && $order['summary']['total'] !== null ? app_money((float) $order['summary']['total']) : htmlspecialchars(t('account.on_quote'), ENT_QUOTES, 'UTF-8'); ?></li>
+                        <li><?= htmlspecialchars(t('account.order_split'), ENT_QUOTES, 'UTF-8'); ?> : <?= !empty($order['selection']['split_payment']) ? htmlspecialchars(t('account.yes'), ENT_QUOTES, 'UTF-8') : htmlspecialchars(t('account.no'), ENT_QUOTES, 'UTF-8'); ?></li>
+                        <li><?= htmlspecialchars(t('account.order_domain'), ENT_QUOTES, 'UTF-8'); ?> : <?= !empty($order['selection']['include_domain']) ? htmlspecialchars((string) ($order['selection']['custom_domain_name'] ?? t('account.yes')), ENT_QUOTES, 'UTF-8') : htmlspecialchars(t('account.no'), ENT_QUOTES, 'UTF-8'); ?></li>
                     </ul>
                     <p class="copy"><?= nl2br(htmlspecialchars((string) ($order['project_description'] ?? ''), ENT_QUOTES, 'UTF-8')); ?></p>
                 </article>
@@ -155,7 +155,7 @@ require __DIR__ . '/includes/header.php';
                     <input type="hidden" name="name" value="<?= htmlspecialchars($name, ENT_QUOTES, 'UTF-8'); ?>">
                     <input type="hidden" name="email" value="<?= htmlspecialchars($email, ENT_QUOTES, 'UTF-8'); ?>">
                     <div class="field">
-                        <label for="department">Service</label>
+                        <label for="department"><?= htmlspecialchars(t('account.department'), ENT_QUOTES, 'UTF-8'); ?></label>
                         <select id="department" name="department">
                             <?php foreach ($support['departments'] as $key => $label): ?>
                                 <option value="<?= htmlspecialchars($key, ENT_QUOTES, 'UTF-8'); ?>"><?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?></option>
@@ -163,7 +163,7 @@ require __DIR__ . '/includes/header.php';
                         </select>
                     </div>
                     <div class="field">
-                        <label for="priority">Priorité</label>
+                        <label for="priority"><?= htmlspecialchars(t('account.priority'), ENT_QUOTES, 'UTF-8'); ?></label>
                         <select id="priority" name="priority">
                             <?php foreach ($support['priorities'] as $key => $label): ?>
                                 <option value="<?= htmlspecialchars($key, ENT_QUOTES, 'UTF-8'); ?>"><?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?></option>
@@ -171,22 +171,22 @@ require __DIR__ . '/includes/header.php';
                         </select>
                     </div>
                     <div class="field field--full">
-                        <label for="subject">Sujet</label>
+                        <label for="subject"><?= htmlspecialchars(t('account.subject'), ENT_QUOTES, 'UTF-8'); ?></label>
                         <select id="subject" name="subject" data-support-subject data-support-topics="<?= htmlspecialchars(json_encode($support['topics'], JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8'); ?>"></select>
                     </div>
                     <div class="field field--full">
-                        <label for="order_id">Commande liée</label>
+                        <label for="order_id"><?= htmlspecialchars(t('account.linked_order'), ENT_QUOTES, 'UTF-8'); ?></label>
                         <select id="order_id" name="order_id">
-                            <option value="">Aucune</option>
+                            <option value=""><?= htmlspecialchars(t('account.none'), ENT_QUOTES, 'UTF-8'); ?></option>
                             <?php foreach ($orders as $order): ?>
                                 <option value="<?= htmlspecialchars((string) $order['id'], ENT_QUOTES, 'UTF-8'); ?>">
-                                    <?= htmlspecialchars(substr((string) $order['id'], 0, 8), ENT_QUOTES, 'UTF-8'); ?> - <?= htmlspecialchars((string) ($order['selection']['creation'] ?? 'commande'), ENT_QUOTES, 'UTF-8'); ?>
+                                    <?= htmlspecialchars(substr((string) $order['id'], 0, 8), ENT_QUOTES, 'UTF-8'); ?> - <?= htmlspecialchars(t('catalog.creation.' . ($order['selection']['creation'] ?? 'showcase') . '.label'), ENT_QUOTES, 'UTF-8'); ?>
                                 </option>
                             <?php endforeach; ?>
                         </select>
                     </div>
                     <div class="field field--full">
-                        <label for="message">Message</label>
+                        <label for="message"><?= htmlspecialchars(t('account.ticket_message'), ENT_QUOTES, 'UTF-8'); ?></label>
                         <textarea id="message" name="message" required></textarea>
                     </div>
                     <div class="field field--full">
@@ -205,7 +205,7 @@ require __DIR__ . '/includes/header.php';
                     <article class="panel" id="ticket-<?= htmlspecialchars((string) $ticket['id'], ENT_QUOTES, 'UTF-8'); ?>" style="margin-bottom:1rem;">
                         <div class="kicker"><?= htmlspecialchars(app_department_label((string) $ticket['department']), ENT_QUOTES, 'UTF-8'); ?> · <?= htmlspecialchars($support['statuses'][$ticket['status']] ?? (string) $ticket['status'], ENT_QUOTES, 'UTF-8'); ?></div>
                         <h3><?= htmlspecialchars((string) $ticket['subject'], ENT_QUOTES, 'UTF-8'); ?></h3>
-                        <p class="muted">Ticket <?= htmlspecialchars(substr((string) $ticket['id'], 0, 8), ENT_QUOTES, 'UTF-8'); ?> · priorité <?= htmlspecialchars($support['priorities'][$ticket['priority']] ?? (string) $ticket['priority'], ENT_QUOTES, 'UTF-8'); ?></p>
+                        <p class="muted"><?= htmlspecialchars(t('account.ticket_ref'), ENT_QUOTES, 'UTF-8'); ?> <?= htmlspecialchars(substr((string) $ticket['id'], 0, 8), ENT_QUOTES, 'UTF-8'); ?> · <?= htmlspecialchars(t('account.ticket_priority'), ENT_QUOTES, 'UTF-8'); ?> <?= htmlspecialchars($support['priorities'][$ticket['priority']] ?? (string) $ticket['priority'], ENT_QUOTES, 'UTF-8'); ?></p>
                         <div class="ticket-thread">
                             <?php foreach ($ticket['thread'] as $entry): ?>
                                 <div class="ticket-entry">
@@ -220,11 +220,11 @@ require __DIR__ . '/includes/header.php';
                             <input type="hidden" name="email" value="<?= htmlspecialchars($email, ENT_QUOTES, 'UTF-8'); ?>">
                             <input type="hidden" name="ticket_id" value="<?= htmlspecialchars((string) $ticket['id'], ENT_QUOTES, 'UTF-8'); ?>">
                             <div class="field field--full">
-                                <label for="reply-<?= htmlspecialchars((string) $ticket['id'], ENT_QUOTES, 'UTF-8'); ?>">Ajouter un message</label>
+                                <label for="reply-<?= htmlspecialchars((string) $ticket['id'], ENT_QUOTES, 'UTF-8'); ?>"><?= htmlspecialchars(t('account.reply_label'), ENT_QUOTES, 'UTF-8'); ?></label>
                                 <textarea id="reply-<?= htmlspecialchars((string) $ticket['id'], ENT_QUOTES, 'UTF-8'); ?>" name="message" required></textarea>
                             </div>
                             <div class="field field--full">
-                                <button class="btn btn--secondary" type="submit">Envoyer le complément</button>
+                                <button class="btn btn--secondary" type="submit"><?= htmlspecialchars(t('account.reply_submit'), ENT_QUOTES, 'UTF-8'); ?></button>
                             </div>
                         </form>
                     </article>
