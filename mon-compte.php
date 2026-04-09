@@ -68,7 +68,7 @@ $currentPage = 'account';
 $pageTitle = app_page_title(t('nav.account'));
 require __DIR__ . '/includes/header.php';
 ?>
-<section class="page-hero">
+<section class="page-hero account-hero">
     <div class="container grid-2">
         <div>
             <div class="eyebrow"><?= htmlspecialchars(t('account.eyebrow'), ENT_QUOTES, 'UTF-8'); ?></div>
@@ -106,7 +106,10 @@ require __DIR__ . '/includes/header.php';
 <?php if ($email !== ''): ?>
     <section class="section">
         <div class="container">
-            <div class="notice"><?= htmlspecialchars(t('account.notice', ['count_orders' => count($orders), 'count_tickets' => count($tickets), 'email' => $email]), ENT_QUOTES, 'UTF-8'); ?></div>
+            <div class="notice">
+                <?= htmlspecialchars(t('account.notice', ['count_orders' => count($orders), 'count_tickets' => count($tickets), 'email' => $email]), ENT_QUOTES, 'UTF-8'); ?>
+                <a class="btn btn--small" href="/mon-compte"><?= htmlspecialchars(t('account.change_account'), ENT_QUOTES, 'UTF-8'); ?></a>
+            </div>
         </div>
     </section>
 
@@ -128,7 +131,13 @@ require __DIR__ . '/includes/header.php';
             <?php endif; ?>
             <?php foreach ($orders as $order): ?>
                 <article class="panel">
-                    <div class="kicker"><?= htmlspecialchars((string) ($order['status'] ?? t('account.order_status_default')), ENT_QUOTES, 'UTF-8'); ?></div>
+                    <?php
+                    $rawStatus = (string) ($order['status'] ?? '');
+                    $statusLabels = ta('account.order_statuses') ?: [];
+                    $statusLabel = $statusLabels[$rawStatus] ?? t('account.order_status_default');
+                    $statusClass = in_array($rawStatus, ['paid', 'delivered'], true) ? 'status-badge--success' : (in_array($rawStatus, ['cancelled'], true) ? 'status-badge--danger' : 'status-badge--pending');
+                    ?>
+                    <div class="kicker"><span class="status-badge <?= $statusClass; ?>"><?= htmlspecialchars($statusLabel, ENT_QUOTES, 'UTF-8'); ?></span></div>
                     <h3><?= htmlspecialchars(t('catalog.creation.' . ($order['selection']['creation'] ?? 'showcase') . '.headline'), ENT_QUOTES, 'UTF-8'); ?> / <?= htmlspecialchars(t('catalog.hosting.' . ($order['selection']['hosting'] ?? 'shared-yearly') . '.headline'), ENT_QUOTES, 'UTF-8'); ?></h3>
                     <p class="muted"><?= htmlspecialchars(t('account.order_ref'), ENT_QUOTES, 'UTF-8'); ?> <?= htmlspecialchars(substr((string) $order['id'], 0, 8), ENT_QUOTES, 'UTF-8'); ?> · <?= htmlspecialchars(date('d/m/Y', strtotime((string) $order['created_at'])), ENT_QUOTES, 'UTF-8'); ?></p>
                     <ul>
@@ -208,7 +217,7 @@ require __DIR__ . '/includes/header.php';
                         <p class="muted"><?= htmlspecialchars(t('account.ticket_ref'), ENT_QUOTES, 'UTF-8'); ?> <?= htmlspecialchars(substr((string) $ticket['id'], 0, 8), ENT_QUOTES, 'UTF-8'); ?> · <?= htmlspecialchars(t('account.ticket_priority'), ENT_QUOTES, 'UTF-8'); ?> <?= htmlspecialchars($support['priorities'][$ticket['priority']] ?? (string) $ticket['priority'], ENT_QUOTES, 'UTF-8'); ?></p>
                         <div class="ticket-thread">
                             <?php foreach ($ticket['thread'] as $entry): ?>
-                                <div class="ticket-entry">
+                                <div class="ticket-entry ticket-entry--<?= htmlspecialchars((string) ($entry['author_type'] ?? 'customer'), ENT_QUOTES, 'UTF-8'); ?>">
                                     <strong><?= htmlspecialchars((string) $entry['author_label'], ENT_QUOTES, 'UTF-8'); ?></strong>
                                     <p class="copy"><?= nl2br(htmlspecialchars((string) $entry['message'], ENT_QUOTES, 'UTF-8')); ?></p>
                                 </div>
