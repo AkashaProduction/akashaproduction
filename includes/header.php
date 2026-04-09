@@ -14,7 +14,7 @@ $langLabels = app_lang_labels();
     <title><?= htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8'); ?></title>
     <meta name="description" content="<?= htmlspecialchars(t('site.meta_description'), ENT_QUOTES, 'UTF-8'); ?>">
     <meta name="theme-color" content="#08101d">
-    <link rel="stylesheet" href="/assets/site.css?v=12">
+    <link rel="stylesheet" href="/assets/site.css?v=13">
 </head>
 <body>
 <div class="site-shell">
