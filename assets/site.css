@@ -206,8 +206,9 @@ main {
 .lang-dropdown {
   display: none;
   position: absolute;
-  top: calc(100% + 0.4rem);
+  top: 100%;
   right: 0;
+  padding-top: 0.5rem;
   min-width: 160px;
   border-radius: var(--radius-small);
   border: 1px solid rgba(217, 163, 109, 0.15);
@@ -218,14 +219,6 @@ main {
   overflow: hidden;
 }
 
-.lang-dropdown::before {
-  content: '';
-  position: absolute;
-  top: -0.6rem;
-  left: 0;
-  right: 0;
-  height: 0.6rem;
-}
 
 .lang-selector:hover .lang-dropdown {
   display: block;
