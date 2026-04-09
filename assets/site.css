@@ -218,6 +218,15 @@ main {
   overflow: hidden;
 }
 
+.lang-dropdown::before {
+  content: '';
+  position: absolute;
+  top: -0.6rem;
+  left: 0;
+  right: 0;
+  height: 0.6rem;
+}
+
 .lang-selector:hover .lang-dropdown {
   display: block;
 }
@@ -436,6 +445,7 @@ main {
   font-size: clamp(3rem, 5vw, 5.6rem);
   line-height: 0.88;
   letter-spacing: -0.03em;
+  font-variant-ligatures: no-common-ligatures;
   margin: 1rem 0 1.1rem;
   max-width: 10ch;
   font-weight: 600;
