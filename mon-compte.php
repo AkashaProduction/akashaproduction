@@ -38,9 +38,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 "Ticket {$ticket['id']}\nClient: {$name}\nEmail: {$email}\n\n{$message}",
                 $email
             );
-            app_flash('success', 'Votre ticket a bien été créé.');
+            app_flash('success', t('account.flash_ticket_success'));
         } else {
-            app_flash('warning', 'Merci de renseigner votre nom, votre email, le sujet et votre message.');
+            app_flash('warning', t('account.flash_ticket_warning'));
         }
 
         app_redirect('/mon-compte?email=' . rawurlencode($email) . '&name=' . rawurlencode($name));
@@ -65,39 +65,39 @@ $orders = $email !== '' ? app_orders_by_email($email) : [];
 $tickets = $email !== '' ? app_tickets_by_email($email) : [];
 
 $currentPage = 'account';
-$pageTitle = app_page_title('Mon compte');
+$pageTitle = app_page_title(t('nav.account'));
 require __DIR__ . '/includes/header.php';
 ?>
 <section class="page-hero">
     <div class="container grid-2">
         <div>
-            <div class="eyebrow">Mon compte</div>
-            <h1 class="page-title">Retrouver vos commandes et votre support.</h1>
-            <p class="lead">Renseignez le nom et l’email utilisés lors de votre commande pour accéder à votre dossier client, consulter vos demandes et ouvrir un ticket si nécessaire.</p>
+            <div class="eyebrow"><?= htmlspecialchars(t(‘account.eyebrow’), ENT_QUOTES, ‘UTF-8’); ?></div>
+            <h1 class="page-title"><?= htmlspecialchars(t(‘account.title’), ENT_QUOTES, ‘UTF-8’); ?></h1>
+            <p class="lead"><?= htmlspecialchars(t(‘account.lead’), ENT_QUOTES, ‘UTF-8’); ?></p>
             <div class="grid-3 account-points">
                 <article class="card compact-card">
-                    <h3>Commandes</h3>
-                    <p class="copy">Consultez les services enregistrés, les options choisies et le détail de votre demande.</p>
+                    <h3><?= htmlspecialchars(t(‘account.orders_card_title’), ENT_QUOTES, ‘UTF-8’); ?></h3>
+                    <p class="copy"><?= htmlspecialchars(t(‘account.orders_card_text’), ENT_QUOTES, ‘UTF-8’); ?></p>
                 </article>
                 <article class="card compact-card">
-                    <h3>Commercial</h3>
-                    <p class="copy">Ouvrez un ticket pour un devis, une question de commande, un paiement ou un domaine.</p>
+                    <h3><?= htmlspecialchars(t(‘account.commercial_card_title’), ENT_QUOTES, ‘UTF-8’); ?></h3>
+                    <p class="copy"><?= htmlspecialchars(t(‘account.commercial_card_text’), ENT_QUOTES, ‘UTF-8’); ?></p>
                 </article>
                 <article class="card compact-card">
-                    <h3>Technique</h3>
-                    <p class="copy">Signalez un incident, un problème d’accès, de DNS, d’email ou de performance.</p>
+                    <h3><?= htmlspecialchars(t(‘account.technical_card_title’), ENT_QUOTES, ‘UTF-8’); ?></h3>
+                    <p class="copy"><?= htmlspecialchars(t(‘account.technical_card_text’), ENT_QUOTES, ‘UTF-8’); ?></p>
                 </article>
             </div>
         </div>
         <div class="form-card">
-            <div class="kicker">Accès client</div>
-            <h2 class="section-title">Connexion à votre dossier</h2>
-            <p class="copy">Ce formulaire permet de retrouver votre espace à partir des informations déjà utilisées dans votre commande.</p>
+            <div class="kicker"><?= htmlspecialchars(t('account.access_kicker'), ENT_QUOTES, 'UTF-8'); ?></div>
+            <h2 class="section-title"><?= htmlspecialchars(t('account.access_title'), ENT_QUOTES, 'UTF-8'); ?></h2>
+            <p class="copy"><?= htmlspecialchars(t('account.access_text'), ENT_QUOTES, 'UTF-8'); ?></p>
             <form class="form-grid" method="post">
                 <input type="hidden" name="action" value="lookup">
-                <div class="field field--full"><label for="lookup-name">Nom utilisé lors de la commande</label><input id="lookup-name" name="name" value="<?= htmlspecialchars($name, ENT_QUOTES, 'UTF-8'); ?>" required></div>
-                <div class="field field--full"><label for="lookup-email">Email utilisé lors de la commande</label><input id="lookup-email" name="email" type="email" value="<?= htmlspecialchars($email, ENT_QUOTES, 'UTF-8'); ?>" required></div>
-                <div class="field field--full"><button class="btn btn--primary" type="submit">Accéder à mon espace client</button></div>
+                <div class="field field--full"><label for="lookup-name"><?= htmlspecialchars(t('account.name_label'), ENT_QUOTES, 'UTF-8'); ?></label><input id="lookup-name" name="name" value="<?= htmlspecialchars($name, ENT_QUOTES, 'UTF-8'); ?>" required></div>
+                <div class="field field--full"><label for="lookup-email"><?= htmlspecialchars(t('account.email_label'), ENT_QUOTES, 'UTF-8'); ?></label><input id="lookup-email" name="email" type="email" value="<?= htmlspecialchars($email, ENT_QUOTES, 'UTF-8'); ?>" required></div>
+                <div class="field field--full"><button class="btn btn--primary" type="submit"><?= htmlspecialchars(t('account.access_submit'), ENT_QUOTES, 'UTF-8'); ?></button></div>
             </form>
         </div>
     </div>
@@ -106,7 +106,7 @@ require __DIR__ . '/includes/header.php';
 <?php if ($email !== ''): ?>
     <section class="section">
         <div class="container">
-            <div class="notice"><?= count($orders); ?> commande(s) et <?= count($tickets); ?> ticket(s) retrouvés pour <?= htmlspecialchars($email, ENT_QUOTES, 'UTF-8'); ?>.</div>
+            <div class="notice"><?= htmlspecialchars(t('account.notice', ['count_orders' => count($orders), 'count_tickets' => count($tickets), 'email' => $email]), ENT_QUOTES, 'UTF-8'); ?></div>
         </div>
     </section>
 
@@ -114,16 +114,16 @@ require __DIR__ . '/includes/header.php';
         <div class="container grid-2">
             <div class="section-heading section-heading--tight">
                 <div>
-                    <div class="eyebrow">Dossier client</div>
-                    <h2 class="section-title">Vos commandes</h2>
+                    <div class="eyebrow"><?= htmlspecialchars(t('account.orders_eyebrow'), ENT_QUOTES, 'UTF-8'); ?></div>
+                    <h2 class="section-title"><?= htmlspecialchars(t('account.orders_title'), ENT_QUOTES, 'UTF-8'); ?></h2>
                 </div>
             </div>
         </div>
         <div class="container grid-2">
             <?php if (!$orders): ?>
                 <article class="panel">
-                    <h3>Aucune commande retrouvée</h3>
-                    <p class="copy">Aucune commande n’est actuellement associée à cet email. Vérifiez l’adresse utilisée lors de la demande ou contactez-nous si nécessaire.</p>
+                    <h3><?= htmlspecialchars(t(‘account.no_orders_title’), ENT_QUOTES, ‘UTF-8’); ?></h3>
+                    <p class="copy"><?= htmlspecialchars(t(‘account.no_orders_text’), ENT_QUOTES, ‘UTF-8’); ?></p>
                 </article>
             <?php endif; ?>
             <?php foreach ($orders as $order): ?>
@@ -148,8 +148,8 @@ require __DIR__ . '/includes/header.php';
     <section class="section">
         <div class="container grid-2">
             <div class="form-card">
-                <div class="kicker">Support client</div>
-                <h2 class="section-title">Créer un ticket</h2>
+                <div class="kicker"><?= htmlspecialchars(t('account.ticket_kicker'), ENT_QUOTES, 'UTF-8'); ?></div>
+                <h2 class="section-title"><?= htmlspecialchars(t('account.ticket_title'), ENT_QUOTES, 'UTF-8'); ?></h2>
                 <form class="form-grid" method="post">
                     <input type="hidden" name="action" value="create_ticket">
                     <input type="hidden" name="name" value="<?= htmlspecialchars($name, ENT_QUOTES, 'UTF-8'); ?>">
@@ -190,16 +190,16 @@ require __DIR__ . '/includes/header.php';
                         <textarea id="message" name="message" required></textarea>
                     </div>
                     <div class="field field--full">
-                        <button class="btn btn--primary" type="submit">Créer le ticket</button>
+                        <button class="btn btn--primary" type="submit"><?= htmlspecialchars(t('account.create_ticket_submit'), ENT_QUOTES, 'UTF-8'); ?></button>
                     </div>
                 </form>
             </div>
 
             <div class="form-card">
-                <div class="kicker">Tickets</div>
-                <h2 class="section-title">Historique de support</h2>
+                <div class="kicker"><?= htmlspecialchars(t('account.tickets_kicker'), ENT_QUOTES, 'UTF-8'); ?></div>
+                <h2 class="section-title"><?= htmlspecialchars(t('account.tickets_title'), ENT_QUOTES, 'UTF-8'); ?></h2>
                 <?php if (!$tickets): ?>
-                    <p class="copy">Aucun ticket pour le moment.</p>
+                    <p class="copy"><?= htmlspecialchars(t('account.no_tickets'), ENT_QUOTES, 'UTF-8'); ?></p>
                 <?php endif; ?>
                 <?php foreach ($tickets as $ticket): ?>
                     <article class="panel" id="ticket-<?= htmlspecialchars((string) $ticket['id'], ENT_QUOTES, 'UTF-8'); ?>" style="margin-bottom:1rem;">

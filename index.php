@@ -2,58 +2,55 @@
 require __DIR__ . '/includes/bootstrap.php';
 
 $currentPage = 'presentation';
-$pageTitle = app_page_title('Présentation');
+$pageTitle = app_page_title(t('nav.presentation'));
 $projects = app_config()['projects'];
-$subprojects = app_config()['subprojects'];
 
 require __DIR__ . '/includes/header.php';
 ?>
 <section class="hero">
     <div class="container hero-grid">
         <div class="hero-copy">
-            <div class="eyebrow">Concept et création web</div>
-            <h1 class="hero-title">Des sites clairs. Des bases solides.</h1>
-            <p class="lead">
-                Akasha Production regroupe nos créations, notre savoir-faire et nos offres de création web dans une base unique:
-                présentation, solutions, commande, support client et évolution technique dans un même ensemble cohérent.
-            </p>
+            <div class="eyebrow"><?= htmlspecialchars(t('home.eyebrow'), ENT_QUOTES, 'UTF-8'); ?></div>
+            <h1 class="hero-title"><?= htmlspecialchars(t('home.title'), ENT_QUOTES, 'UTF-8'); ?></h1>
+            <p class="lead"><?= htmlspecialchars(t('home.lead'), ENT_QUOTES, 'UTF-8'); ?></p>
             <div class="cta-row">
-                <a class="btn btn--primary" href="<?= htmlspecialchars(app_nav_href('solutions'), ENT_QUOTES, 'UTF-8'); ?>">Découvrir les solutions</a>
-                <a class="btn btn--secondary" href="<?= htmlspecialchars(app_nav_href('commander'), ENT_QUOTES, 'UTF-8'); ?>">Commander</a>
+                <a class="btn btn--primary" href="<?= htmlspecialchars(app_nav_href('solutions'), ENT_QUOTES, 'UTF-8'); ?>"><?= htmlspecialchars(t('home.cta_solutions'), ENT_QUOTES, 'UTF-8'); ?></a>
+                <a class="btn btn--secondary" href="<?= htmlspecialchars(app_nav_href('commander'), ENT_QUOTES, 'UTF-8'); ?>"><?= htmlspecialchars(t('home.cta_order'), ENT_QUOTES, 'UTF-8'); ?></a>
             </div>
             <div class="hero-stats">
                 <article class="stat-card">
-                    <strong>Depuis 2005</strong>
-                    <span>Expérience de développement et de mise en ligne de projets professionnels.</span>
+                    <strong><?= htmlspecialchars(t('home.stat1_title'), ENT_QUOTES, 'UTF-8'); ?></strong>
+                    <span><?= htmlspecialchars(t('home.stat1_text'), ENT_QUOTES, 'UTF-8'); ?></span>
                 </article>
                 <article class="stat-card">
-                    <strong>Sites, packs, support</strong>
-                    <span>Une base pensée pour présenter, vendre, accompagner et faire évoluer les services.</span>
+                    <strong><?= htmlspecialchars(t('home.stat2_title'), ENT_QUOTES, 'UTF-8'); ?></strong>
+                    <span><?= htmlspecialchars(t('home.stat2_text'), ENT_QUOTES, 'UTF-8'); ?></span>
                 </article>
                 <article class="stat-card">
-                    <strong>Écosystème propriétaire</strong>
-                    <span>Des créations internes et des domaines thématiques structurés autour d’une même vision.</span>
+                    <strong><?= htmlspecialchars(t('home.stat3_title'), ENT_QUOTES, 'UTF-8'); ?></strong>
+                    <span><?= htmlspecialchars(t('home.stat3_text'), ENT_QUOTES, 'UTF-8'); ?></span>
                 </article>
             </div>
             <div class="meta-list">
-                <?php foreach ($subprojects as $item): ?>
-                    <span class="meta-tag"><?= htmlspecialchars($item, ENT_QUOTES, 'UTF-8'); ?></span>
-                <?php endforeach; ?>
+                <span class="meta-tag"><?= htmlspecialchars(t('home.tag1'), ENT_QUOTES, 'UTF-8'); ?></span>
+                <span class="meta-tag"><?= htmlspecialchars(t('home.tag2'), ENT_QUOTES, 'UTF-8'); ?></span>
+                <span class="meta-tag"><?= htmlspecialchars(t('home.tag3'), ENT_QUOTES, 'UTF-8'); ?></span>
+                <span class="meta-tag"><?= htmlspecialchars(t('home.tag4'), ENT_QUOTES, 'UTF-8'); ?></span>
             </div>
         </div>
         <div class="glass device-scene">
             <div class="scene-card scene-card--top">
-                <span class="scene-card__label">Akasha Production</span>
-                <strong class="scene-card__value">Présence web premium</strong>
-                <span class="scene-card__meta">Présentation, services, commande et support dans une même base.</span>
+                <span class="scene-card__label"><?= htmlspecialchars(t('home.scene_top_label'), ENT_QUOTES, 'UTF-8'); ?></span>
+                <strong class="scene-card__value"><?= htmlspecialchars(t('home.scene_top_value'), ENT_QUOTES, 'UTF-8'); ?></strong>
+                <span class="scene-card__meta"><?= htmlspecialchars(t('home.scene_top_meta'), ENT_QUOTES, 'UTF-8'); ?></span>
             </div>
-            <img class="shot shot-desktop" src="https://images.unsplash.com/photo-1496171367470-9ed9a91ea931?auto=format&fit=crop&w=1200&q=80" alt="Présentation d'une interface web sur écran desktop">
-            <img class="shot shot-tablet" src="https://images.unsplash.com/photo-1496171367470-9ed9a91ea931?auto=format&fit=crop&w=900&q=80" alt="Présentation sur tablette">
-            <img class="shot shot-mobile" src="https://images.unsplash.com/photo-1496171367470-9ed9a91ea931?auto=format&fit=crop&w=600&q=80" alt="Présentation sur mobile">
+            <img class="shot shot-desktop" src="https://images.unsplash.com/photo-1496171367470-9ed9a91ea931?auto=format&fit=crop&w=1200&q=80" alt="<?= htmlspecialchars(t('home.scene_top_value'), ENT_QUOTES, 'UTF-8'); ?>">
+            <img class="shot shot-tablet" src="https://images.unsplash.com/photo-1496171367470-9ed9a91ea931?auto=format&fit=crop&w=900&q=80" alt="<?= htmlspecialchars(t('home.scene_top_value'), ENT_QUOTES, 'UTF-8'); ?>">
+            <img class="shot shot-mobile" src="https://images.unsplash.com/photo-1496171367470-9ed9a91ea931?auto=format&fit=crop&w=600&q=80" alt="<?= htmlspecialchars(t('home.scene_top_value'), ENT_QUOTES, 'UTF-8'); ?>">
             <div class="scene-card scene-card--bottom">
-                <span class="scene-card__label">Architecture</span>
-                <strong class="scene-card__value">Solutions combinables</strong>
-                <span class="scene-card__meta">Création, hébergement, domaine, espace client et ticketing.</span>
+                <span class="scene-card__label"><?= htmlspecialchars(t('home.scene_bottom_label'), ENT_QUOTES, 'UTF-8'); ?></span>
+                <strong class="scene-card__value"><?= htmlspecialchars(t('home.scene_bottom_value'), ENT_QUOTES, 'UTF-8'); ?></strong>
+                <span class="scene-card__meta"><?= htmlspecialchars(t('home.scene_bottom_meta'), ENT_QUOTES, 'UTF-8'); ?></span>
             </div>
         </div>
     </div>
@@ -62,33 +59,27 @@ require __DIR__ . '/includes/header.php';
 <section class="section">
     <div class="container grid-2">
         <div class="panel">
-            <div class="kicker">Qui nous sommes</div>
-            <h2 class="section-title">Nous réalisons nos propres sites et accompagnons aussi des projets professionnels.</h2>
-            <p class="copy">
-                Akasha Production conçoit, développe et fait évoluer ses propres créations. Cette pratique directe nous oblige à penser l’ergonomie,
-                la structure éditoriale, la cohérence commerciale et la tenue technique sur la durée.
-            </p>
-            <p class="copy">
-                Au fil des années, nous avons également développé plusieurs sites professionnels pour des activités très différentes.
-                Le résultat recherché est toujours le même: une présence web sérieuse, lisible, durable et réellement exploitable.
-            </p>
+            <div class="kicker"><?= htmlspecialchars(t('home.who_kicker'), ENT_QUOTES, 'UTF-8'); ?></div>
+            <h2 class="section-title"><?= htmlspecialchars(t('home.who_title'), ENT_QUOTES, 'UTF-8'); ?></h2>
+            <p class="copy"><?= htmlspecialchars(t('home.who_p1'), ENT_QUOTES, 'UTF-8'); ?></p>
+            <p class="copy"><?= htmlspecialchars(t('home.who_p2'), ENT_QUOTES, 'UTF-8'); ?></p>
         </div>
         <div class="grid-2">
             <article class="card">
-                <h3>Une maison mère pour plusieurs univers</h3>
-                <p class="copy">Chaque sous-projet garde sa personnalité, tout en restant rattaché à une architecture claire de domaines, contenus et offres.</p>
+                <h3><?= htmlspecialchars(t('home.card1_title'), ENT_QUOTES, 'UTF-8'); ?></h3>
+                <p class="copy"><?= htmlspecialchars(t('home.card1_text'), ENT_QUOTES, 'UTF-8'); ?></p>
             </article>
             <article class="card">
-                <h3>Des offres cadrées et combinables</h3>
-                <p class="copy">Le site permet d’assembler création, hébergement, domaine et packs promotionnels dans un parcours plus cohérent.</p>
+                <h3><?= htmlspecialchars(t('home.card2_title'), ENT_QUOTES, 'UTF-8'); ?></h3>
+                <p class="copy"><?= htmlspecialchars(t('home.card2_text'), ENT_QUOTES, 'UTF-8'); ?></p>
             </article>
             <article class="card">
-                <h3>Un socle orienté exploitation réelle</h3>
-                <p class="copy">Commandes, demandes commerciales et tickets techniques sont pensés pour être traités, suivis et détaillés côté client.</p>
+                <h3><?= htmlspecialchars(t('home.card3_title'), ENT_QUOTES, 'UTF-8'); ?></h3>
+                <p class="copy"><?= htmlspecialchars(t('home.card3_text'), ENT_QUOTES, 'UTF-8'); ?></p>
             </article>
             <article class="card">
-                <h3>Une expérience nourrie par le terrain</h3>
-                <p class="copy">Nos propres projets servent de laboratoire permanent, et les projets professionnels nous imposent un niveau d’exigence concret.</p>
+                <h3><?= htmlspecialchars(t('home.card4_title'), ENT_QUOTES, 'UTF-8'); ?></h3>
+                <p class="copy"><?= htmlspecialchars(t('home.card4_text'), ENT_QUOTES, 'UTF-8'); ?></p>
             </article>
         </div>
     </div>
@@ -98,19 +89,19 @@ require __DIR__ . '/includes/header.php';
     <div class="container">
         <div class="section-heading">
             <div>
-                <div class="eyebrow">Projets en ligne</div>
-                <h2 class="section-title">Quelques réalisations et univers déjà publiés</h2>
+                <div class="eyebrow"><?= htmlspecialchars(t('home.projects_eyebrow'), ENT_QUOTES, 'UTF-8'); ?></div>
+                <h2 class="section-title"><?= htmlspecialchars(t('home.projects_title'), ENT_QUOTES, 'UTF-8'); ?></h2>
             </div>
-            <p class="copy section-heading__note">Descriptions reprises à partir des contenus, titres ou méta-descriptions réellement visibles sur les sites quand ils étaient accessibles.</p>
+            <p class="copy section-heading__note"><?= htmlspecialchars(t('home.projects_note'), ENT_QUOTES, 'UTF-8'); ?></p>
         </div>
         <div class="project-grid">
             <?php foreach ($projects as $project): ?>
                 <article class="project-card">
                     <div class="project-thumb">
-                        <img src="<?= htmlspecialchars(app_screenshot_url($project['url']), ENT_QUOTES, 'UTF-8'); ?>" alt="<?= htmlspecialchars($project['title'], ENT_QUOTES, 'UTF-8'); ?>" onerror="this.outerHTML='<div class=&quot;project-placeholder&quot;>À venir</div>'">
+                        <img src="<?= htmlspecialchars(app_screenshot_url($project['url']), ENT_QUOTES, 'UTF-8'); ?>" alt="<?= htmlspecialchars($project['title'], ENT_QUOTES, 'UTF-8'); ?>" onerror="this.outerHTML='<div class=&quot;project-placeholder&quot;><?= htmlspecialchars(t('home.coming_soon'), ENT_QUOTES, 'UTF-8'); ?></div>'">
                         <div class="project-thumb__overlay">
                             <span class="project-domain"><?= htmlspecialchars($project['domain'] ?? parse_url($project['url'], PHP_URL_HOST) ?? '', ENT_QUOTES, 'UTF-8'); ?></span>
-                            <span class="project-status"><?= htmlspecialchars($project['status'] ?? 'En ligne', ENT_QUOTES, 'UTF-8'); ?></span>
+                            <span class="project-status"><?= htmlspecialchars($project['status'] ?? '', ENT_QUOTES, 'UTF-8'); ?></span>
                         </div>
                     </div>
                     <div class="project-body">
@@ -118,7 +109,7 @@ require __DIR__ . '/includes/header.php';
                         <p class="copy project-copy"><?= htmlspecialchars($project['description'], ENT_QUOTES, 'UTF-8'); ?></p>
                         <div class="project-actions">
                             <span class="project-link-label"><?= htmlspecialchars($project['domain'] ?? '', ENT_QUOTES, 'UTF-8'); ?></span>
-                            <a class="btn btn--secondary" href="<?= htmlspecialchars($project['url'], ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noreferrer">Visiter</a>
+                            <a class="btn btn--secondary" href="<?= htmlspecialchars($project['url'], ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noreferrer"><?= htmlspecialchars(t('home.visit'), ENT_QUOTES, 'UTF-8'); ?></a>
                         </div>
                     </div>
                 </article>

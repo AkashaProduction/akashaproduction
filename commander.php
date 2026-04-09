@@ -131,14 +131,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $currentPage = 'commander';
-$pageTitle = app_page_title('Commander');
+$pageTitle = app_page_title(t('nav.commander'));
 require __DIR__ . '/includes/header.php';
 ?>
 <section class="page-hero">
     <div class="container">
-        <div class="eyebrow">Commander</div>
-        <h1 class="page-title">Composez votre offre sur mesure.</h1>
-        <p class="lead">Combinez creation, hebergement et nom de domaine. Les promotions s'appliquent automatiquement sur les combinaisons eligibles.</p>
+        <div class="eyebrow"><?= htmlspecialchars(t('commander.eyebrow'), ENT_QUOTES, 'UTF-8'); ?></div>
+        <h1 class="page-title"><?= htmlspecialchars(t('commander.title'), ENT_QUOTES, 'UTF-8'); ?></h1>
+        <p class="lead"><?= htmlspecialchars(t('commander.lead'), ENT_QUOTES, 'UTF-8'); ?></p>
     </div>
 </section>
 
@@ -148,7 +148,7 @@ require __DIR__ . '/includes/header.php';
             <form class="form-grid" method="post" data-order-form>
                 <!-- CREATION -->
                 <div class="field field--full">
-                    <div class="kicker">Creation</div>
+                    <div class="kicker"><?= htmlspecialchars(t('commander.creation_kicker'), ENT_QUOTES, 'UTF-8'); ?></div>
                     <div class="product-tabs" data-product-group="creation">
                         <?php foreach ($catalog['creation'] as $key => $entry): ?>
                             <label class="product-tab">
@@ -165,7 +165,7 @@ require __DIR__ . '/includes/header.php';
 
                 <!-- HEBERGEMENT -->
                 <div class="field field--full">
-                    <div class="kicker">Hebergement</div>
+                    <div class="kicker"><?= htmlspecialchars(t('commander.hosting_kicker'), ENT_QUOTES, 'UTF-8'); ?></div>
                     <div class="product-tabs" data-product-group="hosting">
                         <?php foreach ($catalog['hosting'] as $key => $entry): ?>
                             <label class="product-tab">
@@ -181,8 +181,8 @@ require __DIR__ . '/includes/header.php';
 
                 <!-- SOUS-DOMAINE OFFERT -->
                 <div class="field field--full">
-                    <div class="kicker">Sous-domaine offert</div>
-                    <p class="copy">Un sous-domaine gratuit vous est propose sur nos domaines parents, sous reserve de coherence avec votre projet.</p>
+                    <div class="kicker"><?= htmlspecialchars(t('commander.subdomain_kicker'), ENT_QUOTES, 'UTF-8'); ?></div>
+                    <p class="copy"><?= htmlspecialchars(t('commander.subdomain_text'), ENT_QUOTES, 'UTF-8'); ?></p>
                     <div class="subdomain-row">
                         <input id="subdomain_prefix" name="subdomain_prefix" placeholder="votre-choix" value="<?= htmlspecialchars($prefillSubdomainPrefix, ENT_QUOTES, 'UTF-8'); ?>">
                         <span class="subdomain-dot">.</span>
@@ -196,10 +196,10 @@ require __DIR__ . '/includes/header.php';
 
                 <!-- NOM DE DOMAINE PERSONNALISE -->
                 <div class="field field--full">
-                    <div class="kicker">Nom de domaine personnalise</div>
+                    <div class="kicker"><?= htmlspecialchars(t('commander.domain_kicker'), ENT_QUOTES, 'UTF-8'); ?></div>
                     <label class="checkbox-row">
                         <input id="include-domain" name="include_domain" type="checkbox" value="1" data-toggle-target="#domain-search-block"<?= $prefillIncludeDomain ? ' checked' : ''; ?>>
-                        <span>Ajouter un nom de domaine dedie (tarif selon extension)</span>
+                        <span><?= htmlspecialchars(t('commander.domain_add'), ENT_QUOTES, 'UTF-8'); ?></span>
                     </label>
                 </div>
                 <div class="field field--full" id="domain-search-block"<?= $prefillIncludeDomain ? '' : ' hidden'; ?>>
@@ -230,25 +230,25 @@ require __DIR__ . '/includes/header.php';
                 </div>
 
                 <!-- INFORMATIONS CLIENT -->
-                <div class="field field--full"><div class="kicker">Vos informations</div></div>
-                <div class="field"><label for="first_name">Prenom</label><input id="first_name" name="first_name" required></div>
-                <div class="field"><label for="last_name">Nom</label><input id="last_name" name="last_name" required></div>
-                <div class="field"><label for="email">Email</label><input id="email" name="email" type="email" required></div>
-                <div class="field"><label for="phone">Telephone</label><input id="phone" name="phone"></div>
-                <div class="field"><label for="company">Organisation</label><input id="company" name="company"></div>
-                <div class="field"><label for="country">Pays</label><input id="country" name="country"></div>
+                <div class="field field--full"><div class="kicker"><?= htmlspecialchars(t('commander.info_kicker'), ENT_QUOTES, 'UTF-8'); ?></div></div>
+                <div class="field"><label for="first_name"><?= htmlspecialchars(t('commander.firstname'), ENT_QUOTES, 'UTF-8'); ?></label><input id="first_name" name="first_name" required></div>
+                <div class="field"><label for="last_name"><?= htmlspecialchars(t('commander.lastname'), ENT_QUOTES, 'UTF-8'); ?></label><input id="last_name" name="last_name" required></div>
+                <div class="field"><label for="email"><?= htmlspecialchars(t('commander.email'), ENT_QUOTES, 'UTF-8'); ?></label><input id="email" name="email" type="email" required></div>
+                <div class="field"><label for="phone"><?= htmlspecialchars(t('commander.phone'), ENT_QUOTES, 'UTF-8'); ?></label><input id="phone" name="phone"></div>
+                <div class="field"><label for="company"><?= htmlspecialchars(t('commander.company'), ENT_QUOTES, 'UTF-8'); ?></label><input id="company" name="company"></div>
+                <div class="field"><label for="country"><?= htmlspecialchars(t('commander.country'), ENT_QUOTES, 'UTF-8'); ?></label><input id="country" name="country"></div>
 
                 <!-- DESCRIPTION PROJET -->
                 <div class="field field--full">
-                    <label for="project_description">Description du projet</label>
+                    <label for="project_description"><?= htmlspecialchars(t('commander.description'), ENT_QUOTES, 'UTF-8'); ?></label>
                     <textarea id="project_description" name="project_description" required></textarea>
                 </div>
 
                 <!-- DEVIS (conditionnel) -->
                 <div class="field field--full" data-quote-block hidden>
                     <div class="panel">
-                        <div class="kicker">Formulaire devis</div>
-                        <p class="copy">Completez ces informations pour permettre un chiffrage adapte a votre besoin.</p>
+                        <div class="kicker"><?= htmlspecialchars(t('commander.quote_kicker'), ENT_QUOTES, 'UTF-8'); ?></div>
+                        <p class="copy"><?= htmlspecialchars(t('commander.quote_text'), ENT_QUOTES, 'UTF-8'); ?></p>
                         <div class="form-grid">
                             <?php foreach ($catalog['quote_questions'] as $question => $options): ?>
                                 <div class="field">
@@ -266,7 +266,7 @@ require __DIR__ . '/includes/header.php';
 
                 <!-- PAIEMENT -->
                 <div class="field field--full">
-                    <label class="checkbox-row"><input id="split-payment" name="split_payment" type="checkbox" value="1"> Payer en 3x sans frais (souscription sur 12 mois)</label>
+                    <label class="checkbox-row"><input id="split-payment" name="split_payment" type="checkbox" value="1"> <?= htmlspecialchars(t('commander.split_payment'), ENT_QUOTES, 'UTF-8'); ?></label>
                 </div>
 
                 <div class="field field--full">
@@ -277,8 +277,8 @@ require __DIR__ . '/includes/header.php';
 
         <!-- SIDEBAR RESUME -->
         <div class="order-summary" data-order-summary>
-            <div class="kicker">Resume de commande</div>
-            <h2 class="section-title">Votre selection</h2>
+            <div class="kicker"><?= htmlspecialchars(t('commander.summary_kicker'), ENT_QUOTES, 'UTF-8'); ?></div>
+            <h2 class="section-title"><?= htmlspecialchars(t('commander.summary_title'), ENT_QUOTES, 'UTF-8'); ?></h2>
 
             <div class="summary-lines">
                 <div class="summary-line">
@@ -310,7 +310,7 @@ require __DIR__ . '/includes/header.php';
             <p class="copy" data-order-detail><?= $prefillIsQuote ? 'Etude commerciale personnalisee' : 'Paiement a l\'activation'; ?></p>
 
             <div class="panel summary-note">
-                <p class="copy">Les prix combines beneficient automatiquement de la tarification pack. Paiement securise par Stripe avec facture detaillee.</p>
+                <p class="copy"><?= htmlspecialchars(t('commander.summary_note'), ENT_QUOTES, 'UTF-8'); ?></p>
             </div>
         </div>
     </div>

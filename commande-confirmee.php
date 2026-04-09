@@ -1,8 +1,4 @@
 <?php
-/**
- * Payment confirmation page.
- * GET /commande-confirmee?order=ORDER_ID&session_id=STRIPE_SESSION_ID
- */
 declare(strict_types=1);
 
 require __DIR__ . '/includes/bootstrap.php';
@@ -31,14 +27,14 @@ if ($orderId !== '') {
 }
 
 $currentPage = '';
-$pageTitle = app_page_title('Commande confirmee');
+$pageTitle = app_page_title(t('confirmation.eyebrow'));
 require __DIR__ . '/includes/header.php';
 ?>
 <section class="page-hero">
     <div class="container">
-        <div class="eyebrow">Confirmation</div>
-        <h1 class="page-title">Merci pour votre commande.</h1>
-        <p class="lead">Votre paiement a ete enregistre avec succes. Vous recevrez une facture detaillee par email.</p>
+        <div class="eyebrow"><?= htmlspecialchars(t('confirmation.eyebrow'), ENT_QUOTES, 'UTF-8'); ?></div>
+        <h1 class="page-title"><?= htmlspecialchars(t('confirmation.title'), ENT_QUOTES, 'UTF-8'); ?></h1>
+        <p class="lead"><?= htmlspecialchars(t('confirmation.lead'), ENT_QUOTES, 'UTF-8'); ?></p>
     </div>
 </section>
 
@@ -46,44 +42,44 @@ require __DIR__ . '/includes/header.php';
     <div class="container" style="max-width: 640px;">
         <?php if ($order): ?>
             <div class="panel">
-                <div class="kicker">Recapitulatif</div>
+                <div class="kicker"><?= htmlspecialchars(t('confirmation.summary_kicker'), ENT_QUOTES, 'UTF-8'); ?></div>
                 <div class="summary-lines">
                     <div class="summary-line">
-                        <span>Reference</span>
+                        <span><?= htmlspecialchars(t('confirmation.reference'), ENT_QUOTES, 'UTF-8'); ?></span>
                         <strong><?= htmlspecialchars(substr($order['id'], 0, 12), ENT_QUOTES, 'UTF-8'); ?>...</strong>
                     </div>
                     <div class="summary-line">
-                        <span>Client</span>
+                        <span><?= htmlspecialchars(t('confirmation.client'), ENT_QUOTES, 'UTF-8'); ?></span>
                         <strong><?= htmlspecialchars(($order['customer']['first_name'] ?? '') . ' ' . ($order['customer']['last_name'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></strong>
                     </div>
                     <div class="summary-line">
-                        <span>Email</span>
+                        <span><?= htmlspecialchars(t('confirmation.email'), ENT_QUOTES, 'UTF-8'); ?></span>
                         <strong><?= htmlspecialchars($order['customer']['email'] ?? '', ENT_QUOTES, 'UTF-8'); ?></strong>
                     </div>
                     <?php if (!empty($order['summary']['total'])): ?>
                         <div class="summary-line">
-                            <span>Total</span>
+                            <span><?= htmlspecialchars(t('confirmation.total'), ENT_QUOTES, 'UTF-8'); ?></span>
                             <strong><?= app_money((float) $order['summary']['total']); ?></strong>
                         </div>
                     <?php endif; ?>
                     <div class="summary-line">
-                        <span>Statut</span>
-                        <strong style="color: var(--accent);">Paye</strong>
+                        <span><?= htmlspecialchars(t('confirmation.status'), ENT_QUOTES, 'UTF-8'); ?></span>
+                        <strong style="color: var(--accent);"><?= htmlspecialchars(t('confirmation.status_paid'), ENT_QUOTES, 'UTF-8'); ?></strong>
                     </div>
                 </div>
             </div>
 
             <div class="panel" style="margin-top: 1.5rem;">
-                <p class="copy">Nous preparons votre projet. Un email de confirmation avec votre facture vous sera envoye sous peu. Pour toute question, rendez-vous sur votre <a href="/mon-compte">espace client</a> ou <a href="/contact">contactez-nous</a>.</p>
+                <p class="copy"><?= htmlspecialchars(t('confirmation.next_text'), ENT_QUOTES, 'UTF-8'); ?> <a href="/mon-compte"><?= htmlspecialchars(t('confirmation.account_link'), ENT_QUOTES, 'UTF-8'); ?></a> <?= htmlspecialchars(t('confirmation.or'), ENT_QUOTES, 'UTF-8'); ?> <a href="/contact"><?= htmlspecialchars(t('confirmation.contact_link'), ENT_QUOTES, 'UTF-8'); ?></a>.</p>
             </div>
         <?php else: ?>
             <div class="panel">
-                <p class="copy">Commande introuvable ou deja traitee. Consultez votre <a href="/mon-compte">espace client</a> pour le suivi.</p>
+                <p class="copy"><?= htmlspecialchars(t('confirmation.not_found'), ENT_QUOTES, 'UTF-8'); ?> <a href="/mon-compte"><?= htmlspecialchars(t('confirmation.account_link'), ENT_QUOTES, 'UTF-8'); ?></a> <?= htmlspecialchars(t('confirmation.for_tracking'), ENT_QUOTES, 'UTF-8'); ?></p>
             </div>
         <?php endif; ?>
 
         <div style="margin-top: 2rem; text-align: center;">
-            <a href="/" class="btn btn--primary">Retour a l'accueil</a>
+            <a href="/" class="btn btn--primary"><?= htmlspecialchars(t('confirmation.back'), ENT_QUOTES, 'UTF-8'); ?></a>
         </div>
     </div>
 </section>

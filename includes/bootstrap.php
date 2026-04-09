@@ -15,3 +15,16 @@ if (file_exists($runtimeConfigPath)) {
 }
 
 require_once __DIR__ . '/helpers.php';
+require_once __DIR__ . '/i18n.php';
+
+if (isset($_GET['lang'])) {
+    app_set_lang((string) $_GET['lang']);
+    $redir = strtok((string) ($_SERVER['REQUEST_URI'] ?? '/'), '?');
+    $qs = $_GET;
+    unset($qs['lang']);
+    if ($qs) {
+        $redir .= '?' . http_build_query($qs);
+    }
+    header('Location: ' . $redir);
+    exit;
+}
