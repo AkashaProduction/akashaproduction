@@ -156,7 +156,7 @@
   },
   "account": {
     "eyebrow": "Mon compte",
-    "title": "Votre panel admin. Gestion commandes, techniques et support.",
+    "title": "Votre panel client. Gestion commandes, techniques et support.",
     "lead": "Renseignez le nom et l'email utilisés lors de votre commande pour accéder à votre dossier client, consulter vos demandes et ouvrir un ticket si nécessaire.",
     "orders_card_title": "Commandes",
     "orders_card_text": "Consultez les services enregistrés et l'avancée de leur déploiement sur la toile.",

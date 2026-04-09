@@ -377,11 +377,40 @@ main {
 }
 
 .commander-hero .solutions-bubble--3 {
-  bottom: -1.5rem; right: -1rem;
+  bottom: -1.5rem; right: 3rem;
   left: auto; top: auto;
   width: 52%; height: 50%;
   border-radius: 20px;
   z-index: 3;
+}
+
+/* Admin stats */
+.admin-stats {
+  gap: 0.8rem;
+  margin-top: 1.2rem;
+}
+
+.admin-stat {
+  text-align: center;
+  padding: 1rem 0.5rem;
+  border-radius: var(--radius-small);
+  background: rgba(172, 100, 52, 0.06);
+  border: 1px solid rgba(172, 100, 52, 0.1);
+}
+
+.admin-stat strong {
+  display: block;
+  font-family: "Space Grotesk", "Segoe UI", sans-serif;
+  font-size: 1.8rem;
+  color: var(--accent);
+}
+
+.admin-stat span {
+  font-size: 0.82rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
 }
 
 /* Mon compte: wider page-title */
