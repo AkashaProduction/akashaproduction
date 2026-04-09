@@ -96,7 +96,7 @@ require __DIR__ . '/includes/header.php';
         </div>
         <div class="project-grid">
             <?php foreach ($projects as $project): ?>
-                <article class="project-card">
+                <article class="project-card<?= ($project['domain'] ?? '') === 'epanouissement-amoureux.fr' ? ' project-card--hidden' : ''; ?>">
                     <div class="project-thumb">
                         <img src="<?= htmlspecialchars(app_screenshot_url($project['url']), ENT_QUOTES, 'UTF-8'); ?>" alt="<?= htmlspecialchars($project['title'], ENT_QUOTES, 'UTF-8'); ?>" onerror="this.outerHTML='<div class=&quot;project-placeholder&quot;><?= htmlspecialchars(t('home.coming_soon'), ENT_QUOTES, 'UTF-8'); ?></div>'">
                         <div class="project-thumb__overlay">

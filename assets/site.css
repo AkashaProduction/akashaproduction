@@ -870,6 +870,22 @@ li {
   background: radial-gradient(ellipse at 50% 0%, #573f2c 0%, #211510 70%);
 }
 
+.project-card--hidden {
+  position: relative;
+  pointer-events: none;
+  user-select: none;
+}
+
+.project-card--hidden::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(14, 13, 18, 0.88);
+  backdrop-filter: blur(6px);
+  border-radius: var(--radius);
+  z-index: 5;
+}
+
 .project-thumb__overlay {
   position: absolute;
   inset: auto 0 0 0;
