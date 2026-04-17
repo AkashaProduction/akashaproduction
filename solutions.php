@@ -37,6 +37,39 @@ require __DIR__ . '/includes/header.php';
     </div>
 </section>
 
+<!-- PROMO CMS SOURCE HÉBERGÉ -->
+<section class="promo-hero">
+    <div class="container">
+        <div class="promo-badge">Offre limitée - Stock limité</div>
+        <h2>Exclusif : CMS Source Hébergé</h2>
+        <p class="promo-subtitle">Nous vous installons une puissante solution paramétrable selon vos goûts et projets</p>
+
+        <div class="modules-grid">
+            <div class="module-chip">Actualité</div>
+            <div class="module-chip">Marketplace</div>
+            <div class="module-chip">Événements</div>
+            <div class="module-chip">Carte interactive</div>
+            <div class="module-chip">Financement participatif</div>
+            <div class="module-chip">Association</div>
+            <div class="module-chip">Communauté membres</div>
+            <div class="module-chip">Forums</div>
+        </div>
+
+        <div class="pricing-box-promo">
+            <div class="price-regular">490€ / an</div>
+            <div class="price-promo">290€/an</div>
+            <div class="pricing-items">
+                <div class="pricing-item">Hébergement inclus</div>
+                <div class="pricing-item">Installation incluse</div>
+                <div class="pricing-item">Maintenance mensuelle</div>
+                <div class="pricing-item">Domaine .fr/.net/.org offert</div>
+            </div>
+        </div>
+
+        <a href="/commander?pack=cms-promo" class="btn btn--primary">Commander cette offre</a>
+    </div>
+</section>
+
 <!-- CRÉATIONS -->
 <section class="section">
     <div class="container">
