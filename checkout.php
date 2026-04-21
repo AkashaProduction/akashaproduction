@@ -189,17 +189,9 @@ if ($httpCode >= 400 || !isset($data['url'])) {
     app_redirect('/commander');
 }
 
-// Update order with Stripe session
-$orders = app_read_json('orders.json');
-foreach ($orders as &$o) {
-    if (($o['id'] ?? '') === $orderId) {
-        $o['stripe_session_id'] = $data['id'];
-        $o['status'] = 'checkout-started';
-        break;
-    }
-}
-unset($o);
-app_write_json('orders.json', $orders);
+app_update_order_status($orderId, 'checkout-started', [
+    'stripe_session_id' => (string) $data['id'],
+]);
 
 header('Location: ' . $data['url']);
 exit;

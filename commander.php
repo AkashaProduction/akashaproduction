@@ -42,6 +42,20 @@ $prefillIsQuote = $prefillCreation === 'custom' || $prefillHosting === 'cloud';
 $prefillTotal = $prefillIsQuote ? null : app_compute_total($prefillCreation, $prefillHosting, false);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    app_csrf_enforce();
+
+    // Honeypot
+    if (trim((string) ($_POST['website_url'] ?? '')) !== '') {
+        app_log('info', 'commander_honeypot', []);
+        app_flash('success', t('commander.flash_quote_success'));
+        app_redirect('/commander');
+    }
+
+    if (!app_rate_limit('commander', 10, 600)) {
+        app_flash('warning', t('commander.flash_warning'));
+        app_redirect('/commander');
+    }
+
     $firstName = trim((string) ($_POST['first_name'] ?? ''));
     $lastName = trim((string) ($_POST['last_name'] ?? ''));
     $email = trim((string) ($_POST['email'] ?? ''));
@@ -50,26 +64,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $country = trim((string) ($_POST['country'] ?? ''));
     $creation = (string) ($_POST['creation'] ?? 'showcase');
     $hosting = (string) ($_POST['hosting'] ?? 'shared-yearly');
+    if (!isset($catalog['creation'][$creation])) {
+        $creation = 'showcase';
+    }
+    if (!isset($catalog['hosting'][$hosting])) {
+        $hosting = 'shared-yearly';
+    }
     $subdomainPrefix = trim((string) ($_POST['subdomain_prefix'] ?? ''));
     $parentDomain = (string) ($_POST['parent_domain'] ?? 'akashaproduction.com');
+    if (!in_array($parentDomain, $catalog['parent_domains'], true)) {
+        $parentDomain = 'akashaproduction.com';
+    }
     $projectDescription = trim((string) ($_POST['project_description'] ?? ''));
     $includeDomain = !empty($_POST['include_domain']);
-    $customDomainName = trim((string) ($_POST['custom_domain_name'] ?? ''));
+    $customDomainName = strtolower(trim((string) ($_POST['custom_domain_name'] ?? '')));
+    $customDomainName = preg_replace('/[^a-z0-9\-]/', '', $customDomainName) ?? '';
     $domainExtension = strtolower(trim((string) ($_POST['domain_extension'] ?? '')));
+    $domainExtension = preg_replace('/[^a-z0-9\-]/', '', $domainExtension) ?? '';
     $splitPayment = !empty($_POST['split_payment']);
     $isQuote = $creation === 'custom' || $hosting === 'cloud';
 
-    if ($firstName === '' || $lastName === '' || $email === '' || $projectDescription === '') {
+    if ($firstName === '' || $lastName === '' || $projectDescription === '' || !app_valid_email($email)) {
         app_flash('warning', t('commander.flash_warning'));
         app_redirect('/commander');
     }
 
     $domainPrice = 0;
-    if ($includeDomain && $customDomainName !== '') {
-        $allPrices = app_domain_selling_prices();
-        if (isset($allPrices[$domainExtension])) {
-            $domainPrice = $allPrices[$domainExtension];
+    if ($includeDomain) {
+        if ($customDomainName === '' || !isset($domainPrices[$domainExtension])) {
+            app_flash('warning', t('commander.flash_warning'));
+            app_redirect('/commander');
         }
+        $domainPrice = (int) $domainPrices[$domainExtension];
+    } else {
+        $customDomainName = '';
+        $domainExtension = '';
     }
 
     $quoteAnswers = [];
@@ -159,6 +188,11 @@ require __DIR__ . '/includes/header.php';
     <div class="container grid-2 order-layout">
         <div class="form-card">
             <form class="form-grid" method="post" data-order-form>
+                <?= app_csrf_field(); ?>
+                <div style="position:absolute;left:-10000px;" aria-hidden="true">
+                    <label for="website_url_c">Laissez vide</label>
+                    <input id="website_url_c" name="website_url" type="text" tabindex="-1" autocomplete="off">
+                </div>
                 <!-- CREATION -->
                 <div class="field field--full">
                     <div class="kicker"><?= htmlspecialchars(t('commander.creation_kicker'), ENT_QUOTES, 'UTF-8'); ?></div>

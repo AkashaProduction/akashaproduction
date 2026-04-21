@@ -1,4 +1,6 @@
 includes/runtime-config.php
 storage/*.json
 storage/uploads/*
+storage/logs/*
 !storage/.gitkeep
+!storage/.htaccess

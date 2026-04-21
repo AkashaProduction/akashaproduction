@@ -2,6 +2,20 @@
 require __DIR__ . '/includes/bootstrap.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    app_csrf_enforce();
+
+    // Honeypot : champ caché « website_url » rempli = bot.
+    if (trim((string) ($_POST['website_url'] ?? '')) !== '') {
+        app_log('info', 'contact_honeypot', []);
+        app_flash('success', t('contact.flash_success'));
+        app_redirect('/contact');
+    }
+
+    if (!app_rate_limit('contact', 5, 300)) {
+        app_flash('warning', t('contact.flash_warning'));
+        app_redirect('/contact');
+    }
+
     $firstName = trim((string) ($_POST['first_name'] ?? ''));
     $lastName = trim((string) ($_POST['last_name'] ?? ''));
     $email = trim((string) ($_POST['email'] ?? ''));
@@ -12,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $hasProject = !empty($_POST['has_project']);
     $projectDetails = trim((string) ($_POST['project_details'] ?? ''));
 
-    if ($firstName === '' || $lastName === '' || $email === '' || $message === '') {
+    if ($firstName === '' || $lastName === '' || $message === '' || !app_valid_email($email)) {
         app_flash('warning', t('contact.flash_warning'));
         app_redirect('/contact');
     }
@@ -23,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'created_at' => app_now(),
         'first_name' => $firstName,
         'last_name' => $lastName,
-        'email' => $email,
+        'email' => strtolower($email),
         'phone' => $phone,
         'company' => $company,
         'website' => $website,
@@ -67,6 +81,11 @@ require __DIR__ . '/includes/header.php';
         </div>
         <div class="form-card">
             <form class="form-grid" method="post" enctype="multipart/form-data">
+                <?= app_csrf_field(); ?>
+                <div style="position:absolute;left:-10000px;" aria-hidden="true">
+                    <label for="website_url">Laissez vide</label>
+                    <input id="website_url" name="website_url" type="text" tabindex="-1" autocomplete="off">
+                </div>
                 <div class="field"><label for="first_name"><?= htmlspecialchars(t('contact.firstname'), ENT_QUOTES, 'UTF-8'); ?></label><input id="first_name" name="first_name" required></div>
                 <div class="field"><label for="last_name"><?= htmlspecialchars(t('contact.lastname'), ENT_QUOTES, 'UTF-8'); ?></label><input id="last_name" name="last_name" required></div>
                 <div class="field"><label for="email"><?= htmlspecialchars(t('contact.email'), ENT_QUOTES, 'UTF-8'); ?></label><input id="email" name="email" type="email" required></div>

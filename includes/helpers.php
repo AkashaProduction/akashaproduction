@@ -20,7 +20,7 @@ function app_read_json(string $file): array
 {
     $path = app_storage_path($file);
     if (!file_exists($path)) {
-        file_put_contents($path, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), LOCK_EX);
+        app_atomic_write($path, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
     }
     $raw = file_get_contents($path);
     $data = json_decode($raw ?: '[]', true);
@@ -29,14 +29,72 @@ function app_read_json(string $file): array
 
 function app_write_json(string $file, array $data): void
 {
-    file_put_contents($path = app_storage_path($file), json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), LOCK_EX);
+    $path = app_storage_path($file);
+    app_atomic_write($path, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+}
+
+function app_atomic_write(string $path, string $contents): void
+{
+    $dir = dirname($path);
+    if (!is_dir($dir)) {
+        mkdir($dir, 0775, true);
+    }
+    $tmp = tempnam($dir, '.tmp-');
+    if ($tmp === false) {
+        file_put_contents($path, $contents, LOCK_EX);
+        return;
+    }
+    file_put_contents($tmp, $contents);
+    if (!rename($tmp, $path)) {
+        @unlink($tmp);
+        file_put_contents($path, $contents, LOCK_EX);
+        return;
+    }
+    @chmod($path, 0664);
+}
+
+function app_json_mutate(string $file, callable $mutator): void
+{
+    $path = app_storage_path($file);
+    if (!file_exists($path)) {
+        app_atomic_write($path, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+    }
+    $fp = fopen($path, 'c+');
+    if ($fp === false) {
+        app_log('error', 'json_mutate_open_failed', ['file' => $file]);
+        return;
+    }
+    try {
+        if (!flock($fp, LOCK_EX)) {
+            app_log('error', 'json_mutate_lock_failed', ['file' => $file]);
+            return;
+        }
+        $raw = stream_get_contents($fp) ?: '[]';
+        $data = json_decode($raw, true);
+        if (!is_array($data)) {
+            $data = [];
+        }
+        $next = $mutator($data);
+        if (!is_array($next)) {
+            $next = $data;
+        }
+        $encoded = json_encode($next, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        ftruncate($fp, 0);
+        rewind($fp);
+        fwrite($fp, $encoded);
+        fflush($fp);
+        flock($fp, LOCK_UN);
+    } finally {
+        fclose($fp);
+    }
 }
 
 function app_append_json(string $file, array $record): void
 {
-    $data = app_read_json($file);
-    array_unshift($data, $record);
-    app_write_json($file, $data);
+    app_json_mutate($file, static function (array $data) use ($record): array {
+        array_unshift($data, $record);
+        return $data;
+    });
 }
 
 function app_flash(string $type, string $message): void
@@ -69,6 +127,115 @@ function app_now(): string
 {
     return date(DATE_ATOM);
 }
+
+/* ------------------------------------------------------------------ */
+/* Logging                                                            */
+/* ------------------------------------------------------------------ */
+
+function app_log(string $level, string $event, array $context = []): void
+{
+    $dir = __DIR__ . '/../storage/logs';
+    if (!is_dir($dir)) {
+        @mkdir($dir, 0775, true);
+    }
+    $line = json_encode([
+        'ts' => app_now(),
+        'level' => $level,
+        'event' => $event,
+        'context' => $context,
+        'ip' => $_SERVER['REMOTE_ADDR'] ?? null,
+        'ua' => substr((string) ($_SERVER['HTTP_USER_AGENT'] ?? ''), 0, 200),
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    if ($line === false) {
+        return;
+    }
+    @file_put_contents($dir . '/app.log', $line . "\n", FILE_APPEND | LOCK_EX);
+}
+
+/* ------------------------------------------------------------------ */
+/* Rate limiting (session-based)                                      */
+/* ------------------------------------------------------------------ */
+
+function app_rate_limit(string $key, int $max, int $windowSeconds): bool
+{
+    $bucket = $_SESSION['akasha_rate'][$key] ?? [];
+    $now = time();
+    $bucket = array_values(array_filter($bucket, static fn ($t) => ($t + $windowSeconds) > $now));
+    if (count($bucket) >= $max) {
+        $_SESSION['akasha_rate'][$key] = $bucket;
+        return false;
+    }
+    $bucket[] = $now;
+    $_SESSION['akasha_rate'][$key] = $bucket;
+    return true;
+}
+
+function app_rate_reset(string $key): void
+{
+    unset($_SESSION['akasha_rate'][$key]);
+}
+
+/* ------------------------------------------------------------------ */
+/* CSRF                                                               */
+/* ------------------------------------------------------------------ */
+
+function app_csrf_token(): string
+{
+    if (empty($_SESSION['akasha_csrf'])) {
+        $_SESSION['akasha_csrf'] = bin2hex(random_bytes(32));
+    }
+    return (string) $_SESSION['akasha_csrf'];
+}
+
+function app_csrf_field(): string
+{
+    return '<input type="hidden" name="_csrf" value="' . htmlspecialchars(app_csrf_token(), ENT_QUOTES, 'UTF-8') . '">';
+}
+
+function app_csrf_check(?string $token = null): bool
+{
+    $provided = $token ?? (string) ($_POST['_csrf'] ?? '');
+    $expected = (string) ($_SESSION['akasha_csrf'] ?? '');
+    if ($provided === '' || $expected === '') {
+        return false;
+    }
+    return hash_equals($expected, $provided);
+}
+
+function app_csrf_enforce(): void
+{
+    if (!app_csrf_check()) {
+        app_log('warning', 'csrf_rejected', ['uri' => $_SERVER['REQUEST_URI'] ?? '']);
+        http_response_code(400);
+        echo 'Requête invalide (jeton CSRF).';
+        exit;
+    }
+}
+
+/* ------------------------------------------------------------------ */
+/* Email header sanitization + validation                             */
+/* ------------------------------------------------------------------ */
+
+function app_clean_header(string $value): string
+{
+    return trim(preg_replace('/[\r\n\x00]+/', ' ', $value));
+}
+
+function app_valid_email(string $email): bool
+{
+    $email = trim($email);
+    if ($email === '' || strlen($email) > 254) {
+        return false;
+    }
+    if (preg_match('/[\r\n\x00]/', $email)) {
+        return false;
+    }
+    return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
+}
+
+/* ------------------------------------------------------------------ */
+/* Misc utility                                                       */
+/* ------------------------------------------------------------------ */
 
 function app_screenshot_url(string $url): string
 {
@@ -113,19 +280,35 @@ function app_compute_total(string $creation, string $hosting, bool $includeCusto
     return $total;
 }
 
+/* ------------------------------------------------------------------ */
+/* Mail                                                               */
+/* ------------------------------------------------------------------ */
+
 function app_send_mail_to(string $to, string $subject, string $body, ?string $replyTo = null): bool
 {
+    $to = app_clean_header($to);
+    $subject = app_clean_header($subject);
+    if (!app_valid_email($to)) {
+        app_log('error', 'mail_invalid_to', ['to' => $to]);
+        return false;
+    }
     $from = (string) (app_config()['site']['contact_email'] ?? 'noreply@akashaproduction.com');
+    if (!app_valid_email($from)) {
+        $from = 'noreply@akashaproduction.com';
+    }
     $headers = [
         'MIME-Version: 1.0',
         'Content-type: text/plain; charset=utf-8',
         'From: Akasha Production <' . $from . '>',
     ];
-    if ($replyTo) {
-        $headers[] = 'Reply-To: ' . $replyTo;
+    if ($replyTo !== null && $replyTo !== '' && app_valid_email($replyTo)) {
+        $headers[] = 'Reply-To: ' . app_clean_header($replyTo);
     }
-
-    return @mail($to, $subject, $body, implode("\r\n", $headers));
+    $ok = mail($to, $subject, $body, implode("\r\n", $headers));
+    if (!$ok) {
+        app_log('error', 'mail_failed', ['to' => $to, 'subject' => substr($subject, 0, 60)]);
+    }
+    return $ok;
 }
 
 function app_send_mail(string $subject, string $body, ?string $replyTo = null): bool
@@ -133,18 +316,30 @@ function app_send_mail(string $subject, string $body, ?string $replyTo = null): 
     return app_send_mail_to((string) app_config()['site']['contact_email'], $subject, $body, $replyTo);
 }
 
+/* ------------------------------------------------------------------ */
+/* Uploads                                                            */
+/* ------------------------------------------------------------------ */
+
 function app_handle_uploads(string $field): array
 {
     if (!isset($_FILES[$field])) {
         return [];
     }
 
-    $allowed = ['pdf', 'docx', 'jpg', 'jpeg', 'webp'];
+    $allowed = [
+        'pdf' => ['application/pdf'],
+        'docx' => ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/zip'],
+        'jpg' => ['image/jpeg'],
+        'jpeg' => ['image/jpeg'],
+        'webp' => ['image/webp'],
+    ];
+    $maxBytes = 8 * 1024 * 1024; // 8 MB
     $saved = [];
     $uploadDir = app_storage_path('uploads');
     if (!is_dir($uploadDir)) {
         mkdir($uploadDir, 0775, true);
     }
+    $finfo = class_exists('finfo') ? new finfo(FILEINFO_MIME_TYPE) : null;
 
     $files = $_FILES[$field];
     $count = is_array($files['name']) ? count($files['name']) : 0;
@@ -152,18 +347,32 @@ function app_handle_uploads(string $field): array
         if (($files['error'][$index] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
             continue;
         }
-
-        $original = (string) $files['name'][$index];
-        $extension = strtolower(pathinfo($original, PATHINFO_EXTENSION));
-        if (!in_array($extension, $allowed, true)) {
+        if (($files['size'][$index] ?? 0) > $maxBytes) {
+            app_log('warning', 'upload_too_large', ['size' => $files['size'][$index] ?? 0]);
             continue;
         }
 
-        $safeName = date('YmdHis') . '-' . preg_replace('/[^a-zA-Z0-9._-]/', '-', $original);
+        $original = (string) $files['name'][$index];
+        $extension = strtolower(pathinfo($original, PATHINFO_EXTENSION));
+        if (!isset($allowed[$extension])) {
+            continue;
+        }
+
+        $tmp = (string) $files['tmp_name'][$index];
+        if ($finfo !== null) {
+            $mime = (string) $finfo->file($tmp);
+            if ($mime !== '' && !in_array($mime, $allowed[$extension], true)) {
+                app_log('warning', 'upload_mime_mismatch', ['ext' => $extension, 'mime' => $mime]);
+                continue;
+            }
+        }
+
+        $safeName = date('YmdHis') . '-' . app_uuid() . '.' . $extension;
         $target = $uploadDir . '/' . $safeName;
-        if (move_uploaded_file($files['tmp_name'][$index], $target)) {
+        if (move_uploaded_file($tmp, $target)) {
+            @chmod($target, 0644);
             $saved[] = [
-                'original' => $original,
+                'original' => preg_replace('/[\r\n\x00]/', '', $original),
                 'stored' => $safeName,
             ];
         }
@@ -171,6 +380,10 @@ function app_handle_uploads(string $field): array
 
     return $saved;
 }
+
+/* ------------------------------------------------------------------ */
+/* Orders / Tickets                                                   */
+/* ------------------------------------------------------------------ */
 
 function app_orders_by_email(string $email): array
 {
@@ -215,49 +428,95 @@ function app_create_ticket(array $payload): array
 
 function app_add_ticket_reply(string $ticketId, string $authorType, string $authorLabel, string $message, ?string $email = null): bool
 {
-    $tickets = app_read_json('tickets.json');
-    foreach ($tickets as &$ticket) {
-        if (($ticket['id'] ?? '') !== $ticketId) {
-            continue;
+    $ok = false;
+    app_json_mutate('tickets.json', function (array $tickets) use ($ticketId, $authorType, $authorLabel, $message, $email, &$ok): array {
+        foreach ($tickets as &$ticket) {
+            if (($ticket['id'] ?? '') !== $ticketId) {
+                continue;
+            }
+            if ($authorType === 'customer' && strtolower((string) ($ticket['customer']['email'] ?? '')) !== strtolower((string) $email)) {
+                return $tickets;
+            }
+            $ticket['thread'][] = [
+                'id' => app_uuid(),
+                'created_at' => app_now(),
+                'author_type' => $authorType,
+                'author_label' => $authorLabel,
+                'message' => $message,
+            ];
+            $ticket['updated_at'] = app_now();
+            $ticket['status'] = $authorType === 'admin' ? 'answered' : 'open';
+            $ok = true;
+            return $tickets;
         }
-        if ($authorType === 'customer' && strtolower((string) ($ticket['customer']['email'] ?? '')) !== strtolower((string) $email)) {
-            return false;
-        }
-        $ticket['thread'][] = [
-            'id' => app_uuid(),
-            'created_at' => app_now(),
-            'author_type' => $authorType,
-            'author_label' => $authorLabel,
-            'message' => $message,
-        ];
-        $ticket['updated_at'] = app_now();
-        $ticket['status'] = $authorType === 'admin' ? 'answered' : 'open';
-        app_write_json('tickets.json', $tickets);
-        return true;
-    }
-    return false;
+        return $tickets;
+    });
+    return $ok;
 }
 
 function app_update_ticket(string $ticketId, string $status, string $priority): bool
 {
-    $tickets = app_read_json('tickets.json');
-    foreach ($tickets as &$ticket) {
-        if (($ticket['id'] ?? '') !== $ticketId) {
-            continue;
+    $ok = false;
+    app_json_mutate('tickets.json', function (array $tickets) use ($ticketId, $status, $priority, &$ok): array {
+        foreach ($tickets as &$ticket) {
+            if (($ticket['id'] ?? '') !== $ticketId) {
+                continue;
+            }
+            $ticket['status'] = $status;
+            $ticket['priority'] = $priority;
+            $ticket['updated_at'] = app_now();
+            $ok = true;
+            return $tickets;
         }
-        $ticket['status'] = $status;
-        $ticket['priority'] = $priority;
-        $ticket['updated_at'] = app_now();
-        app_write_json('tickets.json', $tickets);
-        return true;
+        return $tickets;
+    });
+    return $ok;
+}
+
+function app_update_order_status(string $orderId, string $status, array $extra = []): bool
+{
+    $ok = false;
+    app_json_mutate('orders.json', function (array $orders) use ($orderId, $status, $extra, &$ok): array {
+        foreach ($orders as &$order) {
+            if (($order['id'] ?? '') !== $orderId) {
+                continue;
+            }
+            $order['status'] = $status;
+            $order['updated_at'] = app_now();
+            foreach ($extra as $k => $v) {
+                $order[$k] = $v;
+            }
+            $ok = true;
+            return $orders;
+        }
+        return $orders;
+    });
+    return $ok;
+}
+
+/* ------------------------------------------------------------------ */
+/* Admin authentication                                               */
+/* ------------------------------------------------------------------ */
+
+function app_admin_password_hash(): string
+{
+    $config = app_config();
+    $hash = (string) ($config['admin_password_hash'] ?? '');
+    if ($hash !== '') {
+        return $hash;
     }
-    return false;
+    // Back-compat: legacy plaintext. Treat as disabled unless explicitly set.
+    $legacy = (string) ($config['admin_password'] ?? '');
+    if ($legacy === '') {
+        return '';
+    }
+    // One-shot migration: compute a hash for the legacy value so password_verify works.
+    return password_hash($legacy, PASSWORD_DEFAULT);
 }
 
 function app_admin_is_enabled(): bool
 {
-    $config = app_config();
-    return !empty($config['admin_password']);
+    return app_admin_password_hash() !== '';
 }
 
 function app_is_admin_email(string $email): bool
@@ -279,15 +538,25 @@ function app_is_admin_email(string $email): bool
 
 function app_admin_login(string $email, string $password): bool
 {
-    $config = app_config();
     if (!app_admin_is_enabled()) {
         return false;
     }
-    if ($email === $config['admin_email'] && hash_equals((string) $config['admin_password'], $password)) {
-        $_SESSION['akasha_admin'] = true;
-        return true;
+    if (!app_is_admin_email($email)) {
+        app_log('info', 'admin_login_wrong_email', ['email' => $email]);
+        return false;
     }
-    return false;
+    $hash = app_admin_password_hash();
+    if (!password_verify($password, $hash)) {
+        app_log('info', 'admin_login_wrong_password', ['email' => $email]);
+        return false;
+    }
+    session_regenerate_id(true);
+    $_SESSION['akasha_admin'] = [
+        'email' => strtolower(trim($email)),
+        'logged_at' => time(),
+    ];
+    app_log('info', 'admin_login_ok', ['email' => $email]);
+    return true;
 }
 
 function app_admin_logged_in(): bool
@@ -298,7 +567,83 @@ function app_admin_logged_in(): bool
 function app_admin_logout(): void
 {
     unset($_SESSION['akasha_admin']);
+    session_regenerate_id(true);
 }
+
+/* ------------------------------------------------------------------ */
+/* Customer authentication (OTP by email)                             */
+/* ------------------------------------------------------------------ */
+
+function app_customer_logged_in(): bool
+{
+    return !empty($_SESSION['akasha_customer']['email']);
+}
+
+function app_customer_email(): string
+{
+    return (string) ($_SESSION['akasha_customer']['email'] ?? '');
+}
+
+function app_customer_name(): string
+{
+    return (string) ($_SESSION['akasha_customer']['name'] ?? '');
+}
+
+function app_customer_logout(): void
+{
+    unset($_SESSION['akasha_customer'], $_SESSION['akasha_customer_otp']);
+    session_regenerate_id(true);
+}
+
+function app_customer_issue_otp(string $email, string $name = ''): string
+{
+    $code = (string) random_int(100000, 999999);
+    $_SESSION['akasha_customer_otp'] = [
+        'email' => strtolower(trim($email)),
+        'name' => trim($name),
+        'code_hash' => password_hash($code, PASSWORD_DEFAULT),
+        'expires_at' => time() + 600, // 10 min
+        'attempts' => 0,
+    ];
+    return $code;
+}
+
+function app_customer_pending_email(): string
+{
+    return (string) ($_SESSION['akasha_customer_otp']['email'] ?? '');
+}
+
+function app_customer_verify_otp(string $code): bool
+{
+    $otp = $_SESSION['akasha_customer_otp'] ?? null;
+    if (!is_array($otp)) {
+        return false;
+    }
+    if (($otp['expires_at'] ?? 0) < time()) {
+        unset($_SESSION['akasha_customer_otp']);
+        return false;
+    }
+    if (($otp['attempts'] ?? 0) >= 5) {
+        unset($_SESSION['akasha_customer_otp']);
+        return false;
+    }
+    $_SESSION['akasha_customer_otp']['attempts'] = ($otp['attempts'] ?? 0) + 1;
+    if (!password_verify(trim($code), (string) $otp['code_hash'])) {
+        return false;
+    }
+    session_regenerate_id(true);
+    $_SESSION['akasha_customer'] = [
+        'email' => $otp['email'],
+        'name' => $otp['name'],
+        'logged_at' => time(),
+    ];
+    unset($_SESSION['akasha_customer_otp']);
+    return true;
+}
+
+/* ------------------------------------------------------------------ */
+/* Page title                                                         */
+/* ------------------------------------------------------------------ */
 
 function app_page_title(string $title): string
 {

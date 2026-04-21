@@ -4,27 +4,19 @@ declare(strict_types=1);
 require __DIR__ . '/includes/bootstrap.php';
 
 $orderId = trim((string) ($_GET['order'] ?? ''));
-$sessionId = trim((string) ($_GET['session_id'] ?? ''));
-
 $order = null;
 if ($orderId !== '') {
-    $orders = app_read_json('orders.json');
-    foreach ($orders as &$o) {
+    foreach (app_read_json('orders.json') as $o) {
         if (($o['id'] ?? '') === $orderId) {
-            if (($o['status'] ?? '') !== 'paid' && $sessionId !== '') {
-                $o['status'] = 'paid';
-                $o['paid_at'] = app_now();
-                $o['stripe_session_id'] = $sessionId;
-            }
             $order = $o;
             break;
         }
     }
-    unset($o);
-    if ($order && ($order['status'] ?? '') === 'paid') {
-        app_write_json('orders.json', $orders);
-    }
 }
+
+$isPaid = $order !== null && (($order['status'] ?? '') === 'paid');
+// La MAJ officielle du statut "paid" arrive par le webhook Stripe
+// (stripe-webhook.php) — cette page est en lecture seule.
 
 $currentPage = '';
 $pageTitle = app_page_title(t('confirmation.eyebrow'));
@@ -64,10 +56,20 @@ require __DIR__ . '/includes/header.php';
                     <?php endif; ?>
                     <div class="summary-line">
                         <span><?= htmlspecialchars(t('confirmation.status'), ENT_QUOTES, 'UTF-8'); ?></span>
-                        <strong style="color: var(--accent);"><?= htmlspecialchars(t('confirmation.status_paid'), ENT_QUOTES, 'UTF-8'); ?></strong>
+                        <?php if ($isPaid): ?>
+                            <strong style="color: var(--accent);"><?= htmlspecialchars(t('confirmation.status_paid'), ENT_QUOTES, 'UTF-8'); ?></strong>
+                        <?php else: ?>
+                            <strong><?= htmlspecialchars(t('confirmation.status_pending'), ENT_QUOTES, 'UTF-8'); ?></strong>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
+
+            <?php if (!$isPaid): ?>
+                <div class="panel" style="margin-top:1.2rem;">
+                    <p class="copy"><?= htmlspecialchars(t('confirmation.pending_notice'), ENT_QUOTES, 'UTF-8'); ?></p>
+                </div>
+            <?php endif; ?>
 
             <div class="panel" style="margin-top: 1.5rem;">
                 <p class="copy"><?= htmlspecialchars(t('confirmation.next_text'), ENT_QUOTES, 'UTF-8'); ?> <a href="/mon-compte"><?= htmlspecialchars(t('confirmation.account_link'), ENT_QUOTES, 'UTF-8'); ?></a> <?= htmlspecialchars(t('confirmation.or'), ENT_QUOTES, 'UTF-8'); ?> <a href="/contact"><?= htmlspecialchars(t('confirmation.contact_link'), ENT_QUOTES, 'UTF-8'); ?></a>.</p>

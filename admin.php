@@ -1,18 +1,26 @@
 <?php
 require __DIR__ . '/includes/bootstrap.php';
 
-if (isset($_GET['logout'])) {
-    app_admin_logout();
-    app_flash('success', 'Session administrateur fermée.');
-    app_redirect('/admin');
-}
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    app_csrf_enforce();
     $action = (string) ($_POST['action'] ?? '');
+
+    if ($action === 'logout') {
+        app_admin_logout();
+        app_flash('success', 'Session administrateur fermée.');
+        app_redirect('/admin');
+    }
+
     if ($action === 'login') {
+        if (!app_rate_limit('admin_login', 5, 300)) {
+            app_flash('warning', 'Trop de tentatives. Réessayez dans quelques minutes.');
+            app_log('warning', 'admin_login_rate_limited', []);
+            app_redirect('/admin');
+        }
         $email = trim((string) ($_POST['email'] ?? ''));
         $password = (string) ($_POST['password'] ?? '');
         if (app_admin_login($email, $password)) {
+            app_rate_reset('admin_login');
             app_flash('success', 'Connexion administrateur ouverte.');
         } else {
             app_flash('warning', app_admin_is_enabled() ? 'Identifiants invalides.' : 'Le panel admin n\'est pas encore activé côté configuration.');
@@ -20,32 +28,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         app_redirect('/admin');
     }
 
-    if ($action === 'update_order' && app_admin_logged_in()) {
+    if (!app_admin_logged_in()) {
+        app_redirect('/admin');
+    }
+
+    if ($action === 'update_order') {
         $orderId = (string) ($_POST['order_id'] ?? '');
         $newStatus = (string) ($_POST['status'] ?? '');
-        if ($orderId !== '' && $newStatus !== '') {
-            $orders = app_read_json('orders.json');
-            foreach ($orders as &$order) {
-                if (($order['id'] ?? '') === $orderId) {
-                    $order['status'] = $newStatus;
-                    break;
-                }
-            }
-            unset($order);
-            app_write_json('orders.json', $orders);
+        $allowedStatuses = ['pending-validation', 'quote-requested', 'checkout-started', 'paid', 'in-progress', 'delivered', 'cancelled', 'payment-failed'];
+        if ($orderId !== '' && in_array($newStatus, $allowedStatuses, true)) {
+            app_update_order_status($orderId, $newStatus);
+            app_log('info', 'admin_order_updated', ['order_id' => $orderId, 'status' => $newStatus]);
             app_flash('success', 'Commande mise à jour.');
         }
         app_redirect('/admin');
     }
 
-    if ($action === 'update_ticket' && app_admin_logged_in()) {
+    if ($action === 'update_ticket') {
         $ticketId = (string) ($_POST['ticket_id'] ?? '');
         $status = (string) ($_POST['status'] ?? 'open');
         $priority = (string) ($_POST['priority'] ?? 'normal');
         $replyMessage = trim((string) ($_POST['reply_message'] ?? ''));
         if ($replyMessage !== '') {
-            $tickets = app_read_json('tickets.json');
-            foreach ($tickets as $ticket) {
+            foreach (app_read_json('tickets.json') as $ticket) {
                 if (($ticket['id'] ?? '') === $ticketId) {
                     app_add_ticket_reply($ticketId, 'admin', 'Akasha Production', $replyMessage);
                     $customerEmail = (string) ($ticket['customer']['email'] ?? '');
@@ -62,7 +67,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
         app_update_ticket($ticketId, $status, $priority);
+        app_log('info', 'admin_ticket_updated', ['ticket_id' => $ticketId]);
         app_flash('success', 'Ticket mis à jour.');
+        app_redirect('/admin');
+    }
+
+    if ($action === 'delete_contact') {
+        $contactId = (string) ($_POST['contact_id'] ?? '');
+        if ($contactId !== '') {
+            app_json_mutate('contacts.json', function (array $items) use ($contactId): array {
+                return array_values(array_filter($items, static fn ($c) => ($c['id'] ?? '') !== $contactId));
+            });
+            app_log('info', 'admin_contact_deleted', ['contact_id' => $contactId]);
+            app_flash('success', 'Message supprimé.');
+        }
         app_redirect('/admin');
     }
 }
@@ -72,14 +90,17 @@ $pageTitle = app_page_title('Administration');
 $support = app_config()['support'];
 $orders = app_admin_logged_in() ? app_read_json('orders.json') : [];
 $tickets = app_admin_logged_in() ? app_read_json('tickets.json') : [];
+$contacts = app_admin_logged_in() ? app_read_json('contacts.json') : [];
 
 $orderStatuses = [
     'pending-validation' => 'En attente de validation',
     'quote-requested' => 'Devis demandé',
+    'checkout-started' => 'Paiement initié',
     'paid' => 'Payé',
     'in-progress' => 'En cours de réalisation',
     'delivered' => 'Livré',
     'cancelled' => 'Annulé',
+    'payment-failed' => 'Paiement échoué',
 ];
 
 require __DIR__ . '/includes/header.php';
@@ -95,7 +116,11 @@ require __DIR__ . '/includes/header.php';
             <div class="form-card">
                 <div class="kicker">Connexion</div>
                 <h2 class="section-title">Accès administrateur</h2>
+                <?php if (!app_admin_is_enabled()): ?>
+                    <p class="copy"><strong>Admin désactivé.</strong> Définissez <code>admin_password_hash</code> dans <code>includes/runtime-config.php</code>.</p>
+                <?php endif; ?>
                 <form class="form-grid" method="post">
+                    <?= app_csrf_field(); ?>
                     <input type="hidden" name="action" value="login">
                     <div class="field field--full"><label for="admin-email">Email administrateur</label><input id="admin-email" name="email" type="email" required></div>
                     <div class="field field--full"><label for="admin-password">Mot de passe</label><input id="admin-password" name="password" type="password" required></div>
@@ -107,22 +132,15 @@ require __DIR__ . '/includes/header.php';
                 <div class="kicker">Tableau de bord</div>
                 <h2 class="section-title">Activité</h2>
                 <div class="grid-3 admin-stats">
-                    <div class="admin-stat">
-                        <strong><?= count($orders); ?></strong>
-                        <span>Commande<?= count($orders) > 1 ? 's' : ''; ?></span>
-                    </div>
-                    <div class="admin-stat">
-                        <strong><?= count($tickets); ?></strong>
-                        <span>Ticket<?= count($tickets) > 1 ? 's' : ''; ?></span>
-                    </div>
-                    <div class="admin-stat">
-                        <strong><?= count(array_filter($tickets, fn($t) => ($t['status'] ?? '') === 'open')); ?></strong>
-                        <span>Ouvert<?= count(array_filter($tickets, fn($t) => ($t['status'] ?? '') === 'open')) > 1 ? 's' : ''; ?></span>
-                    </div>
+                    <div class="admin-stat"><strong><?= count($orders); ?></strong><span>Commande<?= count($orders) > 1 ? 's' : ''; ?></span></div>
+                    <div class="admin-stat"><strong><?= count($tickets); ?></strong><span>Ticket<?= count($tickets) > 1 ? 's' : ''; ?></span></div>
+                    <div class="admin-stat"><strong><?= count($contacts); ?></strong><span>Message<?= count($contacts) > 1 ? 's' : ''; ?></span></div>
                 </div>
-                <div class="cta-row" style="margin-top:1.2rem;">
-                    <a class="btn btn--secondary" href="/admin?logout=1">Se déconnecter</a>
-                </div>
+                <form method="post" style="margin-top:1.2rem;">
+                    <?= app_csrf_field(); ?>
+                    <input type="hidden" name="action" value="logout">
+                    <button class="btn btn--secondary" type="submit">Se déconnecter</button>
+                </form>
             </div>
         <?php endif; ?>
     </div>
@@ -148,7 +166,7 @@ require __DIR__ . '/includes/header.php';
                     <?php
                     $rawStatus = (string) ($order['status'] ?? '');
                     $statusLabel = $orderStatuses[$rawStatus] ?? $rawStatus;
-                    $statusClass = in_array($rawStatus, ['paid', 'delivered'], true) ? 'status-badge--success' : (in_array($rawStatus, ['cancelled'], true) ? 'status-badge--danger' : 'status-badge--pending');
+                    $statusClass = in_array($rawStatus, ['paid', 'delivered'], true) ? 'status-badge--success' : (in_array($rawStatus, ['cancelled', 'payment-failed'], true) ? 'status-badge--danger' : 'status-badge--pending');
                     ?>
                     <div class="kicker"><span class="status-badge <?= $statusClass; ?>"><?= htmlspecialchars($statusLabel, ENT_QUOTES, 'UTF-8'); ?></span></div>
                     <h3><?= htmlspecialchars(t('catalog.creation.' . ($order['selection']['creation'] ?? 'showcase') . '.headline'), ENT_QUOTES, 'UTF-8'); ?> / <?= htmlspecialchars(t('catalog.hosting.' . ($order['selection']['hosting'] ?? 'shared-yearly') . '.headline'), ENT_QUOTES, 'UTF-8'); ?></h3>
@@ -165,6 +183,7 @@ require __DIR__ . '/includes/header.php';
                         <p class="copy"><?= nl2br(htmlspecialchars((string) $order['project_description'], ENT_QUOTES, 'UTF-8')); ?></p>
                     <?php endif; ?>
                     <form class="form-grid" method="post" style="margin-top:1rem;">
+                        <?= app_csrf_field(); ?>
                         <input type="hidden" name="action" value="update_order">
                         <input type="hidden" name="order_id" value="<?= htmlspecialchars((string) $order['id'], ENT_QUOTES, 'UTF-8'); ?>">
                         <div class="field">
@@ -178,6 +197,48 @@ require __DIR__ . '/includes/header.php';
                         <div class="field" style="align-self:end;">
                             <button class="btn btn--primary" type="submit">Mettre à jour</button>
                         </div>
+                    </form>
+                </article>
+            <?php endforeach; ?>
+        </div>
+    </section>
+
+    <!-- MESSAGES DE CONTACT -->
+    <section class="section">
+        <div class="container">
+            <div class="section-heading">
+                <div>
+                    <div class="eyebrow">Messages</div>
+                    <h2 class="section-title">Contacts reçus</h2>
+                </div>
+            </div>
+        </div>
+        <div class="container grid-2">
+            <?php if (!$contacts): ?>
+                <article class="panel"><p class="copy">Aucun message reçu.</p></article>
+            <?php endif; ?>
+            <?php foreach ($contacts as $contact): ?>
+                <article class="panel">
+                    <div class="kicker"><?= htmlspecialchars(date('d/m/Y H:i', strtotime((string) ($contact['created_at'] ?? 'now'))), ENT_QUOTES, 'UTF-8'); ?></div>
+                    <h3><?= htmlspecialchars(($contact['first_name'] ?? '') . ' ' . ($contact['last_name'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></h3>
+                    <p class="muted"><a href="mailto:<?= htmlspecialchars((string) ($contact['email'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"><?= htmlspecialchars((string) ($contact['email'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></a>
+                        <?php if (!empty($contact['phone'])): ?> · <?= htmlspecialchars((string) $contact['phone'], ENT_QUOTES, 'UTF-8'); ?><?php endif; ?>
+                        <?php if (!empty($contact['company'])): ?> · <?= htmlspecialchars((string) $contact['company'], ENT_QUOTES, 'UTF-8'); ?><?php endif; ?>
+                    </p>
+                    <?php if (!empty($contact['message'])): ?>
+                        <p class="copy"><?= nl2br(htmlspecialchars((string) $contact['message'], ENT_QUOTES, 'UTF-8')); ?></p>
+                    <?php endif; ?>
+                    <?php if (!empty($contact['has_project']) && !empty($contact['project_details'])): ?>
+                        <p class="copy"><strong>Projet :</strong> <?= nl2br(htmlspecialchars((string) $contact['project_details'], ENT_QUOTES, 'UTF-8')); ?></p>
+                    <?php endif; ?>
+                    <?php if (!empty($contact['attachments'])): ?>
+                        <p class="muted">Pièces jointes : <?= htmlspecialchars(implode(', ', array_column((array) $contact['attachments'], 'original')), ENT_QUOTES, 'UTF-8'); ?></p>
+                    <?php endif; ?>
+                    <form method="post" style="margin-top:.8rem;">
+                        <?= app_csrf_field(); ?>
+                        <input type="hidden" name="action" value="delete_contact">
+                        <input type="hidden" name="contact_id" value="<?= htmlspecialchars((string) ($contact['id'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>">
+                        <button class="btn btn--secondary" type="submit" onclick="return confirm('Supprimer ce message ?');">Supprimer</button>
                     </form>
                 </article>
             <?php endforeach; ?>
@@ -218,6 +279,7 @@ require __DIR__ . '/includes/header.php';
                         <?php endforeach; ?>
                     </div>
                     <form class="form-grid" method="post" style="margin-top:1rem;">
+                        <?= app_csrf_field(); ?>
                         <input type="hidden" name="action" value="update_ticket">
                         <input type="hidden" name="ticket_id" value="<?= htmlspecialchars((string) $ticket['id'], ENT_QUOTES, 'UTF-8'); ?>">
                         <div class="field">

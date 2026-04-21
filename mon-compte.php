@@ -5,27 +5,81 @@ $support = app_config()['support'];
 $catalog = app_config()['catalog'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    app_csrf_enforce();
     $action = (string) ($_POST['action'] ?? '');
-    if ($action === 'lookup') {
+
+    if ($action === 'logout') {
+        app_customer_logout();
+        app_flash('success', t('account.flash_logout'));
+        app_redirect('/mon-compte');
+    }
+
+    if ($action === 'request_otp') {
+        if (trim((string) ($_POST['website_url'] ?? '')) !== '') {
+            app_log('info', 'otp_honeypot', []);
+            app_flash('success', t('account.flash_otp_sent'));
+            app_redirect('/mon-compte');
+        }
+        if (!app_rate_limit('otp_request', 5, 600)) {
+            app_flash('warning', t('account.flash_otp_rate'));
+            app_redirect('/mon-compte');
+        }
         $email = trim((string) ($_POST['email'] ?? ''));
+        $name = trim((string) ($_POST['name'] ?? ''));
+        if (!app_valid_email($email)) {
+            app_flash('warning', t('account.flash_otp_invalid'));
+            app_redirect('/mon-compte');
+        }
         if (app_is_admin_email($email)) {
             app_redirect('/admin');
         }
-        app_redirect('/mon-compte?email=' . rawurlencode($email) . '&name=' . rawurlencode((string) ($_POST['name'] ?? '')));
+        $code = app_customer_issue_otp($email, $name);
+        app_send_mail_to(
+            $email,
+            'Votre code d\'accès Akasha Production',
+            "Votre code d'accès : {$code}\n\nIl expire dans 10 minutes.\n\nSi vous n'êtes pas à l'origine de cette demande, ignorez ce message.",
+            (string) app_config()['site']['contact_email']
+        );
+        app_log('info', 'otp_issued', ['email' => strtolower($email)]);
+        app_flash('success', t('account.flash_otp_sent'));
+        app_redirect('/mon-compte');
     }
 
+    if ($action === 'verify_otp') {
+        if (!app_rate_limit('otp_verify', 10, 600)) {
+            app_flash('warning', t('account.flash_otp_rate'));
+            app_redirect('/mon-compte');
+        }
+        $code = trim((string) ($_POST['code'] ?? ''));
+        if (app_customer_verify_otp($code)) {
+            app_rate_reset('otp_verify');
+            app_rate_reset('otp_request');
+            app_flash('success', t('account.flash_login_success'));
+        } else {
+            app_flash('warning', t('account.flash_otp_invalid'));
+        }
+        app_redirect('/mon-compte');
+    }
+
+    // Toutes les actions suivantes exigent un client authentifié.
+    if (!app_customer_logged_in()) {
+        app_flash('warning', t('account.flash_login_required'));
+        app_redirect('/mon-compte');
+    }
+
+    $email = app_customer_email();
+    $name = app_customer_name();
+
     if ($action === 'create_ticket') {
-        $name = trim((string) ($_POST['name'] ?? ''));
-        $email = trim((string) ($_POST['email'] ?? ''));
         $department = (string) ($_POST['department'] ?? 'commercial');
         $priority = (string) ($_POST['priority'] ?? 'normal');
         $subject = trim((string) ($_POST['subject'] ?? ''));
         $message = trim((string) ($_POST['message'] ?? ''));
         $orderId = trim((string) ($_POST['order_id'] ?? ''));
 
-        if ($name !== '' && $email !== '' && $subject !== '' && $message !== '') {
+        if ($subject !== '' && $message !== '') {
             $ticket = app_create_ticket([
-                'name' => $name,
+                'name' => $name !== '' ? $name : 'Client',
                 'email' => $email,
                 'department' => $department,
                 'priority' => $priority,
@@ -42,27 +96,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             app_flash('warning', t('account.flash_ticket_warning'));
         }
-
-        app_redirect('/mon-compte?email=' . rawurlencode($email) . '&name=' . rawurlencode($name));
+        app_redirect('/mon-compte');
     }
 
     if ($action === 'reply_ticket') {
-        $email = trim((string) ($_POST['email'] ?? ''));
-        $name = trim((string) ($_POST['name'] ?? ''));
         $ticketId = trim((string) ($_POST['ticket_id'] ?? ''));
         $message = trim((string) ($_POST['message'] ?? ''));
         if ($ticketId !== '' && $message !== '') {
             app_add_ticket_reply($ticketId, 'customer', $name !== '' ? $name : 'Client', $message, $email);
             app_flash('success', t('account.flash_reply_success'));
         }
-        app_redirect('/mon-compte?email=' . rawurlencode($email) . '&name=' . rawurlencode($name));
+        app_redirect('/mon-compte');
     }
 }
 
-$email = trim((string) ($_GET['email'] ?? ''));
-$name = trim((string) ($_GET['name'] ?? ''));
-$orders = $email !== '' ? app_orders_by_email($email) : [];
-$tickets = $email !== '' ? app_tickets_by_email($email) : [];
+$isAuth = app_customer_logged_in();
+$email = $isAuth ? app_customer_email() : '';
+$name = $isAuth ? app_customer_name() : '';
+$pendingEmail = app_customer_pending_email();
+$orders = $isAuth ? app_orders_by_email($email) : [];
+$tickets = $isAuth ? app_tickets_by_email($email) : [];
 
 $currentPage = 'account';
 $pageTitle = app_page_title(t('nav.account'));
@@ -91,24 +144,52 @@ require __DIR__ . '/includes/header.php';
         </div>
         <div class="form-card">
             <div class="kicker"><?= htmlspecialchars(t('account.access_kicker'), ENT_QUOTES, 'UTF-8'); ?></div>
-            <h2 class="section-title"><?= htmlspecialchars(t('account.access_title'), ENT_QUOTES, 'UTF-8'); ?></h2>
-            <p class="copy"><?= htmlspecialchars(t('account.access_text'), ENT_QUOTES, 'UTF-8'); ?></p>
-            <form class="form-grid" method="post">
-                <input type="hidden" name="action" value="lookup">
-                <div class="field field--full"><label for="lookup-name"><?= htmlspecialchars(t('account.name_label'), ENT_QUOTES, 'UTF-8'); ?></label><input id="lookup-name" name="name" value="<?= htmlspecialchars($name, ENT_QUOTES, 'UTF-8'); ?>" required></div>
-                <div class="field field--full"><label for="lookup-email"><?= htmlspecialchars(t('account.email_label'), ENT_QUOTES, 'UTF-8'); ?></label><input id="lookup-email" name="email" type="email" value="<?= htmlspecialchars($email, ENT_QUOTES, 'UTF-8'); ?>" required></div>
-                <div class="field field--full"><button class="btn btn--primary" type="submit"><?= htmlspecialchars(t('account.access_submit'), ENT_QUOTES, 'UTF-8'); ?></button></div>
-            </form>
+            <?php if ($isAuth): ?>
+                <h2 class="section-title"><?= htmlspecialchars(t('account.access_welcome'), ENT_QUOTES, 'UTF-8'); ?></h2>
+                <p class="copy"><?= htmlspecialchars(t('account.access_signed_as', ['email' => $email]), ENT_QUOTES, 'UTF-8'); ?></p>
+                <form method="post">
+                    <?= app_csrf_field(); ?>
+                    <input type="hidden" name="action" value="logout">
+                    <button class="btn btn--secondary" type="submit"><?= htmlspecialchars(t('account.logout'), ENT_QUOTES, 'UTF-8'); ?></button>
+                </form>
+            <?php elseif ($pendingEmail !== ''): ?>
+                <h2 class="section-title"><?= htmlspecialchars(t('account.otp_title'), ENT_QUOTES, 'UTF-8'); ?></h2>
+                <p class="copy"><?= htmlspecialchars(t('account.otp_text', ['email' => $pendingEmail]), ENT_QUOTES, 'UTF-8'); ?></p>
+                <form class="form-grid" method="post">
+                    <?= app_csrf_field(); ?>
+                    <input type="hidden" name="action" value="verify_otp">
+                    <div class="field field--full"><label for="otp-code"><?= htmlspecialchars(t('account.otp_code_label'), ENT_QUOTES, 'UTF-8'); ?></label><input id="otp-code" name="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required></div>
+                    <div class="field field--full"><button class="btn btn--primary" type="submit"><?= htmlspecialchars(t('account.otp_verify'), ENT_QUOTES, 'UTF-8'); ?></button></div>
+                </form>
+                <form method="post" style="margin-top:.8rem;">
+                    <?= app_csrf_field(); ?>
+                    <input type="hidden" name="action" value="logout">
+                    <button class="btn btn--secondary" type="submit"><?= htmlspecialchars(t('account.otp_cancel'), ENT_QUOTES, 'UTF-8'); ?></button>
+                </form>
+            <?php else: ?>
+                <h2 class="section-title"><?= htmlspecialchars(t('account.access_title'), ENT_QUOTES, 'UTF-8'); ?></h2>
+                <p class="copy"><?= htmlspecialchars(t('account.access_text'), ENT_QUOTES, 'UTF-8'); ?></p>
+                <form class="form-grid" method="post">
+                    <?= app_csrf_field(); ?>
+                    <input type="hidden" name="action" value="request_otp">
+                    <div style="position:absolute;left:-10000px;" aria-hidden="true">
+                        <label for="website_url_a">Laissez vide</label>
+                        <input id="website_url_a" name="website_url" type="text" tabindex="-1" autocomplete="off">
+                    </div>
+                    <div class="field field--full"><label for="lookup-name"><?= htmlspecialchars(t('account.name_label'), ENT_QUOTES, 'UTF-8'); ?></label><input id="lookup-name" name="name" required></div>
+                    <div class="field field--full"><label for="lookup-email"><?= htmlspecialchars(t('account.email_label'), ENT_QUOTES, 'UTF-8'); ?></label><input id="lookup-email" name="email" type="email" required></div>
+                    <div class="field field--full"><button class="btn btn--primary" type="submit"><?= htmlspecialchars(t('account.access_submit'), ENT_QUOTES, 'UTF-8'); ?></button></div>
+                </form>
+            <?php endif; ?>
         </div>
     </div>
 </section>
 
-<?php if ($email !== ''): ?>
+<?php if ($isAuth): ?>
     <section class="section">
         <div class="container">
             <div class="notice">
                 <?= htmlspecialchars(t('account.notice', ['count_orders' => count($orders), 'count_tickets' => count($tickets), 'email' => $email]), ENT_QUOTES, 'UTF-8'); ?>
-                <a class="btn btn--small" href="/mon-compte"><?= htmlspecialchars(t('account.change_account'), ENT_QUOTES, 'UTF-8'); ?></a>
             </div>
         </div>
     </section>
@@ -135,7 +216,7 @@ require __DIR__ . '/includes/header.php';
                     $rawStatus = (string) ($order['status'] ?? '');
                     $statusLabels = ta('account.order_statuses') ?: [];
                     $statusLabel = $statusLabels[$rawStatus] ?? t('account.order_status_default');
-                    $statusClass = in_array($rawStatus, ['paid', 'delivered'], true) ? 'status-badge--success' : (in_array($rawStatus, ['cancelled'], true) ? 'status-badge--danger' : 'status-badge--pending');
+                    $statusClass = in_array($rawStatus, ['paid', 'delivered'], true) ? 'status-badge--success' : (in_array($rawStatus, ['cancelled', 'payment-failed'], true) ? 'status-badge--danger' : 'status-badge--pending');
                     ?>
                     <div class="kicker"><span class="status-badge <?= $statusClass; ?>"><?= htmlspecialchars($statusLabel, ENT_QUOTES, 'UTF-8'); ?></span></div>
                     <h3><?= htmlspecialchars(t('catalog.creation.' . ($order['selection']['creation'] ?? 'showcase') . '.headline'), ENT_QUOTES, 'UTF-8'); ?> / <?= htmlspecialchars(t('catalog.hosting.' . ($order['selection']['hosting'] ?? 'shared-yearly') . '.headline'), ENT_QUOTES, 'UTF-8'); ?></h3>
@@ -160,9 +241,8 @@ require __DIR__ . '/includes/header.php';
                 <div class="kicker"><?= htmlspecialchars(t('account.ticket_kicker'), ENT_QUOTES, 'UTF-8'); ?></div>
                 <h2 class="section-title"><?= htmlspecialchars(t('account.ticket_title'), ENT_QUOTES, 'UTF-8'); ?></h2>
                 <form class="form-grid" method="post">
+                    <?= app_csrf_field(); ?>
                     <input type="hidden" name="action" value="create_ticket">
-                    <input type="hidden" name="name" value="<?= htmlspecialchars($name, ENT_QUOTES, 'UTF-8'); ?>">
-                    <input type="hidden" name="email" value="<?= htmlspecialchars($email, ENT_QUOTES, 'UTF-8'); ?>">
                     <div class="field">
                         <label for="department"><?= htmlspecialchars(t('account.department'), ENT_QUOTES, 'UTF-8'); ?></label>
                         <select id="department" name="department">
@@ -224,9 +304,8 @@ require __DIR__ . '/includes/header.php';
                             <?php endforeach; ?>
                         </div>
                         <form class="form-grid" method="post">
+                            <?= app_csrf_field(); ?>
                             <input type="hidden" name="action" value="reply_ticket">
-                            <input type="hidden" name="name" value="<?= htmlspecialchars($name, ENT_QUOTES, 'UTF-8'); ?>">
-                            <input type="hidden" name="email" value="<?= htmlspecialchars($email, ENT_QUOTES, 'UTF-8'); ?>">
                             <input type="hidden" name="ticket_id" value="<?= htmlspecialchars((string) $ticket['id'], ENT_QUOTES, 'UTF-8'); ?>">
                             <div class="field field--full">
                                 <label for="reply-<?= htmlspecialchars((string) $ticket['id'], ENT_QUOTES, 'UTF-8'); ?>"><?= htmlspecialchars(t('account.reply_label'), ENT_QUOTES, 'UTF-8'); ?></label>

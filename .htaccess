@@ -2,6 +2,22 @@ RewriteEngine On
 Options -Indexes
 DirectoryIndex index.php index.html
 
+# Force HTTPS (laisse passer en HTTP en local via SERVER_NAME=localhost)
+RewriteCond %{HTTPS} !=on
+RewriteCond %{HTTP_HOST} !^localhost [NC]
+RewriteCond %{HTTP_HOST} !^127\.0\.0\.1 [NC]
+RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [L,R=301]
+
+# Security headers
+<IfModule mod_headers.c>
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+    Header always unset X-Powered-By
+</IfModule>
+
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
@@ -16,3 +32,4 @@ RewriteRule ^admin/?$ admin.php [L,QSA]
 RewriteRule ^domain-check/?$ domain-check.php [L,QSA]
 RewriteRule ^checkout/?$ checkout.php [L,QSA]
 RewriteRule ^commande-confirmee/?$ commande-confirmee.php [L,QSA]
+RewriteRule ^stripe-webhook/?$ stripe-webhook.php [L,QSA]

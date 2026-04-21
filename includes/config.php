@@ -237,5 +237,8 @@ return [
         'contact@akashaproduction.com',
         'contact@permatheque.org',
     ],
-    'admin_password' => '',
+    // Hash password_hash(PASSWORD_DEFAULT) — vide = admin désactivé.
+    'admin_password_hash' => '',
+    'stripe_secret_key' => '',
+    'stripe_webhook_secret' => '',
 ];

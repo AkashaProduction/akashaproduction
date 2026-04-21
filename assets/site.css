@@ -129,7 +129,6 @@ main {
 [data-theme="dark"] .site-header {
   background: rgba(15, 10, 7, 0.95);
 }
-}
 
 .site-header__inner {
   width: min(calc(100% - var(--gutter)), var(--max));
