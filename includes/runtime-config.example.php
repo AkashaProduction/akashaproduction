@@ -4,18 +4,15 @@
  * Copier ce fichier en includes/runtime-config.php (gitignored) et remplir.
  *
  * Pour générer un hash admin :
- *   php -r 'echo password_hash("MON_MOT_DE_PASSE", PASSWORD_DEFAULT), PHP_EOL;'
+ *   php -r 'echo password_hash("MON_MOT_DE_PASSE", PASSWORD_DEFAULT);'
+ *
+ * Les clés Stripe (stripe_secret_key, stripe_webhook_secret) se règlent
+ * désormais directement depuis le panel administrateur (/admin) — elles sont
+ * persistées dans storage/settings.json protégé par htaccess.
  */
 
 return [
-    'site' => [
-        'contact_email' => 'contact@akashaproduction.com',
-    ],
-    'admin_email' => 'contact@akashaproduction.com',
-    // Laisser vide pour désactiver le panel admin.
+    // Hash argon2id/bcrypt du mot de passe administrateur.
+    // Vide = panel admin désactivé.
     'admin_password_hash' => '',
-    // Clé secrète Stripe (sk_live_... ou sk_test_...)
-    'stripe_secret_key' => '',
-    // Signing secret du webhook Stripe (whsec_...)
-    'stripe_webhook_secret' => '',
 ];

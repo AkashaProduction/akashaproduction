@@ -129,6 +129,77 @@ function app_now(): string
 }
 
 /* ------------------------------------------------------------------ */
+/* Settings (admin-editable runtime values in storage/settings.json)  */
+/* ------------------------------------------------------------------ */
+
+function app_settings_path(): string
+{
+    return __DIR__ . '/../storage/settings.json';
+}
+
+function app_settings_load(): array
+{
+    $path = app_settings_path();
+    if (!file_exists($path)) {
+        return [];
+    }
+    $raw = file_get_contents($path);
+    $data = json_decode($raw ?: '{}', true);
+    return is_array($data) ? $data : [];
+}
+
+function app_settings_save(array $partial): void
+{
+    $path = app_settings_path();
+    $dir = dirname($path);
+    if (!is_dir($dir)) {
+        mkdir($dir, 0775, true);
+    }
+    $fp = fopen($path, 'c+');
+    if ($fp === false) {
+        app_log('error', 'settings_open_failed', []);
+        return;
+    }
+    try {
+        if (!flock($fp, LOCK_EX)) {
+            return;
+        }
+        $raw = stream_get_contents($fp) ?: '{}';
+        $current = json_decode($raw, true);
+        if (!is_array($current)) {
+            $current = [];
+        }
+        $merged = array_replace_recursive($current, $partial);
+        $encoded = json_encode($merged, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        ftruncate($fp, 0);
+        rewind($fp);
+        fwrite($fp, $encoded);
+        fflush($fp);
+        flock($fp, LOCK_UN);
+    } finally {
+        fclose($fp);
+    }
+    @chmod($path, 0600);
+    // Rafraîchir le $config global pour refléter la valeur immédiatement.
+    global $config;
+    if (is_array($config)) {
+        $config = array_replace_recursive($config, $partial);
+    }
+}
+
+function app_mask_secret(string $value, int $visible = 4): string
+{
+    $len = strlen($value);
+    if ($len === 0) {
+        return '';
+    }
+    if ($len <= $visible) {
+        return str_repeat('•', $len);
+    }
+    return str_repeat('•', max(4, $len - $visible)) . substr($value, -$visible);
+}
+
+/* ------------------------------------------------------------------ */
 /* Logging                                                            */
 /* ------------------------------------------------------------------ */
 

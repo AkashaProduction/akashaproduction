@@ -29,6 +29,12 @@ if (file_exists($runtimeConfigPath)) {
 require_once __DIR__ . '/helpers.php';
 require_once __DIR__ . '/i18n.php';
 
+// Les réglages éditables depuis l'admin (clés Stripe) écrasent config + runtime.
+$settingsStored = app_settings_load();
+if ($settingsStored) {
+    $config = array_replace_recursive($config, $settingsStored);
+}
+
 header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: SAMEORIGIN');
 header('Referrer-Policy: strict-origin-when-cross-origin');

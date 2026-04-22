@@ -232,13 +232,15 @@ return [
         'Harmonie Holistique',
         'Atlas Access Immo',
     ],
-    'admin_email' => 'contact@akashaproduction.com',
+    'admin_email' => 'admin@akashaproduction.com',
     'admin_aliases' => [
+        'admin@akashaproduction.com',
         'contact@akashaproduction.com',
         'contact@permatheque.org',
     ],
-    // Hash password_hash(PASSWORD_DEFAULT) — vide = admin désactivé.
+    // Hash password_hash(PASSWORD_DEFAULT) — défini dans runtime-config.php.
     'admin_password_hash' => '',
+    // Clés Stripe : se règlent désormais dans l'admin (storage/settings.json).
     'stripe_secret_key' => '',
     'stripe_webhook_secret' => '',
 ];

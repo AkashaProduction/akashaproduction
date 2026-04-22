@@ -83,6 +83,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         app_redirect('/admin');
     }
+
+    if ($action === 'save_settings') {
+        $partial = [];
+        $stripeSecret = trim((string) ($_POST['stripe_secret_key'] ?? ''));
+        $stripeWebhook = trim((string) ($_POST['stripe_webhook_secret'] ?? ''));
+
+        if ($stripeSecret !== '') {
+            if (!preg_match('/^(sk|rk)_(test|live)_[A-Za-z0-9]{10,}$/', $stripeSecret)) {
+                app_flash('warning', 'Clé secrète Stripe invalide (format attendu : sk_live_… ou sk_test_…).');
+                app_redirect('/admin');
+            }
+            $partial['stripe_secret_key'] = $stripeSecret;
+        }
+        if ($stripeWebhook !== '') {
+            if (!str_starts_with($stripeWebhook, 'whsec_')) {
+                app_flash('warning', 'Signing secret webhook invalide (doit commencer par whsec_).');
+                app_redirect('/admin');
+            }
+            $partial['stripe_webhook_secret'] = $stripeWebhook;
+        }
+
+        if ($partial) {
+            app_settings_save($partial);
+            app_log('info', 'admin_settings_saved', ['keys' => array_keys($partial)]);
+            app_flash('success', 'Paramètres enregistrés.');
+        } else {
+            app_flash('warning', 'Aucun champ rempli — rien n\'a été modifié.');
+        }
+        app_redirect('/admin');
+    }
+
+    if ($action === 'clear_setting') {
+        $key = (string) ($_POST['key'] ?? '');
+        $allowed = ['stripe_secret_key', 'stripe_webhook_secret'];
+        if (in_array($key, $allowed, true)) {
+            $stored = app_settings_load();
+            unset($stored[$key]);
+            app_atomic_write(app_settings_path(), json_encode($stored, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+            @chmod(app_settings_path(), 0600);
+            app_log('info', 'admin_setting_cleared', ['key' => $key]);
+            app_flash('success', 'Valeur effacée.');
+        }
+        app_redirect('/admin');
+    }
 }
 
 $currentPage = '';
@@ -91,6 +135,10 @@ $support = app_config()['support'];
 $orders = app_admin_logged_in() ? app_read_json('orders.json') : [];
 $tickets = app_admin_logged_in() ? app_read_json('tickets.json') : [];
 $contacts = app_admin_logged_in() ? app_read_json('contacts.json') : [];
+$settingsStored = app_admin_logged_in() ? app_settings_load() : [];
+$stripeSecretPreview = app_mask_secret((string) ($settingsStored['stripe_secret_key'] ?? ''));
+$stripeWebhookPreview = app_mask_secret((string) ($settingsStored['stripe_webhook_secret'] ?? ''));
+$stripeTestMode = str_starts_with((string) ($settingsStored['stripe_secret_key'] ?? ''), 'sk_test_');
 
 $orderStatuses = [
     'pending-validation' => 'En attente de validation',
@@ -308,6 +356,72 @@ require __DIR__ . '/includes/header.php';
                     </form>
                 </article>
             <?php endforeach; ?>
+        </div>
+    </section>
+
+    <!-- PARAMÈTRES -->
+    <section class="section">
+        <div class="container">
+            <div class="section-heading">
+                <div>
+                    <div class="eyebrow">Configuration</div>
+                    <h2 class="section-title">Paramètres</h2>
+                </div>
+            </div>
+        </div>
+        <div class="container" style="max-width:720px;">
+            <article class="panel">
+                <div class="kicker">Stripe</div>
+                <h3>Clés de paiement</h3>
+                <p class="copy">Renseignez ici la clé secrète Stripe et le signing secret du webhook. Laissez vide pour conserver la valeur actuelle. Les champs sont stockés chiffrés côté serveur (fichier protégé par htaccess).</p>
+                <ul style="margin:.8rem 0 1.2rem;">
+                    <li><strong>Clé secrète :</strong> <?= $stripeSecretPreview !== '' ? '<code>' . htmlspecialchars($stripeSecretPreview, ENT_QUOTES, 'UTF-8') . '</code>' : '<em>non configurée</em>'; ?></li>
+                    <li><strong>Mode :</strong> <?= $settingsStored['stripe_secret_key'] ?? '' ? ($stripeTestMode ? '<span class="status-badge status-badge--pending">TEST</span>' : '<span class="status-badge status-badge--success">LIVE</span>') : '—'; ?></li>
+                    <li><strong>Webhook secret :</strong> <?= $stripeWebhookPreview !== '' ? '<code>' . htmlspecialchars($stripeWebhookPreview, ENT_QUOTES, 'UTF-8') . '</code>' : '<em>non configuré</em>'; ?></li>
+                </ul>
+
+                <form class="form-grid" method="post" autocomplete="off">
+                    <?= app_csrf_field(); ?>
+                    <input type="hidden" name="action" value="save_settings">
+                    <div class="field field--full">
+                        <label for="stripe_secret_key">Clé secrète Stripe (<code>sk_live_…</code> ou <code>sk_test_…</code>)</label>
+                        <input id="stripe_secret_key" name="stripe_secret_key" type="password" autocomplete="new-password" placeholder="<?= $stripeSecretPreview !== '' ? 'Laisser vide pour conserver' : 'sk_live_…'; ?>">
+                    </div>
+                    <div class="field field--full">
+                        <label for="stripe_webhook_secret">Signing secret du webhook (<code>whsec_…</code>)</label>
+                        <input id="stripe_webhook_secret" name="stripe_webhook_secret" type="password" autocomplete="new-password" placeholder="<?= $stripeWebhookPreview !== '' ? 'Laisser vide pour conserver' : 'whsec_…'; ?>">
+                    </div>
+                    <div class="field field--full">
+                        <button class="btn btn--primary" type="submit">Enregistrer</button>
+                    </div>
+                </form>
+
+                <?php if ($stripeSecretPreview !== '' || $stripeWebhookPreview !== ''): ?>
+                    <details style="margin-top:1rem;">
+                        <summary>Effacer une clé</summary>
+                        <div style="margin-top:.6rem; display:flex; gap:.6rem; flex-wrap:wrap;">
+                            <?php if ($stripeSecretPreview !== ''): ?>
+                                <form method="post" style="margin:0;">
+                                    <?= app_csrf_field(); ?>
+                                    <input type="hidden" name="action" value="clear_setting">
+                                    <input type="hidden" name="key" value="stripe_secret_key">
+                                    <button class="btn btn--secondary" type="submit" onclick="return confirm('Effacer la clé secrète Stripe ?');">Effacer clé secrète</button>
+                                </form>
+                            <?php endif; ?>
+                            <?php if ($stripeWebhookPreview !== ''): ?>
+                                <form method="post" style="margin:0;">
+                                    <?= app_csrf_field(); ?>
+                                    <input type="hidden" name="action" value="clear_setting">
+                                    <input type="hidden" name="key" value="stripe_webhook_secret">
+                                    <button class="btn btn--secondary" type="submit" onclick="return confirm('Effacer le webhook secret ?');">Effacer webhook secret</button>
+                                </form>
+                            <?php endif; ?>
+                        </div>
+                    </details>
+                <?php endif; ?>
+
+                <p class="muted" style="margin-top:1rem;">URL du webhook à configurer côté Stripe : <code>https://<?= htmlspecialchars($_SERVER['HTTP_HOST'] ?? 'akashaproduction.com', ENT_QUOTES, 'UTF-8'); ?>/stripe-webhook</code> — événements : <code>checkout.session.completed</code>, <code>checkout.session.async_payment_succeeded</code>, <code>checkout.session.async_payment_failed</code>, <code>checkout.session.expired</code>.</p>
+            </article>
         </div>
     </section>
 <?php endif; ?>
