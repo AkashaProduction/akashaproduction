@@ -2,17 +2,46 @@ RewriteEngine On
 Options -Indexes
 DirectoryIndex index.php index.html
 
+# Force HTTPS in production
+<IfModule mod_rewrite.c>
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP_HOST} ^(www\.)?akashaproduction\.com$ [NC]
+  RewriteRule ^ https://akashaproduction.com%{REQUEST_URI} [L,R=301]
+</IfModule>
+
+# Pretty URLs
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 
-RewriteRule ^presentation/?$ index.php [L,QSA]
-RewriteRule ^nos-solutions/?$ solutions.php [L,QSA]
-RewriteRule ^contact/?$ contact.php [L,QSA]
-RewriteRule ^commander/?$ commander.php [L,QSA]
-RewriteRule ^mon-compte/?$ mon-compte.php [L,QSA]
-RewriteRule ^mentions-legales/?$ mentions-legales.php [L,QSA]
 RewriteRule ^admin/?$ admin.php [L,QSA]
-RewriteRule ^domain-check/?$ domain-check.php [L,QSA]
-RewriteRule ^checkout/?$ checkout.php [L,QSA]
-RewriteRule ^commande-confirmee/?$ commande-confirmee.php [L,QSA]
+RewriteRule ^api/([a-z0-9-]+)/?$ api/$1.php [L,QSA]
+
+# Block access to data + includes from web
+<FilesMatch "^(\.|composer\.|package\.|README|CHANGELOG)">
+  Require all denied
+</FilesMatch>
+
+# Long-cache static assets
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType image/jpeg "access plus 30 days"
+  ExpiresByType image/png "access plus 30 days"
+  ExpiresByType image/webp "access plus 30 days"
+  ExpiresByType image/svg+xml "access plus 30 days"
+  ExpiresByType text/css "access plus 7 days"
+  ExpiresByType application/javascript "access plus 7 days"
+  ExpiresByType font/woff2 "access plus 365 days"
+</IfModule>
+
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "geolocation=(), camera=(), microphone=()"
+</IfModule>
+
+# Compress text outputs
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/css application/javascript application/json image/svg+xml
+</IfModule>

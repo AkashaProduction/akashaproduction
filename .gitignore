@@ -1,4 +1,8 @@
 includes/runtime-config.php
-storage/*.json
-storage/uploads/*
-!storage/.gitkeep
+data/*.json
+assets/users-projects/images/*
+!data/.gitkeep
+!data/.htaccess
+!assets/users-projects/images/.gitkeep
+.DS_Store
+node_modules/

@@ -1,189 +1,330 @@
-document.addEventListener("DOMContentLoaded", () => {
-  /* ---------- toggle helpers ---------- */
-  document.querySelectorAll("[data-toggle-target]").forEach((el) => {
-    el.addEventListener("change", () => {
-      const target = document.querySelector(el.getAttribute("data-toggle-target"));
-      if (target) target.hidden = !(el instanceof HTMLInputElement ? el.checked : false);
+(() => {
+  'use strict';
+
+  const $  = (sel, root = document) => root.querySelector(sel);
+  const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ============================================================
+     LOADER + WELCOME orchestration
+     ============================================================ */
+  const loader = $('#loader');
+  const welcome = $('#welcome');
+  const enterBtn = $('#welcomeEnter');
+  const cosmicBg = $('#cosmicBg');
+  const countEl = $('#loaderCount');
+  const body = document.body;
+
+  const sequence = ['3', '2', '1'];
+  const stepDuration = reduceMotion ? 350 : 900;
+
+  function runCountdown() {
+    return new Promise((resolve) => {
+      let i = 0;
+      if (countEl) countEl.textContent = sequence[i];
+      const interval = setInterval(() => {
+        i += 1;
+        if (i < sequence.length) {
+          if (countEl) countEl.textContent = sequence[i];
+        } else {
+          clearInterval(interval);
+          resolve();
+        }
+      }, stepDuration);
+    });
+  }
+
+  function preload(src) {
+    return new Promise((resolve) => {
+      if (!src) { resolve(); return; }
+      const im = new Image();
+      im.onload = () => resolve();
+      im.onerror = () => resolve();
+      im.src = src;
+    });
+  }
+
+  async function bootIntro() {
+    const minDelay = reduceMotion ? 200 : 600;
+    const tasks = [
+      runCountdown(),
+      preload('assets/img/akasha-logo.webp').catch(() => preload('assets/img/akasha-logo.jpg')),
+      new Promise((r) => setTimeout(r, minDelay)),
+    ];
+    await Promise.all(tasks);
+
+    if (loader) loader.classList.add('is-hidden');
+    if (welcome) {
+      welcome.classList.add('is-visible');
+      welcome.setAttribute('aria-hidden', 'false');
+    }
+    setTimeout(() => loader && loader.remove(), 1100);
+  }
+
+  function enterSite() {
+    if (welcome) {
+      welcome.classList.remove('is-visible');
+      welcome.classList.add('is-hidden');
+      welcome.setAttribute('aria-hidden', 'true');
+    }
+    body.classList.remove('is-locked');
+    if (cosmicBg) {
+      const reveal = () => cosmicBg.classList.add('is-visible');
+      if (cosmicBg.complete) reveal();
+      else cosmicBg.addEventListener('load', reveal, { once: true });
+    }
+    setTimeout(() => welcome && welcome.remove(), 1100);
+  }
+
+  if (enterBtn) {
+    enterBtn.addEventListener('click', enterSite);
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (welcome && welcome.classList.contains('is-visible') && (e.key === 'Enter' || e.key === ' ')) {
+      e.preventDefault();
+      enterSite();
+    }
+  });
+
+  bootIntro();
+
+  /* ============================================================
+     NAVBAR — sticky scroll state, mobile toggle, smooth scroll
+     ============================================================ */
+  const nav = $('#mainNav');
+  const navToggle = $('#navToggle');
+
+  function updateNavState() {
+    if (!nav) return;
+    if (window.scrollY > 30) nav.classList.add('is-scrolled');
+    else nav.classList.remove('is-scrolled');
+  }
+
+  window.addEventListener('scroll', updateNavState, { passive: true });
+  updateNavState();
+
+  if (navToggle && nav) {
+    navToggle.addEventListener('click', () => {
+      const open = nav.classList.toggle('is-open');
+      navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+  }
+
+  $$('.nav__link').forEach((link) => {
+    link.addEventListener('click', () => {
+      if (nav && nav.classList.contains('is-open')) {
+        nav.classList.remove('is-open');
+        if (navToggle) navToggle.setAttribute('aria-expanded', 'false');
+      }
     });
   });
 
-  /* ---------- support ticket topics ---------- */
-  const dept = document.querySelector("#department");
-  const subj = document.querySelector("[data-support-subject]");
-  if (dept instanceof HTMLSelectElement && subj instanceof HTMLSelectElement) {
-    const topics = JSON.parse(subj.dataset.supportTopics || "{}");
-    const sync = () => {
-      const list = Array.isArray(topics[dept.value]) ? topics[dept.value] : [];
-      subj.textContent = "";
-      list.forEach((t) => { const o = document.createElement("option"); o.value = t; o.textContent = t; subj.appendChild(o); });
-    };
-    dept.addEventListener("change", sync);
-    sync();
+  /* ============================================================
+     LIGHTBOX — open/close + esc + click outside
+     ============================================================ */
+  const lightboxes = $$('.lightbox');
+
+  function openLightbox(name) {
+    const target = document.getElementById('lightbox' + capitalize(name));
+    if (!target) return;
+    target.classList.add('is-open');
+    body.classList.add('is-locked');
+    const focusable = target.querySelector('input, textarea, button, [href]');
+    if (focusable) setTimeout(() => focusable.focus(), 80);
   }
 
-  /* ---------- order form ---------- */
-  const orderForm = document.querySelector("[data-order-form]");
-  if (!orderForm) return;
-
-  var i18n = window.i18n || {};
-  var i18nLabels = i18n.labels || {};
-
-  const prices = {
-    creation: { showcase: 50, complex: 500, custom: 0 },
-    hosting: { "shared-monthly": 8, "shared-yearly": 88, vps: 200, cloud: 0 },
-    packs: { "showcase:shared-yearly": 120, "complex:shared-yearly": 550, "showcase:vps": 230, "complex:vps": 675 },
-  };
-
-  const $ = (sel) => document.querySelector(sel);
-  const pick = (name) => { const el = orderForm.querySelector("[name=\"" + name + "\"]:checked"); return el ? el.value : ""; };
-
-  const summaryCreation = $("[data-summary-creation]");
-  const summaryCreationPrice = $("[data-summary-creation-price]");
-  const summaryHosting = $("[data-summary-hosting]");
-  const summaryHostingPrice = $("[data-summary-hosting-price]");
-  const summaryDomainLine = $("[data-summary-domain-line]");
-  const summaryDomainName = $("[data-summary-domain-name]");
-  const summaryDomainPrice = $("[data-summary-domain-price]");
-  const summaryPromo = $("[data-summary-promo]");
-  const summaryPromoLabel = $("[data-summary-promo-label]");
-  const totalEl = $("[data-order-total]");
-  const detailEl = $("[data-order-detail]");
-  const quoteBlock = $("[data-quote-block]");
-  const splitInput = $("#split-payment");
-  const includeDomainInput = $("#include-domain");
-  const domainExtSelect = $("#domain-extension");
-
-  function getDomainPrice() {
-    if (!(includeDomainInput instanceof HTMLInputElement) || !includeDomainInput.checked) return 0;
-    if (!domainExtSelect) return 0;
-    var opt = domainExtSelect.selectedOptions[0];
-    if (!opt) return 0;
-    var m = opt.textContent.match(/(\d+)\s/);
-    return m ? parseInt(m[1], 10) : 0;
-  }
-
-  function refresh() {
-    var c = pick("creation") || "showcase";
-    var h = pick("hosting") || "shared-yearly";
-    var isQuote = c === "custom" || h === "cloud";
-    var packKey = c + ":" + h;
-    var domainPrice = getDomainPrice();
-    var base = prices.packs[packKey] != null ? prices.packs[packKey] : ((prices.creation[c] || 0) + (prices.hosting[h] || 0));
-    var hasPack = prices.packs[packKey] != null;
-    var rawSum = (prices.creation[c] || 0) + (prices.hosting[h] || 0);
-    var total = base + domainPrice;
-
-    var onQuote = i18n.on_quote || "Sur devis";
-    var currency = i18n.currency || "\u20AC";
-
-    if (summaryCreation) summaryCreation.textContent = (i18nLabels.creation && i18nLabels.creation[c]) || c;
-    if (summaryCreationPrice) summaryCreationPrice.textContent = prices.creation[c] > 0 ? prices.creation[c] + " " + currency : onQuote;
-    if (summaryHosting) summaryHosting.textContent = (i18nLabels.hosting && i18nLabels.hosting[h]) || h;
-    if (summaryHostingPrice) summaryHostingPrice.textContent = prices.hosting[h] > 0 ? prices.hosting[h] + " " + currency : onQuote;
-
-    if (summaryDomainLine) {
-      summaryDomainLine.hidden = domainPrice === 0;
-      if (summaryDomainName) {
-        var nameInput = $("#domain-name-input");
-        var ext = domainExtSelect ? domainExtSelect.value : "";
-        summaryDomainName.textContent = nameInput && nameInput.value ? nameInput.value + "." + ext : (i18n.domain_custom || "Domaine personnalis\u00E9");
+  function closeLightboxes() {
+    let any = false;
+    lightboxes.forEach((lb) => {
+      if (lb.classList.contains('is-open')) {
+        lb.classList.remove('is-open');
+        any = true;
       }
-      if (summaryDomainPrice) summaryDomainPrice.textContent = domainPrice + " " + (i18n.per_year || "\u20AC/an");
-    }
-
-    if (summaryPromo) {
-      if (hasPack && !isQuote) {
-        summaryPromo.hidden = false;
-        var saving = rawSum - base;
-        if (summaryPromoLabel) summaryPromoLabel.textContent = "-" + saving + " " + currency + " (" + (i18n.pack_discount || "tarif pack") + ")";
-      } else {
-        summaryPromo.hidden = true;
-      }
-    }
-
-    if (quoteBlock) quoteBlock.hidden = !isQuote;
-    if (splitInput instanceof HTMLInputElement) {
-      splitInput.disabled = isQuote;
-      if (isQuote) splitInput.checked = false;
-    }
-
-    if (totalEl) totalEl.textContent = isQuote ? onQuote : total + " " + currency;
-    if (detailEl) {
-      if (isQuote) {
-        detailEl.textContent = i18n.quote_detail || "\u00C9tude commerciale personnalis\u00E9e";
-      } else if (splitInput instanceof HTMLInputElement && splitInput.checked) {
-        var splitText = i18n.split_format || "3 x :amount \u20AC";
-        detailEl.textContent = splitText.replace(":amount", (total / 3).toFixed(2));
-      } else {
-        detailEl.textContent = i18n.pay_detail || "Paiement \u00E0 l'activation";
-      }
-    }
-
-    orderForm.querySelectorAll(".product-tab input").forEach(function(inp) {
-      inp.closest(".product-tab").classList.toggle("product-tab--active", inp.checked);
     });
-
-    var submitBtn = orderForm.querySelector("[data-submit-btn]");
-    if (submitBtn) submitBtn.textContent = isQuote ? (i18n.submit_quote || "Envoyer la demande de devis") : (i18n.submit_pay || "Payer avec Stripe");
+    if (any && !(welcome && welcome.classList.contains('is-visible'))) {
+      body.classList.remove('is-locked');
+    }
   }
 
-  orderForm.querySelectorAll("[name=\"creation\"], [name=\"hosting\"]").forEach(function(el) { el.addEventListener("change", refresh); });
-  if (includeDomainInput) includeDomainInput.addEventListener("change", refresh);
-  if (domainExtSelect) domainExtSelect.addEventListener("change", refresh);
-  if (splitInput) splitInput.addEventListener("change", refresh);
-  var domainNameInput = $("#domain-name-input");
-  if (domainNameInput) domainNameInput.addEventListener("input", refresh);
-  refresh();
+  function capitalize(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  }
 
-  /* ---------- domain availability search ---------- */
-  var searchBtn = $("[data-domain-search]");
-  var resultBox = $("[data-domain-result]");
+  $$('[data-lightbox]').forEach((trigger) => {
+    trigger.addEventListener('click', (e) => {
+      e.preventDefault();
+      openLightbox(trigger.getAttribute('data-lightbox'));
+    });
+  });
 
-  if (searchBtn && domainNameInput && domainExtSelect) {
-    searchBtn.addEventListener("click", function() {
-      var name = domainNameInput.value.trim().toLowerCase().replace(/[^a-z0-9\-]/g, "");
-      var tld = domainExtSelect.value;
-      if (!name || name.length < 2) {
-        showResult("warning", i18n.search_min || "Saisissez au moins 2 caract\u00E8res pour le nom de domaine.");
-        return;
+  $$('[data-close-lightbox]').forEach((closer) => {
+    closer.addEventListener('click', closeLightboxes);
+  });
+
+  lightboxes.forEach((lb) => {
+    lb.addEventListener('click', (e) => {
+      if (e.target === lb) closeLightboxes();
+    });
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeLightboxes();
+  });
+
+  /* ============================================================
+     FORMS — async submit with feedback
+     ============================================================ */
+  function attachFormSubmit(formId, endpoint, feedbackId, options = {}) {
+    const form = document.getElementById(formId);
+    const feedback = document.getElementById(feedbackId);
+    if (!form) return;
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (feedback) {
+        feedback.className = 'form__feedback';
+        feedback.textContent = '';
       }
-      searchBtn.disabled = true;
-      searchBtn.textContent = i18n.searching || "Recherche\u2026";
 
-      fetch("/domain-check?name=" + encodeURIComponent(name) + "&tld=" + encodeURIComponent(tld))
-        .then(function(resp) { return resp.json(); })
-        .then(function(data) {
-          if (data.error) {
-            showResult("warning", data.error);
-          } else if (data.available === true) {
-            var msg = (i18n.domain_available || ":domain est disponible \u2014 :price \u20AC/an").replace(":domain", data.domain).replace(":price", data.price);
-            showResult("success", msg);
-          } else if (data.available === false) {
-            var msg = (i18n.domain_taken || ":domain est d\u00E9j\u00E0 enregistr\u00E9. Essayez un autre nom ou une autre extension.").replace(":domain", data.domain);
-            showResult("taken", msg);
-          } else {
-            var msg = (i18n.domain_unknown || "Impossible de confirmer la disponibilit\u00E9 de :domain. Contactez-nous.").replace(":domain", data.domain);
-            showResult("warning", msg);
-          }
-        })
-        .catch(function() {
-          showResult("warning", i18n.domain_error || "Erreur de connexion. R\u00E9essayez dans quelques instants.");
-        })
-        .finally(function() {
-          searchBtn.disabled = false;
-          searchBtn.textContent = i18n.verify || "V\u00E9rifier";
+      const submitBtn = form.querySelector('button[type="submit"]');
+      const originalText = submitBtn ? submitBtn.textContent : '';
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Envoi…';
+      }
+
+      try {
+        const data = new FormData(form);
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          body: data,
+          headers: { 'Accept': 'application/json' },
         });
-    });
+        let payload = {};
+        try { payload = await res.json(); } catch (err) { /* ignore */ }
 
-    domainNameInput.addEventListener("keydown", function(e) {
-      if (e.key === "Enter") { e.preventDefault(); searchBtn.click(); }
+        if (res.ok && payload.ok) {
+          if (feedback) {
+            feedback.className = 'form__feedback is-success';
+            feedback.textContent = payload.message || 'Merci, votre message a bien été transmis.';
+          }
+          form.reset();
+          if (options.onSuccess) options.onSuccess(payload);
+        } else {
+          if (feedback) {
+            feedback.className = 'form__feedback is-error';
+            feedback.textContent = (payload && payload.message) || 'Un incident est survenu. Réessayez dans quelques instants.';
+          }
+        }
+      } catch (err) {
+        if (feedback) {
+          feedback.className = 'form__feedback is-error';
+          feedback.textContent = 'Connexion interrompue. Veuillez réessayer.';
+        }
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalText;
+        }
+      }
     });
   }
 
-  function showResult(type, text) {
-    if (!resultBox) return;
-    resultBox.hidden = false;
-    resultBox.className = "domain-result domain-result--" + type;
-    resultBox.textContent = text;
+  attachFormSubmit('projectForm', 'api/submit-project.php', 'projectFormFeedback', {
+    onSuccess() {
+      const target = document.getElementById('projects');
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    },
+  });
+  attachFormSubmit('contactForm', 'api/submit-contact.php', 'contactFormFeedback', {
+    onSuccess() {
+      setTimeout(closeLightboxes, 1800);
+    },
+  });
+
+  /* ============================================================
+     LOAD MORE — user projects (DOM-built, no innerHTML)
+     ============================================================ */
+  const loadMoreBtn = document.getElementById('userProjectsLoadMore');
+  const moreContainer = document.getElementById('userProjectsMore');
+  if (loadMoreBtn && moreContainer) {
+    let offset = 9;
+    const batch = parseInt(loadMoreBtn.dataset.batch || '8', 10);
+
+    loadMoreBtn.addEventListener('click', async () => {
+      loadMoreBtn.disabled = true;
+      try {
+        const res = await fetch(`api/user-projects.php?offset=${offset}&limit=${batch}`, {
+          headers: { 'Accept': 'application/json' },
+        });
+        const data = await res.json();
+        if (data && Array.isArray(data.items) && data.items.length) {
+          const wrap = document.createElement('div');
+          wrap.className = 'user-projects__row user-projects__row--3';
+          data.items.forEach((p) => wrap.appendChild(buildUserProjectCard(p)));
+          moreContainer.appendChild(wrap);
+          offset += data.items.length;
+          if (!data.has_more) loadMoreBtn.remove();
+          else loadMoreBtn.disabled = false;
+        } else {
+          loadMoreBtn.remove();
+        }
+      } catch (err) {
+        loadMoreBtn.disabled = false;
+      }
+    });
   }
-});
+
+  function el(tag, attrs = {}, text = null) {
+    const node = document.createElement(tag);
+    Object.entries(attrs).forEach(([k, v]) => {
+      if (v == null) return;
+      if (k === 'class') node.className = v;
+      else if (k === 'style') node.setAttribute('style', v);
+      else node.setAttribute(k, v);
+    });
+    if (text != null) node.textContent = text;
+    return node;
+  }
+
+  function buildUserProjectCard(p) {
+    const url = (p && p.url) || '';
+    const img = (p && p.image) || '';
+    const title = (p && p.title) || 'Projet';
+    const desc = (p && p.description) || '';
+    const submitter = (p && p.submitter) || {};
+    const author = `${submitter.first_name || ''} ${submitter.last_name || ''}`.trim();
+    const domain = url ? url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/.*$/, '') : '';
+
+    const article = el('article', { class: 'card' });
+    const thumb = el('div', { class: 'card__thumb' });
+    if (img) {
+      const im = el('img', { src: img, alt: title, loading: 'lazy', decoding: 'async' });
+      thumb.appendChild(im);
+    } else {
+      const ph = el('div', { style: 'width:100%;height:100%;background:linear-gradient(135deg,#1a0c2e,#3d1a5b);' });
+      thumb.appendChild(ph);
+    }
+    thumb.appendChild(el('div', { class: 'card__thumb-overlay' }));
+    article.appendChild(thumb);
+
+    const bodyEl = el('div', { class: 'card__body' });
+    bodyEl.appendChild(el('h3', { class: 'card__title' }, title));
+    bodyEl.appendChild(el('p', { class: 'card__copy' }, desc));
+    if (author) {
+      bodyEl.appendChild(el('p', { class: 'card__copy', style: 'font-size:0.82rem;color:var(--text-muted);margin:0;' }, '— ' + author));
+    }
+
+    const footer = el('div', { class: 'card__footer' });
+    footer.appendChild(el('span', { class: 'card__domain' }, domain));
+    if (url) {
+      footer.appendChild(el('a', { class: 'btn btn--small btn--ghost', href: url, target: '_blank', rel: 'noopener' }, 'Visiter'));
+    }
+    bodyEl.appendChild(footer);
+
+    article.appendChild(bodyEl);
+    return article;
+  }
+})();

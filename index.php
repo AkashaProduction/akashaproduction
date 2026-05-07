@@ -1,120 +1,479 @@
 <?php
 require __DIR__ . '/includes/bootstrap.php';
+require __DIR__ . '/includes/content.php';
 
-$currentPage = 'presentation';
-$pageTitle = app_page_title(t('nav.presentation'));
-$projects = app_config()['projects'];
+$content = app_content();
+$cfg     = app_config();
+$projects = app_user_projects_published();
+$initialBatch = 6;
+$published = $projects;
+$featured = array_shift($published);
+$row3a = array_slice($published, 0, 3);
+$row2  = array_slice($published, 3, 2);
+$row3b = array_slice($published, 5, 3);
+$remaining = array_slice($published, 8);
+?><!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title><?= app_e($content['site']['meta_title']); ?></title>
+<meta name="description" content="<?= app_e($content['site']['meta_description']); ?>">
+<meta name="theme-color" content="#03020a">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><defs><linearGradient id='g' x1='0' x2='1' y1='0' y2='1'><stop offset='0' stop-color='%235be8ff'/><stop offset='0.5' stop-color='%23a87bff'/><stop offset='1' stop-color='%23ff5cf0'/></linearGradient></defs><circle cx='16' cy='16' r='14' fill='none' stroke='url(%23g)' stroke-width='2'/><circle cx='16' cy='16' r='3' fill='url(%23g)'/></svg>">
+<link rel="preload" as="image" href="assets/img/akasha-logo.webp" type="image/webp">
+<link rel="preload" as="image" href="assets/img/cosmic-bg.webp" type="image/webp">
+<link rel="stylesheet" href="assets/site.css?v=<?= filemtime(__DIR__ . '/assets/site.css'); ?>">
+<meta property="og:title" content="<?= app_e($content['site']['meta_title']); ?>">
+<meta property="og:description" content="<?= app_e($content['site']['meta_description']); ?>">
+<meta property="og:image" content="/assets/img/akasha-logo.jpg">
+<meta property="og:type" content="website">
+</head>
+<body class="is-locked">
 
-require __DIR__ . '/includes/header.php';
-?>
-<section class="hero">
-    <div class="container hero-grid">
-        <div class="hero-copy">
-            <div class="eyebrow"><?= htmlspecialchars(t('home.eyebrow'), ENT_QUOTES, 'UTF-8'); ?></div>
-            <h1 class="hero-title"><?= str_replace('fl', '<span class="fl-fix">fl</span>', htmlspecialchars(t('home.title'), ENT_QUOTES, 'UTF-8')); ?></h1>
-            <p class="lead"><?= htmlspecialchars(t('home.lead'), ENT_QUOTES, 'UTF-8'); ?></p>
-            <div class="cta-row">
-                <a class="btn btn--primary" href="<?= htmlspecialchars(app_nav_href('solutions'), ENT_QUOTES, 'UTF-8'); ?>"><?= htmlspecialchars(t('home.cta_solutions'), ENT_QUOTES, 'UTF-8'); ?></a>
-                <a class="btn btn--secondary" href="<?= htmlspecialchars(app_nav_href('commander'), ENT_QUOTES, 'UTF-8'); ?>"><?= htmlspecialchars(t('home.cta_order'), ENT_QUOTES, 'UTF-8'); ?></a>
-            </div>
-            <div class="hero-stats">
-                <article class="stat-card">
-                    <strong><?= htmlspecialchars(t('home.stat1_title'), ENT_QUOTES, 'UTF-8'); ?></strong>
-                    <span><?= htmlspecialchars(t('home.stat1_text'), ENT_QUOTES, 'UTF-8'); ?></span>
-                </article>
-                <article class="stat-card">
-                    <strong><?= htmlspecialchars(t('home.stat2_title'), ENT_QUOTES, 'UTF-8'); ?></strong>
-                    <span><?= htmlspecialchars(t('home.stat2_text'), ENT_QUOTES, 'UTF-8'); ?></span>
-                </article>
-                <article class="stat-card">
-                    <strong><?= htmlspecialchars(t('home.stat3_title'), ENT_QUOTES, 'UTF-8'); ?></strong>
-                    <span><?= htmlspecialchars(t('home.stat3_text'), ENT_QUOTES, 'UTF-8'); ?></span>
-                </article>
-            </div>
-            <div class="meta-list">
-                <span class="meta-tag"><?= htmlspecialchars(t('home.tag1'), ENT_QUOTES, 'UTF-8'); ?></span>
-                <span class="meta-tag"><?= htmlspecialchars(t('home.tag2'), ENT_QUOTES, 'UTF-8'); ?></span>
-                <span class="meta-tag"><?= htmlspecialchars(t('home.tag3'), ENT_QUOTES, 'UTF-8'); ?></span>
-                <span class="meta-tag"><?= htmlspecialchars(t('home.tag4'), ENT_QUOTES, 'UTF-8'); ?></span>
-            </div>
-        </div>
-        <div class="glass device-scene">
-            <div class="scene-card scene-card--top">
-                <span class="scene-card__label"><?= htmlspecialchars(t('home.scene_top_label'), ENT_QUOTES, 'UTF-8'); ?></span>
-                <strong class="scene-card__value"><?= htmlspecialchars(t('home.scene_top_value'), ENT_QUOTES, 'UTF-8'); ?></strong>
-                <span class="scene-card__meta"><?= htmlspecialchars(t('home.scene_top_meta'), ENT_QUOTES, 'UTF-8'); ?></span>
-            </div>
-            <img class="shot shot-desktop" src="https://images.unsplash.com/photo-1496171367470-9ed9a91ea931?auto=format&fit=crop&w=1200&q=80" alt="<?= htmlspecialchars(t('home.scene_top_value'), ENT_QUOTES, 'UTF-8'); ?>">
-            <img class="shot shot-tablet" src="https://images.unsplash.com/photo-1496171367470-9ed9a91ea931?auto=format&fit=crop&w=900&q=80" alt="<?= htmlspecialchars(t('home.scene_top_value'), ENT_QUOTES, 'UTF-8'); ?>">
-            <img class="shot shot-mobile" src="https://images.unsplash.com/photo-1496171367470-9ed9a91ea931?auto=format&fit=crop&w=600&q=80" alt="<?= htmlspecialchars(t('home.scene_top_value'), ENT_QUOTES, 'UTF-8'); ?>">
-            <div class="scene-card scene-card--bottom">
-                <span class="scene-card__label"><?= htmlspecialchars(t('home.scene_bottom_label'), ENT_QUOTES, 'UTF-8'); ?></span>
-                <strong class="scene-card__value"><?= htmlspecialchars(t('home.scene_bottom_value'), ENT_QUOTES, 'UTF-8'); ?></strong>
-                <span class="scene-card__meta"><?= htmlspecialchars(t('home.scene_bottom_meta'), ENT_QUOTES, 'UTF-8'); ?></span>
-            </div>
-        </div>
+<!-- =========================================================
+     LOADER — countdown 3,2,1 with three dots tracing a circle
+     ========================================================= -->
+<div class="loader" id="loader" aria-hidden="false" role="status" aria-label="Chargement de l'expérience Akasha Production">
+  <div class="loader__inner">
+    <svg class="loader__svg" viewBox="0 0 200 200" aria-hidden="true">
+      <defs>
+        <linearGradient id="loaderGradient" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%"   stop-color="#5be8ff"/>
+          <stop offset="35%"  stop-color="#a87bff"/>
+          <stop offset="70%"  stop-color="#ff5cf0"/>
+          <stop offset="100%" stop-color="#ffa15c"/>
+        </linearGradient>
+        <linearGradient id="loaderGradientText" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%"   stop-color="#5be8ff"/>
+          <stop offset="50%"  stop-color="#a87bff"/>
+          <stop offset="100%" stop-color="#ff5cf0"/>
+        </linearGradient>
+        <filter id="loaderGlow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="3" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+
+      <!-- faint orbital ring -->
+      <circle cx="100" cy="100" r="68" fill="none" stroke="url(#loaderGradient)" stroke-width="0.6" opacity="0.32"/>
+      <circle cx="100" cy="100" r="78" fill="none" stroke="url(#loaderGradient)" stroke-width="0.3" opacity="0.18"/>
+
+      <!-- three orbiting dots -->
+      <g class="loader__dots" style="transform-origin:100px 100px; animation: loaderSpin 3s linear infinite;">
+        <circle cx="100" cy="32" r="6" fill="url(#loaderGradient)" filter="url(#loaderGlow)"/>
+        <circle cx="158.88" cy="134" r="6" fill="url(#loaderGradient)" filter="url(#loaderGlow)" opacity="0.85"/>
+        <circle cx="41.12" cy="134" r="6" fill="url(#loaderGradient)" filter="url(#loaderGlow)" opacity="0.7"/>
+      </g>
+
+      <!-- countdown text inside the ring -->
+      <text id="loaderCount" x="100" y="120" text-anchor="middle" font-family="Cinzel, serif" font-size="64" font-weight="700" fill="url(#loaderGradientText)" filter="url(#loaderGlow)" letter-spacing="2">3</text>
+    </svg>
+    <span class="loader__brand"><?= app_e($content['site']['loader_label']); ?></span>
+  </div>
+</div>
+
+<style>
+@keyframes loaderSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes loaderPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
+.loader__svg #loaderCount { animation: loaderPulse 1s ease-in-out infinite; }
+</style>
+
+<!-- =========================================================
+     WELCOME — image 1 fullscreen with "Entrer" CTA
+     ========================================================= -->
+<div class="welcome" id="welcome" aria-hidden="true">
+  <picture>
+    <source srcset="assets/img/akasha-logo.webp" type="image/webp">
+    <img class="welcome__image" src="assets/img/akasha-logo.jpg" alt="Akasha Production — entrée dans l'univers" id="welcomeImage" decoding="async">
+  </picture>
+  <div class="welcome__veil"></div>
+  <button class="btn btn--primary welcome__cta" id="welcomeEnter" type="button">
+    <?= app_e($content['site']['enter_label']); ?>
+  </button>
+</div>
+
+<!-- =========================================================
+     COSMIC STAGE — image 2 fixed background
+     ========================================================= -->
+<div class="cosmic-stage" aria-hidden="true">
+  <picture>
+    <source srcset="assets/img/cosmic-bg.webp" type="image/webp">
+    <img class="cosmic-stage__image" id="cosmicBg" src="assets/img/cosmic-bg.jpg" alt="" decoding="async" loading="eager">
+  </picture>
+</div>
+
+<!-- =========================================================
+     APP — main page content
+     ========================================================= -->
+<div class="app-shell" id="appShell">
+
+  <!-- NAVBAR -->
+  <header class="nav" id="mainNav">
+    <div class="nav__row">
+      <a class="nav__brand" href="#top" aria-label="Akasha Production">
+        <svg class="nav__brand-glyph" viewBox="0 0 32 32" aria-hidden="true">
+          <defs>
+            <linearGradient id="navGlyph" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#5be8ff"/>
+              <stop offset="60%" stop-color="#a87bff"/>
+              <stop offset="100%" stop-color="#ff5cf0"/>
+            </linearGradient>
+          </defs>
+          <circle cx="16" cy="16" r="13" fill="none" stroke="url(#navGlyph)" stroke-width="1.4"/>
+          <circle cx="16" cy="16" r="2.5" fill="url(#navGlyph)"/>
+        </svg>
+        <span><?= app_e($cfg['site']['name']); ?></span>
+      </a>
+      <button class="nav__toggle" type="button" id="navToggle" aria-expanded="false" aria-controls="navMenu">
+        <span class="sr-only">Ouvrir le menu</span>
+        <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true">
+          <path d="M3 6h14M3 10h14M3 14h14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <nav>
+        <ul class="nav__menu" id="navMenu">
+          <li><a class="nav__link" href="#featured"><?= app_e($content['nav']['featured']); ?></a></li>
+          <li><a class="nav__link" href="#creations"><?= app_e($content['nav']['creations']); ?></a></li>
+          <li><a class="nav__link" href="#projects"><?= app_e($content['nav']['projects']); ?></a></li>
+          <li><button class="nav__link" type="button" data-lightbox="contact"><?= app_e($content['nav']['contact']); ?></button></li>
+        </ul>
+      </nav>
     </div>
-</section>
+  </header>
 
-<section class="section">
-    <div class="container grid-2">
-        <div class="panel">
-            <div class="kicker"><?= htmlspecialchars(t('home.who_kicker'), ENT_QUOTES, 'UTF-8'); ?></div>
-            <h2 class="section-title"><?= htmlspecialchars(t('home.who_title'), ENT_QUOTES, 'UTF-8'); ?></h2>
-            <p class="copy"><?= htmlspecialchars(t('home.who_p1'), ENT_QUOTES, 'UTF-8'); ?></p>
-            <p class="copy"><?= htmlspecialchars(t('home.who_p2'), ENT_QUOTES, 'UTF-8'); ?></p>
-        </div>
-        <div class="grid-2">
-            <article class="card">
-                <h3><?= htmlspecialchars(t('home.card1_title'), ENT_QUOTES, 'UTF-8'); ?></h3>
-                <p class="copy"><?= htmlspecialchars(t('home.card1_text'), ENT_QUOTES, 'UTF-8'); ?></p>
-            </article>
-            <article class="card">
-                <h3><?= htmlspecialchars(t('home.card2_title'), ENT_QUOTES, 'UTF-8'); ?></h3>
-                <p class="copy"><?= htmlspecialchars(t('home.card2_text'), ENT_QUOTES, 'UTF-8'); ?></p>
-            </article>
-            <article class="card">
-                <h3><?= htmlspecialchars(t('home.card3_title'), ENT_QUOTES, 'UTF-8'); ?></h3>
-                <p class="copy"><?= htmlspecialchars(t('home.card3_text'), ENT_QUOTES, 'UTF-8'); ?></p>
-            </article>
-            <article class="card">
-                <h3><?= htmlspecialchars(t('home.card4_title'), ENT_QUOTES, 'UTF-8'); ?></h3>
-                <p class="copy"><?= htmlspecialchars(t('home.card4_text'), ENT_QUOTES, 'UTF-8'); ?></p>
-            </article>
-        </div>
-    </div>
-</section>
+  <main id="top">
 
-<section class="section">
-    <div class="container">
-        <div class="section-heading">
+    <!-- HERO -->
+    <section class="section hero" id="hero">
+      <div class="shell hero__grid">
+        <div class="hero__copy halo-text">
+          <span class="eyebrow"><?= app_e($content['hero']['eyebrow']); ?></span>
+          <h1 class="hero__title"><?= app_e($content['hero']['title']); ?></h1>
+          <p class="hero__lead"><?= app_e($content['hero']['lead']); ?></p>
+          <div class="hero__ctas">
+            <a class="btn btn--primary" href="#creations"><?= app_e($content['hero']['cta_creations']); ?></a>
+            <a class="btn" href="#projects"><?= app_e($content['hero']['cta_projects']); ?></a>
+          </div>
+        </div>
+        <figure class="hero__visual">
+          <picture>
+            <source srcset="assets/img/akasha-logo.webp" type="image/webp">
+            <img src="assets/img/akasha-logo.jpg" alt="Identité Akasha Production — constellation" loading="lazy" decoding="async">
+          </picture>
+        </figure>
+      </div>
+    </section>
+
+    <!-- FEATURED -->
+    <section class="section section--featured" id="featured">
+      <div class="shell">
+        <div class="section-heading halo-text">
+          <span class="eyebrow"><?= app_e($content['featured']['eyebrow']); ?></span>
+          <h2 class="section-title"><?= app_e($content['featured']['title']); ?></h2>
+        </div>
+        <article class="featured">
+          <figure class="featured__media">
+            <picture>
+              <?php if (!empty($content['featured']['image_webp'])): ?>
+                <source srcset="<?= app_e($content['featured']['image_webp']); ?>" type="image/webp">
+              <?php endif; ?>
+              <img src="<?= app_e($content['featured']['image']); ?>" alt="<?= app_e($content['featured']['image_alt']); ?>" loading="lazy" decoding="async">
+            </picture>
+          </figure>
+          <div class="featured__body">
+            <div class="halo-text">
+              <p><?= app_e($content['featured']['description']); ?></p>
+            </div>
             <div>
-                <div class="eyebrow"><?= htmlspecialchars(t('home.projects_eyebrow'), ENT_QUOTES, 'UTF-8'); ?></div>
-                <h2 class="section-title"><?= htmlspecialchars(t('home.projects_title'), ENT_QUOTES, 'UTF-8'); ?></h2>
+              <a class="btn btn--primary" href="<?= app_e($content['featured']['cta_url']); ?>" target="_blank" rel="noopener">
+                <?= app_e($content['featured']['cta_label']); ?>
+                <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true">
+                  <path d="M5 5h10v10M5 15L15 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </a>
             </div>
-            <p class="copy section-heading__note"><?= htmlspecialchars(t('home.projects_note'), ENT_QUOTES, 'UTF-8'); ?></p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- CREATIONS -->
+    <section class="section" id="creations">
+      <div class="shell">
+        <div class="section-heading halo-text">
+          <span class="eyebrow"><?= app_e($content['creations']['eyebrow']); ?></span>
+          <h2 class="section-title"><?= app_e($content['creations']['title']); ?></h2>
+          <p><?= app_e($content['creations']['intro']); ?></p>
         </div>
-        <div class="project-grid">
-            <?php foreach ($projects as $project): ?>
-                <article class="project-card<?= ($project['domain'] ?? '') === 'epanouissement-amoureux.fr' ? ' project-card--hidden' : ''; ?>">
-                    <div class="project-thumb">
-                        <img src="<?= htmlspecialchars(app_screenshot_url($project['url']), ENT_QUOTES, 'UTF-8'); ?>" alt="<?= htmlspecialchars($project['title'], ENT_QUOTES, 'UTF-8'); ?>" onerror="this.outerHTML='<div class=&quot;project-placeholder&quot;><?= htmlspecialchars(t('home.coming_soon'), ENT_QUOTES, 'UTF-8'); ?></div>'">
-                        <div class="project-thumb__overlay">
-                            <span class="project-domain"><?= htmlspecialchars($project['domain'] ?? parse_url($project['url'], PHP_URL_HOST) ?? '', ENT_QUOTES, 'UTF-8'); ?></span>
-                            <span class="project-status"><?= htmlspecialchars($project['status'] ?? '', ENT_QUOTES, 'UTF-8'); ?></span>
-                        </div>
-                    </div>
-                    <div class="project-body">
-                        <h3><?= htmlspecialchars($project['title'], ENT_QUOTES, 'UTF-8'); ?></h3>
-                        <p class="copy project-copy"><?= htmlspecialchars($project['description'], ENT_QUOTES, 'UTF-8'); ?></p>
-                        <div class="project-actions">
-                            <span class="project-link-label"><?= htmlspecialchars($project['domain'] ?? '', ENT_QUOTES, 'UTF-8'); ?></span>
-                            <a class="btn btn--secondary" href="<?= htmlspecialchars($project['url'], ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noreferrer"><?= htmlspecialchars(t('home.visit'), ENT_QUOTES, 'UTF-8'); ?></a>
-                        </div>
-                    </div>
-                </article>
-            <?php endforeach; ?>
+        <div class="creations__grid">
+          <?php foreach ($content['creations']['cards'] as $card): ?>
+            <?php
+              $available = !empty($card['available']);
+              $url = (string) ($card['url'] ?? '');
+              $domain = $url ? preg_replace('#^https?://(www\.)?#', '', $url) : '';
+              $domain = $domain ? rtrim((string) strtok($domain, '/'), '/') : '';
+            ?>
+            <article class="card<?= $available ? '' : ' card--unavailable'; ?>">
+              <div class="card__thumb">
+                <picture>
+                  <?php if (!empty($card['image_webp'])): ?>
+                    <source srcset="<?= app_e($card['image_webp']); ?>" type="image/webp">
+                  <?php endif; ?>
+                  <img src="<?= app_e($card['image']); ?>" alt="<?= app_e($card['name']); ?>" loading="lazy" decoding="async">
+                </picture>
+                <div class="card__thumb-overlay">
+                  <?php if (!$available): ?>
+                    <span class="card__badge">À venir</span>
+                  <?php endif; ?>
+                </div>
+              </div>
+              <div class="card__body">
+                <h3 class="card__title"><?= app_e($card['name']); ?></h3>
+                <p class="card__copy"><?= app_e($card['description']); ?></p>
+                <div class="card__footer">
+                  <span class="card__domain"><?= app_e($domain); ?></span>
+                  <?php if ($available && $url !== ''): ?>
+                    <a class="btn btn--small btn--ghost" href="<?= app_e($url); ?>" target="_blank" rel="noopener">Visiter</a>
+                  <?php else: ?>
+                    <span class="btn btn--small btn--disabled" aria-disabled="true">À venir</span>
+                  <?php endif; ?>
+                </div>
+              </div>
+            </article>
+          <?php endforeach; ?>
         </div>
+      </div>
+    </section>
+
+    <!-- VOS PROJETS -->
+    <section class="section" id="projects">
+      <div class="shell">
+        <div class="section-heading halo-text">
+          <span class="eyebrow"><?= app_e($content['projects']['eyebrow']); ?></span>
+          <h2 class="section-title"><?= app_e($content['projects']['title']); ?></h2>
+          <p><?= app_e($content['projects']['intro']); ?></p>
+        </div>
+
+        <div class="user-projects" id="userProjects">
+          <?php if (!$projects): ?>
+            <div class="halo-text user-projects__empty">
+              <p><?= app_e($content['projects']['empty_state']); ?></p>
+            </div>
+          <?php else: ?>
+            <?php if ($featured): ?>
+              <div class="user-projects__featured">
+                <?= render_user_project_card($featured, 'featured'); ?>
+              </div>
+            <?php endif; ?>
+            <?php if ($row3a): ?>
+              <div class="user-projects__row user-projects__row--3">
+                <?php foreach ($row3a as $p): echo render_user_project_card($p); endforeach; ?>
+              </div>
+            <?php endif; ?>
+            <?php if ($row2): ?>
+              <div class="user-projects__row user-projects__row--2">
+                <?php foreach ($row2 as $p): echo render_user_project_card($p); endforeach; ?>
+              </div>
+            <?php endif; ?>
+            <?php if ($row3b): ?>
+              <div class="user-projects__row user-projects__row--3">
+                <?php foreach ($row3b as $p): echo render_user_project_card($p); endforeach; ?>
+              </div>
+            <?php endif; ?>
+            <div class="user-projects__more" id="userProjectsMore"></div>
+            <?php if ($remaining): ?>
+              <div style="text-align:center;">
+                <button class="btn" type="button" id="userProjectsLoadMore" data-batch="8"><?= app_e($content['projects']['load_more_label']); ?></button>
+              </div>
+            <?php endif; ?>
+          <?php endif; ?>
+        </div>
+
+        <div class="halo-text user-projects__intro" style="margin-top:2.4rem;">
+          <p><?= app_e($content['projects']['instructions']); ?></p>
+        </div>
+
+        <div class="user-projects__form-wrap">
+          <form class="form" id="projectForm" enctype="multipart/form-data" novalidate>
+            <h3 class="form__title"><?= app_e($content['projects']['form_title']); ?></h3>
+            <div id="projectFormFeedback" class="form__feedback" role="status" aria-live="polite"></div>
+            <input type="hidden" name="csrf" value="<?= app_e(app_csrf_token()); ?>">
+
+            <label class="form__field">
+              <span class="form__label">Titre du projet</span>
+              <input class="form__control" type="text" name="title" required maxlength="120" placeholder="Le nom de votre œuvre web">
+            </label>
+
+            <label class="form__field">
+              <span class="form__label">Image de couverture <span class="form__optional">(jpg, png ou webp — max 6 Mo)</span></span>
+              <input class="form__control" type="file" name="image" accept="image/jpeg,image/png,image/webp">
+            </label>
+
+            <label class="form__field">
+              <span class="form__label">Description</span>
+              <textarea class="form__textarea" name="description" required maxlength="800" placeholder="Quelques lignes pour situer le projet, son intention, sa singularité…"></textarea>
+            </label>
+
+            <label class="form__field">
+              <span class="form__label">URL du projet</span>
+              <input class="form__control" type="url" name="url" required placeholder="https://votre-projet.com">
+            </label>
+
+            <div class="form__row">
+              <label class="form__field">
+                <span class="form__label">Prénom</span>
+                <input class="form__control" type="text" name="first_name" required maxlength="80">
+              </label>
+              <label class="form__field">
+                <span class="form__label">Nom</span>
+                <input class="form__control" type="text" name="last_name" required maxlength="80">
+              </label>
+            </div>
+
+            <div class="form__row">
+              <label class="form__field">
+                <span class="form__label">Email</span>
+                <input class="form__control" type="email" name="email" required maxlength="120">
+              </label>
+              <label class="form__field">
+                <span class="form__label">Téléphone <span class="form__optional">(facultatif)</span></span>
+                <input class="form__control" type="tel" name="phone" maxlength="40">
+              </label>
+            </div>
+
+            <label class="form__field">
+              <span class="form__label">Note complémentaire <span class="form__optional">(facultatif)</span></span>
+              <textarea class="form__textarea" name="note" maxlength="600" placeholder="Tout ce que nous devrions savoir avant publication."></textarea>
+            </label>
+
+            <!-- honeypot -->
+            <input type="text" name="company" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;opacity:0" aria-hidden="true">
+
+            <div class="form__actions">
+              <button class="btn btn--primary" type="submit"><?= app_e($content['projects']['submit_label']); ?></button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="shell footer__row">
+      <span><?= app_e($content['footer']['copyright']); ?></span>
+      <div class="footer__links">
+        <button class="footer__link" type="button" data-lightbox="legal"><?= app_e($content['footer']['legal_link']); ?></button>
+        <button class="footer__link" type="button" data-lightbox="contact"><?= app_e($content['footer']['contact_link']); ?></button>
+      </div>
     </div>
-</section>
-<?php require __DIR__ . '/includes/footer.php'; ?>
+  </footer>
+
+</div>
+
+<!-- =========================================================
+     LIGHTBOXES — legal, contact
+     ========================================================= -->
+<div class="lightbox" id="lightboxLegal" role="dialog" aria-modal="true" aria-labelledby="lightboxLegalTitle">
+  <div class="lightbox__panel">
+    <button class="lightbox__close" type="button" data-close-lightbox aria-label="Fermer">×</button>
+    <h2 class="lightbox__title" id="lightboxLegalTitle"><?= app_e($content['footer']['legal_link']); ?></h2>
+    <?php foreach ($content['footer']['legal_lines'] as $line): ?>
+      <p class="lightbox__copy"><?= app_e($line); ?></p>
+    <?php endforeach; ?>
+    <p class="lightbox__copy" style="margin-top:1rem;color:var(--text-muted);font-size:0.85rem;">
+      Données collectées via le site uniquement pour traiter vos demandes. Aucune donnée n'est cédée à des tiers.
+    </p>
+  </div>
+</div>
+
+<div class="lightbox" id="lightboxContact" role="dialog" aria-modal="true" aria-labelledby="lightboxContactTitle">
+  <div class="lightbox__panel">
+    <button class="lightbox__close" type="button" data-close-lightbox aria-label="Fermer">×</button>
+    <h2 class="lightbox__title" id="lightboxContactTitle"><?= app_e($content['contact']['title']); ?></h2>
+    <p class="lightbox__copy"><?= app_e($content['contact']['lead']); ?></p>
+
+    <form class="form" id="contactForm" style="margin-top:1.2rem;background:transparent;border:none;padding:0;" novalidate>
+      <div id="contactFormFeedback" class="form__feedback" role="status" aria-live="polite"></div>
+      <input type="hidden" name="csrf" value="<?= app_e(app_csrf_token()); ?>">
+
+      <div class="form__row">
+        <label class="form__field">
+          <span class="form__label">Prénom</span>
+          <input class="form__control" type="text" name="first_name" required maxlength="80">
+        </label>
+        <label class="form__field">
+          <span class="form__label">Nom</span>
+          <input class="form__control" type="text" name="last_name" required maxlength="80">
+        </label>
+      </div>
+
+      <label class="form__field">
+        <span class="form__label">Email</span>
+        <input class="form__control" type="email" name="email" required maxlength="120">
+      </label>
+
+      <label class="form__field">
+        <span class="form__label">Sujet</span>
+        <input class="form__control" type="text" name="subject" required maxlength="160">
+      </label>
+
+      <label class="form__field">
+        <span class="form__label">Message</span>
+        <textarea class="form__textarea" name="message" required maxlength="2000"></textarea>
+      </label>
+
+      <input type="text" name="company" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;opacity:0" aria-hidden="true">
+
+      <div class="form__actions">
+        <button class="btn btn--primary" type="submit"><?= app_e($content['contact']['submit_label']); ?></button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="assets/site.js?v=<?= filemtime(__DIR__ . '/assets/site.js'); ?>" defer></script>
+
+<?php
+function render_user_project_card(array $p, string $variant = ''): string
+{
+    $title = htmlspecialchars((string) ($p['title'] ?? 'Projet'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+    $desc = htmlspecialchars((string) ($p['description'] ?? ''), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+    $url = (string) ($p['url'] ?? '');
+    $img = (string) ($p['image'] ?? '');
+    $domain = $url ? preg_replace('#^https?://(www\.)?#', '', $url) : '';
+    $domain = $domain ? rtrim((string) strtok($domain, '/'), '/') : '';
+    $author = htmlspecialchars(trim((string) ($p['submitter']['first_name'] ?? '') . ' ' . (string) ($p['submitter']['last_name'] ?? '')), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+
+    ob_start(); ?>
+    <article class="card">
+      <div class="card__thumb">
+        <?php if ($img !== ''): ?>
+          <img src="<?= htmlspecialchars($img, ENT_QUOTES, 'UTF-8'); ?>" alt="<?= $title; ?>" loading="lazy" decoding="async">
+        <?php else: ?>
+          <div style="width:100%;height:100%;background:linear-gradient(135deg,#1a0c2e,#3d1a5b);"></div>
+        <?php endif; ?>
+        <div class="card__thumb-overlay"></div>
+      </div>
+      <div class="card__body">
+        <h3 class="card__title"><?= $title; ?></h3>
+        <p class="card__copy"><?= $desc; ?></p>
+        <?php if ($author !== ''): ?>
+          <p class="card__copy" style="font-size:0.82rem;color:var(--text-muted);margin:0;">— <?= $author; ?></p>
+        <?php endif; ?>
+        <div class="card__footer">
+          <span class="card__domain"><?= htmlspecialchars((string) $domain, ENT_QUOTES, 'UTF-8'); ?></span>
+          <?php if ($url !== ''): ?>
+            <a class="btn btn--small btn--ghost" href="<?= htmlspecialchars($url, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener">Visiter</a>
+          <?php endif; ?>
+        </div>
+      </div>
+    </article>
+    <?php
+    return (string) ob_get_clean();
+}
+?>
+</body>
+</html>
