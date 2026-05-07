@@ -253,6 +253,12 @@ $remaining = array_slice($published, 8);
           <span class="eyebrow"><?= app_e($content['projects']['eyebrow']); ?></span>
           <h2 class="section-title"><?= app_e($content['projects']['title']); ?></h2>
           <p><?= app_e($content['projects']['intro']); ?></p>
+          <?php if (!empty($content['projects']['cms_source_link']) && !empty($content['projects']['cms_source_url'])): ?>
+            <p>
+              <?= app_e($content['projects']['cms_source_lead'] ?? ''); ?>
+              <a href="<?= app_e($content['projects']['cms_source_url']); ?>" target="_blank" rel="noopener"><?= app_e($content['projects']['cms_source_link']); ?></a>.
+            </p>
+          <?php endif; ?>
         </div>
 
         <div class="user-projects" id="userProjects">
@@ -290,9 +296,11 @@ $remaining = array_slice($published, 8);
           <?php endif; ?>
         </div>
 
-        <div class="halo-text user-projects__intro" style="margin-top:2.4rem;">
-          <p><?= app_e($content['projects']['instructions']); ?></p>
-        </div>
+        <?php if (!empty(trim((string) ($content['projects']['instructions'] ?? '')))): ?>
+          <div class="halo-text user-projects__intro" style="margin-top:2.4rem;">
+            <p><?= app_e($content['projects']['instructions']); ?></p>
+          </div>
+        <?php endif; ?>
 
         <div class="user-projects__form-wrap">
           <form class="form" id="projectForm" enctype="multipart/form-data" novalidate>

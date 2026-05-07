@@ -112,14 +112,17 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
 
         case 'save_projects_section':
             $stored['projects'] = [
-                'eyebrow'         => app_clean((string) ($_POST['eyebrow'] ?? '')),
-                'title'           => app_clean((string) ($_POST['title'] ?? '')),
-                'empty_state'     => trim((string) ($_POST['empty_state'] ?? '')),
-                'intro'           => trim((string) ($_POST['intro'] ?? '')),
-                'instructions'    => trim((string) ($_POST['instructions'] ?? '')),
-                'form_title'      => app_clean((string) ($_POST['form_title'] ?? '')),
-                'submit_label'    => app_clean((string) ($_POST['submit_label'] ?? '')),
-                'load_more_label' => app_clean((string) ($_POST['load_more_label'] ?? '')),
+                'eyebrow'           => app_clean((string) ($_POST['eyebrow'] ?? '')),
+                'title'             => app_clean((string) ($_POST['title'] ?? '')),
+                'empty_state'       => trim((string) ($_POST['empty_state'] ?? '')),
+                'intro'             => trim((string) ($_POST['intro'] ?? '')),
+                'cms_source_lead'   => trim((string) ($_POST['cms_source_lead'] ?? '')),
+                'cms_source_link'   => app_clean((string) ($_POST['cms_source_link'] ?? '')),
+                'cms_source_url'    => trim((string) ($_POST['cms_source_url'] ?? '')),
+                'instructions'      => trim((string) ($_POST['instructions'] ?? '')),
+                'form_title'        => app_clean((string) ($_POST['form_title'] ?? '')),
+                'submit_label'      => app_clean((string) ($_POST['submit_label'] ?? '')),
+                'load_more_label'   => app_clean((string) ($_POST['load_more_label'] ?? '')),
             ];
             app_content_save($stored);
             app_flash('success', 'Section Vos projets mise à jour.');
@@ -323,9 +326,16 @@ $loggedIn = app_admin_logged_in();
             </div>
             <label><span>État vide (texte si aucun projet publié)</span><textarea name="empty_state" maxlength="500"><?= app_e($proj['empty_state']); ?></textarea></label>
             <label><span>Intro</span><textarea name="intro" maxlength="800"><?= app_e($proj['intro']); ?></textarea></label>
-            <label><span>Instructions au-dessus du formulaire</span><textarea name="instructions" maxlength="800"><?= app_e($proj['instructions']); ?></textarea></label>
+            <h3 style="margin:1rem 0 0;font-family:var(--font-display);color:var(--neon-cyan);">Lien CMS-Source.org</h3>
+            <p class="form__hint">Affiché sous l'intro pour rediriger les visiteurs vers l'espace création.</p>
+            <label><span>Phrase d'amorce</span><input type="text" name="cms_source_lead" value="<?= app_e($proj['cms_source_lead'] ?? ''); ?>" maxlength="160"></label>
             <div class="admin-grid">
-              <label><span>Titre formulaire</span><input type="text" name="form_title" value="<?= app_e($proj['form_title']); ?>" maxlength="60"></label>
+              <label><span>Texte du lien</span><input type="text" name="cms_source_link" value="<?= app_e($proj['cms_source_link'] ?? ''); ?>" maxlength="120"></label>
+              <label><span>URL du lien</span><input type="url" name="cms_source_url" value="<?= app_e($proj['cms_source_url'] ?? ''); ?>"></label>
+            </div>
+            <label><span>Instructions au-dessus du formulaire (laisser vide pour masquer)</span><textarea name="instructions" maxlength="800"><?= app_e($proj['instructions']); ?></textarea></label>
+            <div class="admin-grid">
+              <label><span>Titre formulaire</span><input type="text" name="form_title" value="<?= app_e($proj['form_title']); ?>" maxlength="80"></label>
               <label><span>Bouton envoi</span><input type="text" name="submit_label" value="<?= app_e($proj['submit_label']); ?>" maxlength="40"></label>
               <label><span>Bouton « Voir plus »</span><input type="text" name="load_more_label" value="<?= app_e($proj['load_more_label']); ?>" maxlength="40"></label>
             </div>

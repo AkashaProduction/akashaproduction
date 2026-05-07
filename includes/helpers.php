@@ -173,9 +173,7 @@ function app_save_uploaded_image(string $field, string $prefix = 'project'): ?ar
 
     $finfo = finfo_open(FILEINFO_MIME_TYPE);
     $mime = $finfo ? (string) finfo_file($finfo, $tmp) : (string) ($_FILES[$field]['type'] ?? '');
-    if ($finfo) {
-        finfo_close($finfo);
-    }
+    // finfo objects auto-free in PHP 8.5+; explicit finfo_close() is deprecated.
 
     if (!isset($allowed[$mime])) {
         return null;
