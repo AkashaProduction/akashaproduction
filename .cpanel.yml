@@ -2,46 +2,19 @@
 deployment:
   tasks:
     - export DEPLOYPATH=/home/prro3328/akashaproduction
-
-    # Ensure target tree exists (never -rf the root: /aletheia and other apps live here)
-    - /bin/mkdir -p $DEPLOYPATH
-    - /bin/mkdir -p $DEPLOYPATH/assets
-    - /bin/mkdir -p $DEPLOYPATH/assets/img
-    - /bin/mkdir -p $DEPLOYPATH/assets/img/projects
-    - /bin/mkdir -p $DEPLOYPATH/assets/img/source
-    - /bin/mkdir -p $DEPLOYPATH/assets/users-projects
-    - /bin/mkdir -p $DEPLOYPATH/assets/users-projects/images
-    - /bin/mkdir -p $DEPLOYPATH/includes
-    - /bin/mkdir -p $DEPLOYPATH/api
-    - /bin/mkdir -p $DEPLOYPATH/data
-
-    # Remove the legacy PHP/HTML files from previous version (preserve data/, /aletheia, /assets, etc.)
+    - export SRC=$(/bin/pwd)
+    - /bin/mkdir -p $DEPLOYPATH $DEPLOYPATH/assets $DEPLOYPATH/assets/img $DEPLOYPATH/assets/img/projects $DEPLOYPATH/assets/img/source $DEPLOYPATH/assets/img/projects/source $DEPLOYPATH/assets/users-projects $DEPLOYPATH/assets/users-projects/images $DEPLOYPATH/includes $DEPLOYPATH/api $DEPLOYPATH/data
     - /bin/rm -f $DEPLOYPATH/solutions.php $DEPLOYPATH/contact.php $DEPLOYPATH/commander.php $DEPLOYPATH/mon-compte.php $DEPLOYPATH/mentions-legales.php $DEPLOYPATH/domain-check.php $DEPLOYPATH/checkout.php $DEPLOYPATH/commande-confirmee.php $DEPLOYPATH/presentation-code.html
-
-    # Remove legacy includes that no longer exist in this version
     - /bin/rm -f $DEPLOYPATH/includes/i18n.php $DEPLOYPATH/includes/footer.php $DEPLOYPATH/includes/header.php $DEPLOYPATH/includes/domain-pricing.php $DEPLOYPATH/includes/stripe-config.php $DEPLOYPATH/includes/runtime-config.example.php
-
-    # Remove legacy multilingual + storage folders if present
     - /bin/rm -rf $DEPLOYPATH/lang $DEPLOYPATH/messages $DEPLOYPATH/docs $DEPLOYPATH/storage
-
-    # Drop old commander hero images (no longer used by the new design)
     - /bin/rm -f $DEPLOYPATH/assets/img/commander-growth.jpg $DEPLOYPATH/assets/img/commander-stars.jpg $DEPLOYPATH/assets/img/commander-victory.jpg
-
-    # Deploy the new flat files
-    - /bin/cp .htaccess $DEPLOYPATH/.htaccess
-    - /bin/cp index.php admin.php $DEPLOYPATH/
-
-    # Deploy assets (images + css + js). Existing user-uploaded images in users-projects/images are preserved.
-    - /bin/cp -R assets/site.css $DEPLOYPATH/assets/site.css
-    - /bin/cp -R assets/site.js $DEPLOYPATH/assets/site.js
-    - /bin/cp -R assets/img/. $DEPLOYPATH/assets/img/
-
-    # Backend: includes + api (always overwrite to keep latest code)
-    - /bin/cp -R includes/. $DEPLOYPATH/includes/
-    - /bin/cp -R api/. $DEPLOYPATH/api/
-
-    # Data folder: only ensure structure (data files are preserved on server, never overwritten)
-    - /bin/cp -n data/.htaccess $DEPLOYPATH/data/.htaccess 2>/dev/null || true
-
-    # Permissions on writable folders
-    - /bin/chmod 0775 $DEPLOYPATH/data $DEPLOYPATH/assets/users-projects/images
+    - /bin/cp $SRC/.htaccess $DEPLOYPATH/.htaccess
+    - /bin/cp $SRC/index.php $DEPLOYPATH/index.php
+    - /bin/cp $SRC/admin.php $DEPLOYPATH/admin.php
+    - /bin/cp $SRC/assets/site.css $DEPLOYPATH/assets/site.css
+    - /bin/cp $SRC/assets/site.js $DEPLOYPATH/assets/site.js
+    - /bin/cp -R $SRC/assets/img/. $DEPLOYPATH/assets/img/
+    - /bin/cp -R $SRC/includes/. $DEPLOYPATH/includes/
+    - /bin/cp -R $SRC/api/. $DEPLOYPATH/api/
+    - /bin/cp -n $SRC/data/.htaccess $DEPLOYPATH/data/.htaccess 2>/dev/null || true
+    - /bin/chmod 0775 $DEPLOYPATH/data $DEPLOYPATH/assets/users-projects/images 2>/dev/null || true
