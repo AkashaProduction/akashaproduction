@@ -5,7 +5,7 @@ function app_content_defaults(): array
 {
     return [
         'site' => [
-            'meta_title'       => 'Akasha Production — La Créativité Interconnectée',
+            'meta_title'       => 'Akasha Production — Créativité Inter Connectée',
             'meta_description' => 'Akasha Production conçoit des créations web sur mesure, des univers interactifs et des jeux narratifs à la croisée du sensible et du conceptuel.',
             'enter_label'      => 'Entrer',
             'loader_label'     => 'Akasha Production',
