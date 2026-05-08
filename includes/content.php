@@ -141,25 +141,116 @@ function app_content_defaults(): array
             'lead'         => "Pour un projet, une collaboration ou une simple question — déposez un message, nous répondons en moins de 48h.",
             'submit_label' => 'Envoyer',
         ],
+        'forms' => [
+            'first_name'              => 'Prénom',
+            'last_name'               => 'Nom',
+            'email'                   => 'Email',
+            'phone'                   => 'Téléphone',
+            'optional'                => '(facultatif)',
+            'close'                   => 'Fermer',
+            'open_menu'               => 'Ouvrir le menu',
+            'project_title'           => 'Titre du projet',
+            'project_title_ph'        => 'Le nom de votre œuvre web',
+            'project_image'           => 'Image de couverture',
+            'project_image_hint'      => '(jpg, png ou webp — max 6 Mo)',
+            'project_description'     => 'Description',
+            'project_description_ph'  => 'Quelques lignes pour situer le projet, son intention, sa singularité…',
+            'project_url'             => 'Site URL',
+            'project_url_ph'          => 'https://votre-projet.com',
+            'project_note'            => 'Note complémentaire',
+            'project_note_ph'         => 'Tout ce que nous devrions savoir avant publication.',
+            'contact_subject'         => 'Sujet',
+            'contact_message'         => 'Message',
+            'loader_aria'             => 'Chargement de l’expérience Akasha Production',
+        ],
     ];
 }
 
-function app_content(): array
+/**
+ * Returns the merged content tree for a specific language.
+ *
+ * Resolution order (deep merge, last-wins):
+ *   1. French defaults from app_content_defaults()
+ *   2. If $lang !== 'fr': translation overrides from app_content_translations()[$lang]
+ *      (still fall back to FR for keys not translated)
+ *   3. Stored overrides from data/content.json (FR) or data/content-{lang}.json (other)
+ *
+ * The active-language behaviour (no $lang argument) keeps the original
+ * `app_content()` signature working — it resolves the request language
+ * automatically via app_lang_resolve().
+ */
+function app_content(?string $lang = null): array
 {
-    static $cache = null;
-    if ($cache !== null) {
-        return $cache;
+    static $cache = [];
+
+    if ($lang === null) {
+        $lang = app_lang_resolve();
+    }
+    if (!app_lang_is_supported($lang)) {
+        $lang = APP_DEFAULT_LANG;
+    }
+    if (isset($cache[$lang])) {
+        return $cache[$lang];
     }
 
-    $defaults = app_content_defaults();
-    $stored = app_read_json('content.json', []);
-    $cache = $stored ? app_array_replace_recursive_keep_lists($defaults, $stored) : $defaults;
-    return $cache;
+    $merged = app_content_defaults();
+
+    if ($lang !== APP_DEFAULT_LANG) {
+        $translations = app_content_translations();
+        if (!empty($translations[$lang])) {
+            // creations.cards is a numeric list with structured items (image, url, available...).
+            // Translations only carry localized name/description; we merge per-index to keep
+            // the non-translated fields (url, image, image_webp, available) from the FR defaults.
+            $cardsOverride = $translations[$lang]['creations']['cards'] ?? null;
+            if (is_array($cardsOverride)) {
+                unset($translations[$lang]['creations']['cards']);
+            }
+            $merged = app_array_replace_recursive_keep_lists($merged, $translations[$lang]);
+            if (is_array($cardsOverride) && !empty($merged['creations']['cards'])) {
+                foreach ($merged['creations']['cards'] as $i => &$card) {
+                    if (isset($cardsOverride[$i]) && is_array($cardsOverride[$i])) {
+                        $card = array_replace($card, $cardsOverride[$i]);
+                    }
+                }
+                unset($card);
+            }
+        }
+        $formTranslations = app_content_form_translations();
+        if (!empty($formTranslations[$lang])) {
+            $merged = app_array_replace_recursive_keep_lists($merged, $formTranslations[$lang]);
+        }
+    }
+
+    $filename = app_content_filename_for_lang($lang);
+    $stored   = app_read_json($filename, []);
+    if ($stored) {
+        $merged = app_array_replace_recursive_keep_lists($merged, $stored);
+    }
+
+    $cache[$lang] = $merged;
+    return $merged;
 }
 
-function app_content_save(array $content): bool
+function app_content_save(array $content, ?string $lang = null): bool
 {
-    return app_write_json('content.json', $content);
+    if ($lang === null) {
+        $lang = APP_DEFAULT_LANG;
+    }
+    if (!app_lang_is_supported($lang)) {
+        $lang = APP_DEFAULT_LANG;
+    }
+    return app_write_json(app_content_filename_for_lang($lang), $content);
+}
+
+function app_content_stored(?string $lang = null): array
+{
+    if ($lang === null) {
+        $lang = APP_DEFAULT_LANG;
+    }
+    if (!app_lang_is_supported($lang)) {
+        $lang = APP_DEFAULT_LANG;
+    }
+    return app_read_json(app_content_filename_for_lang($lang), []);
 }
 
 function app_content_invalidate(): void

@@ -96,11 +96,27 @@ function app_check_csrf(string $token): bool
     return !empty($_SESSION['akasha_csrf']) && hash_equals($_SESSION['akasha_csrf'], $token);
 }
 
+/**
+ * Returns the active admin password hash. The data/admin-credentials.json
+ * file (if present) takes precedence over the hash baked into config.php —
+ * this is how the in-app "change password" feature persists a new hash
+ * without rewriting the PHP config file.
+ */
+function app_admin_password_hash(): string
+{
+    $stored = app_read_json('admin-credentials.json', []);
+    if (!empty($stored['password_hash']) && is_string($stored['password_hash'])) {
+        return (string) $stored['password_hash'];
+    }
+    $config = app_config();
+    return (string) ($config['admin']['password_hash'] ?? '');
+}
+
 function app_admin_login(string $email, string $password): bool
 {
     $config = app_config();
     $expectedEmail = strtolower(trim((string) ($config['admin']['email'] ?? '')));
-    $hash = (string) ($config['admin']['password_hash'] ?? '');
+    $hash = app_admin_password_hash();
     if ($expectedEmail === '' || $hash === '') {
         return false;
     }
@@ -113,6 +129,30 @@ function app_admin_login(string $email, string $password): bool
     $_SESSION['akasha_admin'] = true;
     session_regenerate_id(true);
     return true;
+}
+
+/**
+ * Validate the old password and persist a new bcrypt hash to
+ * data/admin-credentials.json. Returns ['ok' => bool, 'error' => ?string].
+ */
+function app_admin_change_password(string $oldPassword, string $newPassword): array
+{
+    $hash = app_admin_password_hash();
+    if ($hash === '' || !password_verify($oldPassword, $hash)) {
+        return ['ok' => false, 'error' => 'Mot de passe actuel incorrect.'];
+    }
+    if (strlen($newPassword) < 10) {
+        return ['ok' => false, 'error' => 'Le nouveau mot de passe doit faire au moins 10 caractères.'];
+    }
+    $newHash = password_hash($newPassword, PASSWORD_BCRYPT, ['cost' => 12]);
+    if ($newHash === false) {
+        return ['ok' => false, 'error' => 'Impossible de générer le hash bcrypt.'];
+    }
+    $ok = app_write_json('admin-credentials.json', ['password_hash' => $newHash, 'updated_at' => app_now()]);
+    if (!$ok) {
+        return ['ok' => false, 'error' => 'Écriture du nouveau hash impossible (permissions data/).'];
+    }
+    return ['ok' => true, 'error' => null];
 }
 
 function app_admin_logged_in(): bool

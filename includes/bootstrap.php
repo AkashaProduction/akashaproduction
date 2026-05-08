@@ -15,6 +15,9 @@ if (PHP_SAPI !== 'cli' && session_status() === PHP_SESSION_NONE) {
 $config = require __DIR__ . '/config.php';
 
 require_once __DIR__ . '/helpers.php';
+require_once __DIR__ . '/i18n.php';
+require_once __DIR__ . '/translations.php';
+require_once __DIR__ . '/translations-forms.php';
 
 foreach ([$config['paths']['data'], $config['paths']['uploads']] as $dir) {
     if (!is_dir($dir)) {

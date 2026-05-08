@@ -2,8 +2,11 @@
 require __DIR__ . '/includes/bootstrap.php';
 require __DIR__ . '/includes/content.php';
 
-$content = app_content();
-$cfg     = app_config();
+$lang     = app_lang_resolve();
+$langDir  = app_lang_dir($lang);
+$languages = app_languages();
+$content  = app_content($lang);
+$cfg      = app_config();
 $projects = app_user_projects_published();
 $initialBatch = 6;
 $published = $projects;
@@ -13,7 +16,7 @@ $row2  = array_slice($published, 3, 2);
 $row3b = array_slice($published, 5, 3);
 $remaining = array_slice($published, 8);
 ?><!DOCTYPE html>
-<html lang="fr">
+<html lang="<?= app_e($lang); ?>" dir="<?= app_e($langDir); ?>">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -34,7 +37,7 @@ $remaining = array_slice($published, 8);
 <!-- =========================================================
      LOADER — countdown 3,2,1 with three dots tracing a circle
      ========================================================= -->
-<div class="loader" id="loader" aria-hidden="false" role="status" aria-label="Chargement de l'expérience Akasha Production">
+<div class="loader" id="loader" aria-hidden="false" role="status" aria-label="<?= app_e($content['forms']['loader_aria']); ?>">
   <div class="loader__inner">
     <svg class="loader__svg" viewBox="0 0 200 200" aria-hidden="true">
       <defs>
@@ -126,7 +129,7 @@ $remaining = array_slice($published, 8);
         <span><?= app_e($cfg['site']['name']); ?></span>
       </a>
       <button class="nav__toggle" type="button" id="navToggle" aria-expanded="false" aria-controls="navMenu">
-        <span class="sr-only">Ouvrir le menu</span>
+        <span class="sr-only"><?= app_e($content['forms']['open_menu']); ?></span>
         <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true">
           <path d="M3 6h14M3 10h14M3 14h14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
         </svg>
@@ -139,6 +142,25 @@ $remaining = array_slice($published, 8);
           <li><button class="nav__link" type="button" data-lightbox="contact"><?= app_e($content['nav']['contact']); ?></button></li>
         </ul>
       </nav>
+      <div class="lang-switcher" id="langSwitcher">
+        <button class="lang-switcher__current" type="button" aria-haspopup="listbox" aria-expanded="false" aria-label="<?= app_e($languages[$lang]['name']); ?>">
+          <img class="lang-switcher__flag" src="assets/img/flags/<?= app_e($languages[$lang]['flag']); ?>.svg" alt="" width="20" height="15">
+          <span class="lang-switcher__code"><?= strtoupper(app_e($lang)); ?></span>
+          <svg class="lang-switcher__chev" viewBox="0 0 12 8" width="10" height="7" aria-hidden="true">
+            <path d="M1 1.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <ul class="lang-switcher__menu" role="listbox">
+          <?php foreach ($languages as $code => $info): ?>
+            <li role="option" aria-selected="<?= $code === $lang ? 'true' : 'false'; ?>">
+              <a class="lang-switcher__item<?= $code === $lang ? ' is-active' : ''; ?>" href="?lang=<?= app_e($code); ?>" hreflang="<?= app_e($code); ?>">
+                <img class="lang-switcher__flag" src="assets/img/flags/<?= app_e($info['flag']); ?>.svg" alt="" width="20" height="15">
+                <span><?= app_e($info['native']); ?></span>
+              </a>
+            </li>
+          <?php endforeach; ?>
+        </ul>
+      </div>
     </div>
   </header>
 
@@ -309,50 +331,50 @@ $remaining = array_slice($published, 8);
             <input type="hidden" name="csrf" value="<?= app_e(app_csrf_token()); ?>">
 
             <label class="form__field">
-              <span class="form__label">Titre du projet</span>
-              <input class="form__control" type="text" name="title" required maxlength="120" placeholder="Le nom de votre œuvre web">
+              <span class="form__label"><?= app_e($content['forms']['project_title']); ?></span>
+              <input class="form__control" type="text" name="title" required maxlength="120" placeholder="<?= app_e($content['forms']['project_title_ph']); ?>">
             </label>
 
             <label class="form__field">
-              <span class="form__label">Image de couverture <span class="form__optional">(jpg, png ou webp — max 6 Mo)</span></span>
+              <span class="form__label"><?= app_e($content['forms']['project_image']); ?> <span class="form__optional"><?= app_e($content['forms']['project_image_hint']); ?></span></span>
               <input class="form__control" type="file" name="image" accept="image/jpeg,image/png,image/webp">
             </label>
 
             <label class="form__field">
-              <span class="form__label">Description</span>
-              <textarea class="form__textarea" name="description" required maxlength="800" placeholder="Quelques lignes pour situer le projet, son intention, sa singularité…"></textarea>
+              <span class="form__label"><?= app_e($content['forms']['project_description']); ?></span>
+              <textarea class="form__textarea" name="description" required maxlength="800" placeholder="<?= app_e($content['forms']['project_description_ph']); ?>"></textarea>
             </label>
 
             <label class="form__field">
-              <span class="form__label">URL du projet</span>
-              <input class="form__control" type="url" name="url" required placeholder="https://votre-projet.com">
+              <span class="form__label"><?= app_e($content['forms']['project_url']); ?></span>
+              <input class="form__control" type="url" name="url" required placeholder="<?= app_e($content['forms']['project_url_ph']); ?>">
             </label>
 
             <div class="form__row">
               <label class="form__field">
-                <span class="form__label">Prénom</span>
+                <span class="form__label"><?= app_e($content['forms']['first_name']); ?></span>
                 <input class="form__control" type="text" name="first_name" required maxlength="80">
               </label>
               <label class="form__field">
-                <span class="form__label">Nom</span>
+                <span class="form__label"><?= app_e($content['forms']['last_name']); ?></span>
                 <input class="form__control" type="text" name="last_name" required maxlength="80">
               </label>
             </div>
 
             <div class="form__row">
               <label class="form__field">
-                <span class="form__label">Email</span>
+                <span class="form__label"><?= app_e($content['forms']['email']); ?></span>
                 <input class="form__control" type="email" name="email" required maxlength="120">
               </label>
               <label class="form__field">
-                <span class="form__label">Téléphone <span class="form__optional">(facultatif)</span></span>
+                <span class="form__label"><?= app_e($content['forms']['phone']); ?> <span class="form__optional"><?= app_e($content['forms']['optional']); ?></span></span>
                 <input class="form__control" type="tel" name="phone" maxlength="40">
               </label>
             </div>
 
             <label class="form__field">
-              <span class="form__label">Note complémentaire <span class="form__optional">(facultatif)</span></span>
-              <textarea class="form__textarea" name="note" maxlength="600" placeholder="Tout ce que nous devrions savoir avant publication."></textarea>
+              <span class="form__label"><?= app_e($content['forms']['project_note']); ?> <span class="form__optional"><?= app_e($content['forms']['optional']); ?></span></span>
+              <textarea class="form__textarea" name="note" maxlength="600" placeholder="<?= app_e($content['forms']['project_note_ph']); ?>"></textarea>
             </label>
 
             <!-- honeypot -->
@@ -386,20 +408,17 @@ $remaining = array_slice($published, 8);
      ========================================================= -->
 <div class="lightbox" id="lightboxLegal" role="dialog" aria-modal="true" aria-labelledby="lightboxLegalTitle">
   <div class="lightbox__panel">
-    <button class="lightbox__close" type="button" data-close-lightbox aria-label="Fermer">×</button>
+    <button class="lightbox__close" type="button" data-close-lightbox aria-label="<?= app_e($content['forms']['close']); ?>">×</button>
     <h2 class="lightbox__title" id="lightboxLegalTitle"><?= app_e($content['footer']['legal_link']); ?></h2>
     <?php foreach ($content['footer']['legal_lines'] as $line): ?>
       <p class="lightbox__copy"><?= app_e($line); ?></p>
     <?php endforeach; ?>
-    <p class="lightbox__copy" style="margin-top:1rem;color:var(--text-muted);font-size:0.85rem;">
-      Données collectées via le site uniquement pour traiter vos demandes. Aucune donnée n'est cédée à des tiers.
-    </p>
   </div>
 </div>
 
 <div class="lightbox" id="lightboxContact" role="dialog" aria-modal="true" aria-labelledby="lightboxContactTitle">
   <div class="lightbox__panel">
-    <button class="lightbox__close" type="button" data-close-lightbox aria-label="Fermer">×</button>
+    <button class="lightbox__close" type="button" data-close-lightbox aria-label="<?= app_e($content['forms']['close']); ?>">×</button>
     <h2 class="lightbox__title" id="lightboxContactTitle"><?= app_e($content['contact']['title']); ?></h2>
     <p class="lightbox__copy"><?= app_e($content['contact']['lead']); ?></p>
 
@@ -409,27 +428,27 @@ $remaining = array_slice($published, 8);
 
       <div class="form__row">
         <label class="form__field">
-          <span class="form__label">Prénom</span>
+          <span class="form__label"><?= app_e($content['forms']['first_name']); ?></span>
           <input class="form__control" type="text" name="first_name" required maxlength="80">
         </label>
         <label class="form__field">
-          <span class="form__label">Nom</span>
+          <span class="form__label"><?= app_e($content['forms']['last_name']); ?></span>
           <input class="form__control" type="text" name="last_name" required maxlength="80">
         </label>
       </div>
 
       <label class="form__field">
-        <span class="form__label">Email</span>
+        <span class="form__label"><?= app_e($content['forms']['email']); ?></span>
         <input class="form__control" type="email" name="email" required maxlength="120">
       </label>
 
       <label class="form__field">
-        <span class="form__label">Sujet</span>
+        <span class="form__label"><?= app_e($content['forms']['contact_subject']); ?></span>
         <input class="form__control" type="text" name="subject" required maxlength="160">
       </label>
 
       <label class="form__field">
-        <span class="form__label">Message</span>
+        <span class="form__label"><?= app_e($content['forms']['contact_message']); ?></span>
         <textarea class="form__textarea" name="message" required maxlength="2000"></textarea>
       </label>
 

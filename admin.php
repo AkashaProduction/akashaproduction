@@ -38,8 +38,11 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     }
 
     $section = (string) ($_POST['section'] ?? 'content');
+    $editLang = (string) ($_POST['edit_lang'] ?? 'fr');
+    if (!app_lang_is_supported($editLang)) { $editLang = 'fr'; }
     $defaults = app_content_defaults();
-    $stored = app_read_json('content.json', []);
+    $stored   = app_content_stored($editLang);
+    $editLangQS = '&edit_lang=' . urlencode($editLang);
 
     switch ($action) {
         case 'save_site':
@@ -49,9 +52,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                 'enter_label'      => app_clean((string) ($_POST['enter_label'] ?? 'Entrer')),
                 'loader_label'     => app_clean((string) ($_POST['loader_label'] ?? 'Akasha Production')),
             ];
-            app_content_save($stored);
+            app_content_save($stored, $editLang);
             app_flash('success', 'En-tête du site mis à jour.');
-            app_redirect('/admin?section=content');
+            app_redirect('/admin?section=content' . $editLangQS);
 
         case 'save_hero':
             $stored['hero'] = [
@@ -61,9 +64,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                 'cta_creations' => app_clean((string) ($_POST['cta_creations'] ?? '')),
                 'cta_projects'  => app_clean((string) ($_POST['cta_projects'] ?? '')),
             ];
-            app_content_save($stored);
+            app_content_save($stored, $editLang);
             app_flash('success', 'Section Hero mise à jour.');
-            app_redirect('/admin?section=content');
+            app_redirect('/admin?section=content' . $editLangQS);
 
         case 'save_featured':
             $stored['featured'] = [
@@ -76,9 +79,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                 'cta_label'   => app_clean((string) ($_POST['cta_label'] ?? '')),
                 'cta_url'     => trim((string) ($_POST['cta_url'] ?? '')),
             ];
-            app_content_save($stored);
+            app_content_save($stored, $editLang);
             app_flash('success', 'Section À la une mise à jour.');
-            app_redirect('/admin?section=content');
+            app_redirect('/admin?section=content' . $editLangQS);
 
         case 'save_creations':
             $eyebrow = app_clean((string) ($_POST['eyebrow'] ?? ''));
@@ -106,9 +109,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                 'intro'   => $intro,
                 'cards'   => $cards,
             ];
-            app_content_save($stored);
+            app_content_save($stored, $editLang);
             app_flash('success', count($cards) . ' cartes enregistrées.');
-            app_redirect('/admin?section=creations');
+            app_redirect('/admin?section=creations' . $editLangQS);
 
         case 'save_projects_section':
             $stored['projects'] = [
@@ -124,9 +127,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                 'submit_label'      => app_clean((string) ($_POST['submit_label'] ?? '')),
                 'load_more_label'   => app_clean((string) ($_POST['load_more_label'] ?? '')),
             ];
-            app_content_save($stored);
+            app_content_save($stored, $editLang);
             app_flash('success', 'Section Vos projets mise à jour.');
-            app_redirect('/admin?section=content');
+            app_redirect('/admin?section=content' . $editLangQS);
 
         case 'save_footer':
             $lines = preg_split("/\r?\n/", (string) ($_POST['legal_lines'] ?? '')) ?: [];
@@ -148,14 +151,30 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                 'projects'  => app_clean((string) ($_POST['nav_projects'] ?? '')),
                 'contact'   => app_clean((string) ($_POST['nav_contact'] ?? '')),
             ];
-            app_content_save($stored);
+            app_content_save($stored, $editLang);
             app_flash('success', 'Pied de page et navigation mis à jour.');
-            app_redirect('/admin?section=content');
+            app_redirect('/admin?section=content' . $editLangQS);
 
         case 'reset_content':
-            app_content_save([]);
-            app_flash('success', 'Contenu réinitialisé aux valeurs par défaut.');
-            app_redirect('/admin?section=content');
+            app_content_save([], $editLang);
+            app_flash('success', 'Contenu réinitialisé aux valeurs par défaut (' . $editLang . ').');
+            app_redirect('/admin?section=content' . $editLangQS);
+
+        case 'change_password':
+            $oldPassword = (string) ($_POST['current_password'] ?? '');
+            $newPassword = (string) ($_POST['new_password'] ?? '');
+            $confirmPassword = (string) ($_POST['confirm_password'] ?? '');
+            if ($newPassword !== $confirmPassword) {
+                app_flash('error', 'La confirmation ne correspond pas au nouveau mot de passe.');
+                app_redirect('/admin?section=security' . $editLangQS);
+            }
+            $result = app_admin_change_password($oldPassword, $newPassword);
+            if ($result['ok']) {
+                app_flash('success', 'Mot de passe administrateur mis à jour.');
+            } else {
+                app_flash('error', $result['error']);
+            }
+            app_redirect('/admin?section=security' . $editLangQS);
 
         case 'project_status':
             $id = (string) ($_POST['id'] ?? '');
@@ -195,8 +214,11 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
 }
 
 $section = (string) ($_GET['section'] ?? 'content');
-$content = app_content();
+$editLang = (string) ($_GET['edit_lang'] ?? 'fr');
+if (!app_lang_is_supported($editLang)) { $editLang = 'fr'; }
+$content = app_content($editLang);
 $cfg     = app_config();
+$languages = app_languages();
 $flash   = app_pull_flash();
 $loggedIn = app_admin_logged_in();
 ?><!DOCTYPE html>
@@ -252,11 +274,24 @@ $loggedIn = app_admin_logged_in();
     <?php else: ?>
 
       <nav class="admin-tabs">
-        <a class="admin-tab<?= $section === 'content' ? ' is-active' : ''; ?>" href="/admin?section=content">Contenu</a>
-        <a class="admin-tab<?= $section === 'creations' ? ' is-active' : ''; ?>" href="/admin?section=creations">Nos créations</a>
+        <a class="admin-tab<?= $section === 'content' ? ' is-active' : ''; ?>" href="/admin?section=content&amp;edit_lang=<?= app_e($editLang); ?>">Contenu</a>
+        <a class="admin-tab<?= $section === 'creations' ? ' is-active' : ''; ?>" href="/admin?section=creations&amp;edit_lang=<?= app_e($editLang); ?>">Nos créations</a>
         <a class="admin-tab<?= $section === 'projects' ? ' is-active' : ''; ?>" href="/admin?section=projects">Vos projets <?php $pending = count(array_filter(app_user_projects(), fn($p) => ($p['status'] ?? '') === 'pending')); echo $pending ? "({$pending})" : ''; ?></a>
         <a class="admin-tab<?= $section === 'contacts' ? ' is-active' : ''; ?>" href="/admin?section=contacts">Messages</a>
+        <a class="admin-tab<?= $section === 'security' ? ' is-active' : ''; ?>" href="/admin?section=security">Sécurité</a>
       </nav>
+
+      <?php if (in_array($section, ['content', 'creations'], true)): ?>
+        <div class="admin-lang-selector" style="display:flex;align-items:center;gap:0.6rem;margin:0 0 1.2rem 0;padding:0.7rem 1rem;background:rgba(91,232,255,0.05);border:1px solid rgba(91,232,255,0.18);border-radius:10px;">
+          <span style="color:var(--text-muted);font-size:0.85rem;">Langue à éditer :</span>
+          <select onchange="window.location.href=this.value" style="background:rgba(3,2,10,0.5);border:1px solid rgba(91,232,255,0.3);color:var(--neon-cyan);padding:0.4rem 0.7rem;border-radius:6px;font-family:var(--font-display);">
+            <?php foreach ($languages as $code => $info): ?>
+              <option value="/admin?section=<?= app_e($section); ?>&amp;edit_lang=<?= app_e($code); ?>"<?= $code === $editLang ? ' selected' : ''; ?>><?= app_e($info['native']); ?> (<?= strtoupper(app_e($code)); ?>)</option>
+            <?php endforeach; ?>
+          </select>
+          <span style="color:var(--text-muted);font-size:0.78rem;">— les modifications s'appliquent uniquement à cette langue.</span>
+        </div>
+      <?php endif; ?>
 
       <?php if ($section === 'content'): ?>
         <?php $hero = $content['hero']; $featured = $content['featured']; $proj = $content['projects']; $foot = $content['footer']; $contact = $content['contact']; $nav = $content['nav']; $site = $content['site']; ?>
@@ -264,7 +299,7 @@ $loggedIn = app_admin_logged_in();
         <article class="admin-card">
           <h2>Métadonnées du site</h2>
           <form method="post" class="admin-form-grid">
-            <input type="hidden" name="csrf" value="<?= app_e(app_csrf_token()); ?>">
+            <input type="hidden" name="csrf" value="<?= app_e(app_csrf_token()); ?>"><input type="hidden" name="edit_lang" value="<?= app_e($editLang); ?>">
             <input type="hidden" name="action" value="save_site">
             <input type="hidden" name="section" value="content">
             <label><span>Meta title</span><input type="text" name="meta_title" value="<?= app_e($site['meta_title']); ?>" maxlength="160"></label>
@@ -278,7 +313,7 @@ $loggedIn = app_admin_logged_in();
         <article class="admin-card">
           <h2>Hero</h2>
           <form method="post" class="admin-form-grid">
-            <input type="hidden" name="csrf" value="<?= app_e(app_csrf_token()); ?>">
+            <input type="hidden" name="csrf" value="<?= app_e(app_csrf_token()); ?>"><input type="hidden" name="edit_lang" value="<?= app_e($editLang); ?>">
             <input type="hidden" name="action" value="save_hero">
             <input type="hidden" name="section" value="content">
             <label><span>Eyebrow</span><input type="text" name="eyebrow" value="<?= app_e($hero['eyebrow']); ?>" maxlength="60"></label>
@@ -295,7 +330,7 @@ $loggedIn = app_admin_logged_in();
         <article class="admin-card">
           <h2>À la une (Aletheia)</h2>
           <form method="post" class="admin-form-grid">
-            <input type="hidden" name="csrf" value="<?= app_e(app_csrf_token()); ?>">
+            <input type="hidden" name="csrf" value="<?= app_e(app_csrf_token()); ?>"><input type="hidden" name="edit_lang" value="<?= app_e($editLang); ?>">
             <input type="hidden" name="action" value="save_featured">
             <input type="hidden" name="section" value="content">
             <label><span>Eyebrow</span><input type="text" name="eyebrow" value="<?= app_e($featured['eyebrow']); ?>" maxlength="40"></label>
@@ -317,7 +352,7 @@ $loggedIn = app_admin_logged_in();
         <article class="admin-card">
           <h2>Section « Vos projets »</h2>
           <form method="post" class="admin-form-grid">
-            <input type="hidden" name="csrf" value="<?= app_e(app_csrf_token()); ?>">
+            <input type="hidden" name="csrf" value="<?= app_e(app_csrf_token()); ?>"><input type="hidden" name="edit_lang" value="<?= app_e($editLang); ?>">
             <input type="hidden" name="action" value="save_projects_section">
             <input type="hidden" name="section" value="content">
             <div class="admin-grid">
@@ -346,7 +381,7 @@ $loggedIn = app_admin_logged_in();
         <article class="admin-card">
           <h2>Pied de page · navigation · contact</h2>
           <form method="post" class="admin-form-grid">
-            <input type="hidden" name="csrf" value="<?= app_e(app_csrf_token()); ?>">
+            <input type="hidden" name="csrf" value="<?= app_e(app_csrf_token()); ?>"><input type="hidden" name="edit_lang" value="<?= app_e($editLang); ?>">
             <input type="hidden" name="action" value="save_footer">
             <input type="hidden" name="section" value="content">
             <div class="admin-grid">
@@ -379,7 +414,7 @@ $loggedIn = app_admin_logged_in();
           <h2>Réinitialisation</h2>
           <p style="color:var(--text-soft);">Restaure tous les contenus aux valeurs par défaut. Les projets soumis ne sont pas effacés.</p>
           <form method="post" onsubmit="return confirm('Réinitialiser tous les contenus ? Vos projets soumis sont conservés.');">
-            <input type="hidden" name="csrf" value="<?= app_e(app_csrf_token()); ?>">
+            <input type="hidden" name="csrf" value="<?= app_e(app_csrf_token()); ?>"><input type="hidden" name="edit_lang" value="<?= app_e($editLang); ?>">
             <input type="hidden" name="action" value="reset_content">
             <input type="hidden" name="section" value="content">
             <button class="btn btn--ghost" type="submit">Réinitialiser le contenu</button>
@@ -392,7 +427,7 @@ $loggedIn = app_admin_logged_in();
         <article class="admin-card">
           <h2>Nos créations</h2>
           <form method="post" class="admin-form-grid">
-            <input type="hidden" name="csrf" value="<?= app_e(app_csrf_token()); ?>">
+            <input type="hidden" name="csrf" value="<?= app_e(app_csrf_token()); ?>"><input type="hidden" name="edit_lang" value="<?= app_e($editLang); ?>">
             <input type="hidden" name="action" value="save_creations">
             <input type="hidden" name="section" value="creations">
             <div class="admin-grid">
@@ -493,7 +528,7 @@ $loggedIn = app_admin_logged_in();
                   <details>
                     <summary style="cursor:pointer;color:var(--neon-cyan);font-family:var(--font-display);">Éditer</summary>
                     <form method="post" class="admin-form-grid" style="padding-top:0.6rem;">
-                      <input type="hidden" name="csrf" value="<?= app_e(app_csrf_token()); ?>">
+                      <input type="hidden" name="csrf" value="<?= app_e(app_csrf_token()); ?>"><input type="hidden" name="edit_lang" value="<?= app_e($editLang); ?>">
                       <input type="hidden" name="action" value="project_edit">
                       <input type="hidden" name="section" value="projects">
                       <input type="hidden" name="id" value="<?= app_e((string) $p['id']); ?>">
@@ -509,7 +544,7 @@ $loggedIn = app_admin_logged_in();
 
                   <div class="admin-actions">
                     <form method="post" style="display:inline;">
-                      <input type="hidden" name="csrf" value="<?= app_e(app_csrf_token()); ?>">
+                      <input type="hidden" name="csrf" value="<?= app_e(app_csrf_token()); ?>"><input type="hidden" name="edit_lang" value="<?= app_e($editLang); ?>">
                       <input type="hidden" name="action" value="project_status">
                       <input type="hidden" name="section" value="projects">
                       <input type="hidden" name="id" value="<?= app_e((string) $p['id']); ?>">
@@ -517,7 +552,7 @@ $loggedIn = app_admin_logged_in();
                       <button class="btn btn--small btn--primary" type="submit">Approuver</button>
                     </form>
                     <form method="post" style="display:inline;">
-                      <input type="hidden" name="csrf" value="<?= app_e(app_csrf_token()); ?>">
+                      <input type="hidden" name="csrf" value="<?= app_e(app_csrf_token()); ?>"><input type="hidden" name="edit_lang" value="<?= app_e($editLang); ?>">
                       <input type="hidden" name="action" value="project_status">
                       <input type="hidden" name="section" value="projects">
                       <input type="hidden" name="id" value="<?= app_e((string) $p['id']); ?>">
@@ -525,7 +560,7 @@ $loggedIn = app_admin_logged_in();
                       <button class="btn btn--small btn--ghost" type="submit">Refuser</button>
                     </form>
                     <form method="post" style="display:inline;" onsubmit="return confirm('Supprimer définitivement ce projet ?');">
-                      <input type="hidden" name="csrf" value="<?= app_e(app_csrf_token()); ?>">
+                      <input type="hidden" name="csrf" value="<?= app_e(app_csrf_token()); ?>"><input type="hidden" name="edit_lang" value="<?= app_e($editLang); ?>">
                       <input type="hidden" name="action" value="project_delete">
                       <input type="hidden" name="section" value="projects">
                       <input type="hidden" name="id" value="<?= app_e((string) $p['id']); ?>">
@@ -559,6 +594,21 @@ $loggedIn = app_admin_logged_in();
               <?php endforeach; ?>
             </div>
           <?php endif; ?>
+        </article>
+
+      <?php elseif ($section === 'security'): ?>
+        <article class="admin-card">
+          <h2>Sécurité — mot de passe administrateur</h2>
+          <p class="form__hint">Compte connecté : <strong><?= app_e($cfg['admin']['email']); ?></strong>.<br>Le nouveau hash bcrypt sera écrit dans <code>data/admin-credentials.json</code> et prendra effet immédiatement, sans toucher à <code>includes/config.php</code>. Pour réinitialiser, supprime ce fichier et le hash de <code>config.php</code> reprend la main.</p>
+          <form method="post" class="admin-form-grid" autocomplete="off" style="max-width:540px;">
+            <input type="hidden" name="csrf" value="<?= app_e(app_csrf_token()); ?>"><input type="hidden" name="edit_lang" value="<?= app_e($editLang); ?>">
+            <input type="hidden" name="action" value="change_password">
+            <input type="hidden" name="section" value="security">
+            <label><span>Mot de passe actuel</span><input type="password" name="current_password" required autocomplete="current-password"></label>
+            <label><span>Nouveau mot de passe (10 caractères minimum)</span><input type="password" name="new_password" required minlength="10" autocomplete="new-password"></label>
+            <label><span>Confirmation du nouveau mot de passe</span><input type="password" name="confirm_password" required minlength="10" autocomplete="new-password"></label>
+            <div style="display:flex;justify-content:flex-end;"><button class="btn btn--primary" type="submit">Mettre à jour le mot de passe</button></div>
+          </form>
         </article>
 
       <?php endif; ?>

@@ -308,6 +308,122 @@ button { font-family: inherit; }
   text-shadow: var(--halo-text);
 }
 
+/* ==============================================
+   LANGUAGE SWITCHER
+   ============================================== */
+.lang-switcher {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.lang-switcher__current {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(3, 2, 10, 0.45);
+  border: 1px solid rgba(91, 232, 255, 0.3);
+  color: var(--neon-cyan);
+  border-radius: 999px;
+  padding: 0.4rem 0.85rem;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-shadow: var(--halo-text);
+  transition: border-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.lang-switcher__current:hover,
+.lang-switcher__current:focus-visible,
+.lang-switcher[aria-expanded="true"] .lang-switcher__current {
+  border-color: rgba(91, 232, 255, 0.65);
+  color: var(--neon-cyan-soft);
+  box-shadow: 0 0 14px rgba(91, 232, 255, 0.25);
+  outline: none;
+}
+
+.lang-switcher__flag {
+  display: inline-block;
+  width: 20px;
+  height: 15px;
+  border-radius: 2px;
+  object-fit: cover;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.18);
+  flex: 0 0 auto;
+}
+
+.lang-switcher__chev {
+  opacity: 0.7;
+  transition: transform 0.25s ease;
+}
+
+.lang-switcher.is-open .lang-switcher__chev {
+  transform: rotate(180deg);
+}
+
+.lang-switcher__menu {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  right: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem;
+  min-width: 180px;
+  background: rgba(3, 2, 10, 0.96);
+  border: 1px solid rgba(91, 232, 255, 0.25);
+  border-radius: 14px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  transform: translateY(-6px);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
+  z-index: 60;
+}
+
+[dir="rtl"] .lang-switcher__menu {
+  right: auto;
+  left: 0;
+}
+
+.lang-switcher.is-open .lang-switcher__menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.lang-switcher__item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.5rem 0.7rem;
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 0.88rem;
+  font-weight: 500;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.lang-switcher__item:hover,
+.lang-switcher__item:focus-visible {
+  background: rgba(91, 232, 255, 0.08);
+  color: var(--neon-cyan-soft);
+  outline: none;
+}
+
+.lang-switcher__item.is-active {
+  background: rgba(91, 232, 255, 0.12);
+  color: var(--neon-cyan);
+}
+
 @media (max-width: 760px) {
   .nav__toggle { display: inline-flex; align-items: center; gap: 0.4rem; }
   .nav__row { position: relative; }
@@ -333,7 +449,18 @@ button { font-family: inherit; }
     opacity: 1;
     visibility: visible;
   }
+  .lang-switcher__current { padding: 0.35rem 0.7rem; font-size: 0.78rem; }
+  .lang-switcher__menu { right: 0; left: auto; min-width: 160px; }
 }
+
+/* ==============================================
+   RTL fixes (Arabic)
+   ============================================== */
+[dir="rtl"] .hero__grid,
+[dir="rtl"] .featured__grid,
+[dir="rtl"] .cards-grid,
+[dir="rtl"] .form__row { direction: rtl; }
+[dir="rtl"] .form__optional { margin-right: 0.4rem; margin-left: 0; }
 
 /* ============================================================
    Shell + content wrappers

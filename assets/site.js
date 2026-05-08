@@ -122,6 +122,31 @@
   });
 
   /* ============================================================
+     LANGUAGE SWITCHER — toggle dropdown
+     ============================================================ */
+  const langSwitcher = $('#langSwitcher');
+  if (langSwitcher) {
+    const langButton = langSwitcher.querySelector('.lang-switcher__current');
+    function closeLangSwitcher() {
+      langSwitcher.classList.remove('is-open');
+      if (langButton) langButton.setAttribute('aria-expanded', 'false');
+    }
+    if (langButton) {
+      langButton.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = langSwitcher.classList.toggle('is-open');
+        langButton.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      });
+    }
+    document.addEventListener('click', (e) => {
+      if (!langSwitcher.contains(e.target)) closeLangSwitcher();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeLangSwitcher();
+    });
+  }
+
+  /* ============================================================
      LIGHTBOX — open/close + esc + click outside
      ============================================================ */
   const lightboxes = $$('.lightbox');
